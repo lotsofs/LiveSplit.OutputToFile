@@ -406,9 +406,9 @@ namespace LiveSplit.UI.Components
             TimeSpan? runDelta = CalculateRunDelta(state, method, out TimeSpan? runTime);
             if (state.CurrentPhase == TimerPhase.Running || state.CurrentPhase == TimerPhase.Paused)
             {
-                goldDeltae[method][state.CurrentSplitIndex] = goldDelta;
-                segmentDeltae[method][state.CurrentSplitIndex] = segmentDelta;
-                runDeltae[method][state.CurrentSplitIndex] = runDelta;
+                goldDeltae[method][state.CurrentSplitIndex - 1] = goldDelta;
+                segmentDeltae[method][state.CurrentSplitIndex - 1] = segmentDelta;
+                runDeltae[method][state.CurrentSplitIndex - 1] = runDelta;
             }
 
             MakeFile(FILE_PREVIOUS_SEGMENT_TIME, segmentTime?.ToString() ?? "-", method, true, false);
@@ -543,7 +543,7 @@ namespace LiveSplit.UI.Components
                 // d.hh:mm:ss
             }
             if (showPlus) {
-                time = negative ? "-" : "+" + time;
+                time = (negative ? "-" : "+") + time;
             }
             return time;
         }
