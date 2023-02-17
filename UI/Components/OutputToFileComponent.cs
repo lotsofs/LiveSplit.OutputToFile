@@ -140,6 +140,7 @@ namespace LiveSplit.UI.Components
         const string FILE_PREVIOUS_GOLD_DIFFERENCE = "PreviousSplit_{0}_GoldDifference.txt";
         const string FILE_PREVIOUS_RUN_DIFFERENCE = "PreviousSplit_{0}_RunDifference.txt";
 
+        const string FILE_SPLITLIST_NAMES =                     "SplitList_Names.txt";
         const string FILE_SPLITLIST_FINISH_TIME_LIVE =          "SplitList_{0}_Time_Run_Current.txt";
         const string FILE_SPLITLIST_FINISH_TIME_UPCOMING =      "SplitList_{0}_Time_Run_Upcoming.txt";
         const string FILE_SPLITLIST_RUN_DELTA =                 "SplitList_{0}_Delta_Run.txt";
@@ -325,6 +326,7 @@ namespace LiveSplit.UI.Components
                 last = state.CurrentSplitIndex + Settings.SplitsAfter;
             }
 
+            string splitNames = "";
             string finishTimeLive = "";
             string finishTimeUpcoming = "";
             string runDelta = "";
@@ -341,6 +343,8 @@ namespace LiveSplit.UI.Components
 
             for (int i = first; i <= last; i++)
             {
+                if (method == TimingMethod.RealTime) splitNames += state.Run[i].Name; // only write to this once
+                
                 if (i == state.CurrentSplitIndex) currentSplitHighlight += "███████████████████████████████████████████";
 
                 if (i < state.CurrentSplitIndex)
@@ -362,6 +366,7 @@ namespace LiveSplit.UI.Components
                     segmentTimeUpcoming += CustomTimeFormat(pbSegmentTimes[method][i]?.ToString() ?? "-", false);
                 }
 
+                splitNames += "\n";
                 finishTimeLive += "\n";
                 finishTimeUpcoming += "\n";
                 runDelta += "\n";
@@ -377,6 +382,7 @@ namespace LiveSplit.UI.Components
                 behindLostHighlights += "\n";
             }
 
+            MakeFile(string.Format(FILE_SPLITLIST_NAMES, null), splitNames);
             MakeFile(string.Format(FILE_SPLITLIST_FINISH_TIME_LIVE, method.ToString()), finishTimeLive);
             MakeFile(string.Format(FILE_SPLITLIST_FINISH_TIME_UPCOMING, method.ToString()), finishTimeUpcoming);
             MakeFile(string.Format(FILE_SPLITLIST_RUN_DELTA, method.ToString()), runDelta);
