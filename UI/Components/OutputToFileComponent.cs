@@ -343,7 +343,7 @@ namespace LiveSplit.UI.Components
 
             for (int i = first; i <= last; i++)
             {
-                if (method == TimingMethod.RealTime) splitNames += state.Run[i].Name; // only write to this once
+                splitNames += state.Run[i].Name; // only write to this once
                 
                 if (i == state.CurrentSplitIndex) currentSplitHighlight += "███████████████████████████████████████████";
 
@@ -382,7 +382,7 @@ namespace LiveSplit.UI.Components
                 behindLostHighlights += "\n";
             }
 
-            MakeFile(string.Format(FILE_SPLITLIST_NAMES, null), splitNames);
+            MakeFile(string.Format(FILE_SPLITLIST_NAMES, ""), splitNames);
             MakeFile(string.Format(FILE_SPLITLIST_FINISH_TIME_LIVE, method.ToString()), finishTimeLive);
             MakeFile(string.Format(FILE_SPLITLIST_FINISH_TIME_UPCOMING, method.ToString()), finishTimeUpcoming);
             MakeFile(string.Format(FILE_SPLITLIST_RUN_DELTA, method.ToString()), runDelta);
