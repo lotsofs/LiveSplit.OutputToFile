@@ -404,7 +404,7 @@ namespace LiveSplit.UI.Components
             TimeSpan? goldDelta = CalculateGoldDelta(state, method);
             TimeSpan? segmentDelta = CalculateSegmentDelta(state, method, out TimeSpan? segmentTime);
             TimeSpan? runDelta = CalculateRunDelta(state, method, out TimeSpan? runTime);
-            if (state.CurrentPhase == TimerPhase.Running || state.CurrentPhase == TimerPhase.Paused)
+            if ((state.CurrentPhase == TimerPhase.Running || state.CurrentPhase == TimerPhase.Paused) && state.CurrentSplitIndex > 0)
             {
                 goldDeltae[method][state.CurrentSplitIndex - 1] = goldDelta;
                 segmentDeltae[method][state.CurrentSplitIndex - 1] = segmentDelta;
