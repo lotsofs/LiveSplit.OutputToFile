@@ -282,11 +282,15 @@ namespace LiveSplit.UI.Components
             Cache["FolderPath"] = Settings.FolderPath;
             Cache["SplitsBefore"] = Settings.SplitsBefore;
             Cache["SplitsAfter"] = Settings.SplitsAfter;
+            Cache["TimerPhase"] = state.CurrentPhase;
             if (Cache.HasChanged)
             {
                 MakeFile("GameName.txt", state.Run.GameName);
                 MakeFile("CategoryName.txt", state.Run.CategoryName);
+                MakeFile("TotalSplits.txt", state.Run.Count.ToString());
                 MakeFile("AttemptCount.txt", state.Run.AttemptCount.ToString());
+                int finishedRunsInHistory = state.Run.AttemptHistory.Where(x => x.Time.RealTime != null).Count();
+                MakeFile("FinishedRunsCount.txt", (finishedRunsInHistory + (state.CurrentPhase == TimerPhase.Ended ? 1 : 0)).ToString());
                 _writeSplits = true;
             }
             if (_writeSplits)
