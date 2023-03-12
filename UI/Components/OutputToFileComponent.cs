@@ -459,18 +459,21 @@ namespace LiveSplit.UI.Components
             {
                 MakeFile("CurrentSplit_Name.txt", "-");
                 MakeFile("CurrentSplit_Index.txt", "-1");
+                MakeFile("CurrentSplit_ReverseIndex.txt", (state.Run.Count + 1).ToString());
                 MakeFile("PreviousSplit_Name.txt", "-");
             }
             else if (state.CurrentPhase == TimerPhase.Ended)
             {
                 MakeFile("CurrentSplit_Name.txt", "-");
                 MakeFile("CurrentSplit_Index.txt", state.Run.Count.ToString());
+                MakeFile("CurrentSplit_ReverseIndex.txt", "0");
                 MakeFile("PreviousSplit_Name.txt", state.Run[state.Run.Count - 1].Name);
             }
             else
             {
                 MakeFile("CurrentSplit_Name.txt", currentSplit.Name);
                 MakeFile("CurrentSplit_Index.txt", state.CurrentSplitIndex.ToString());
+                MakeFile("CurrentSplit_ReverseIndex.txt", (state.Run.Count - state.CurrentSplitIndex).ToString());
                 MakeFile("PreviousSplit_Name.txt", state.CurrentSplitIndex >= 1 ? state.Run[state.CurrentSplitIndex - 1].Name : "-");
             }
         }
