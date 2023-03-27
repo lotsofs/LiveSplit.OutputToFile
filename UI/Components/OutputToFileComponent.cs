@@ -513,6 +513,7 @@ namespace LiveSplit.UI.Components
             bool negative = time[0] == '-';
             if (negative) time = time.Substring(1);
             // hh:mm:ss.ddddddd
+            if (time.Length < 9) time += ".0000000";
 
             if (time.Substring(0, 7) == "00:00:0")
             {
