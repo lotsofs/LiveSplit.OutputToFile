@@ -87,7 +87,8 @@ namespace LiveSplit.UI.Components
 		const string FILE_INFO_SPLITCOUNT =			@"TotalSplits.txt";
 		const string FILE_INFO_ATTEMPTCOUNT =		@"AttemptCount.txt";
 		const string FILE_INFO_FINISHEDRUNSCOUNT =	@"FinishedRunsCount.txt";
-		const string FILE_TIMER =					@"Timer_{0}.txt";
+		const string FILE_TIMER_RUN =				@"Timers\{0}\RunTimer.txt";
+		const string FILE_TIMER_SEGMENT =			@"Timers\{0}\SegmentTimer.txt";
 
 		const string FILE_PREVIOUS_SIGN =				@"PreviousSplit\{0}\Sign.txt";
 		const string FILE_PREVIOUS_SEGMENT_TIME =		@"PreviousSplit\{0}\SegmentTime.txt";
@@ -285,6 +286,99 @@ namespace LiveSplit.UI.Components
 
 		#endregion
 
+		void WriteTimer(LiveSplitState state)
+		{
+			Cache.Restart();
+			TimeSpan realTime = state.CurrentTime.RealTime ?? TimeSpan.Zero;
+			TimeSpan gameTime = state.CurrentTime.GameTime ?? TimeSpan.Zero;
+
+			Cache["RealTimeSeconds"] = realTime.Seconds;
+			Cache["GameTimeSeconds"] = gameTime.Seconds;
+			if (Cache.HasChanged)
+			{
+				if (state.CurrentPhase == TimerPhase.NotRunning)
+				{
+					MakeFile(FILE_TIMER_RUN, TimeSpan.Zero.ToString(@"hh\:mm\:ss"), TimingMethod.RealTime, false, false);
+					MakeFile(FILE_TIMER_SEGMENT, TimeSpan.Zero.ToString(@"hh\:mm\:ss"), TimingMethod.RealTime, false, false);
+					MakeFile(FILE_TIMER_RUN, TimeSpan.Zero.ToString(@"hh\:mm\:ss"), TimingMethod.GameTime, false, false);
+					MakeFile(FILE_TIMER_SEGMENT, TimeSpan.Zero.ToString(@"hh\:mm\:ss"), TimingMethod.GameTime, false, false);
+					return;
+				}
+				else if (state.CurrentPhase == TimerPhase.Ended)
+				{
+					if (state.Run.Count > 1)
+					{
+						if (state.Run[state.Run.Count - 2].SplitTime.RealTime == null)
+						{
+							MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.RealTime, false, false);
+							MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.GameTime, false, false);
+						}
+						else
+						{
+							if (state.CurrentTime.RealTime.HasValue)
+							{
+								MakeFile(FILE_TIMER_SEGMENT, (state.CurrentTime.RealTime.Value - state.Run[state.Run.Count - 2].SplitTime.RealTime.Value).ToString(@"hh\:mm\:ss"), TimingMethod.RealTime, false, false);
+							}
+							else
+							{
+								MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.RealTime, false, false);
+							}
+							if (state.CurrentTime.GameTime.HasValue)
+							{
+								MakeFile(FILE_TIMER_SEGMENT, (state.CurrentTime.GameTime.Value - state.Run[state.Run.Count - 2].SplitTime.GameTime.Value).ToString(@"hh\:mm\:ss"), TimingMethod.GameTime, false, false);
+							}
+							else
+							{
+								MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.GameTime, false, false);
+							}
+						}
+					}
+					else { 
+						MakeFile(FILE_TIMER_SEGMENT, state.CurrentTime.RealTime?.ToString(@"hh\:mm\:ss") ?? "-", TimingMethod.RealTime, false, false);
+						MakeFile(FILE_TIMER_SEGMENT, state.CurrentTime.GameTime?.ToString(@"hh\:mm\:ss") ?? "-", TimingMethod.GameTime, false, false);
+					}
+				}
+				else
+				{
+					if (state.CurrentSplitIndex > 0)
+					{
+						if (state.Run[state.CurrentSplitIndex - 1].SplitTime.RealTime == null)
+						{
+							MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.RealTime, false, false);
+							MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.GameTime, false, false);
+						}
+						else
+						{
+							if (state.CurrentTime.RealTime.HasValue)
+							{
+								MakeFile(FILE_TIMER_SEGMENT, (state.CurrentTime.RealTime.Value - state.Run[state.CurrentSplitIndex - 1].SplitTime.RealTime.Value).ToString(@"hh\:mm\:ss"), TimingMethod.RealTime, false, false);
+							}
+							else
+							{
+								MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.RealTime, false, false);
+							}
+							if (state.CurrentTime.GameTime.HasValue)
+							{
+								MakeFile(FILE_TIMER_SEGMENT, (state.CurrentTime.GameTime.Value - state.Run[state.CurrentSplitIndex - 1].SplitTime.GameTime.Value).ToString(@"hh\:mm\:ss"), TimingMethod.GameTime, false, false);
+							}
+							else
+							{
+								MakeFile(FILE_TIMER_SEGMENT, "-", TimingMethod.GameTime, false, false);
+							}
+						}
+					}
+					else
+					{
+						MakeFile(FILE_TIMER_SEGMENT, state.CurrentTime.RealTime?.ToString(@"hh\:mm\:ss") ?? "-", TimingMethod.RealTime, false, false);
+						MakeFile(FILE_TIMER_SEGMENT, state.CurrentTime.GameTime?.ToString(@"hh\:mm\:ss") ?? "-", TimingMethod.GameTime, false, false);
+					}
+				}
+				MakeFile(FILE_TIMER_RUN, state.CurrentTime.RealTime?.ToString(@"hh\:mm\:ss") ?? "-", TimingMethod.RealTime, false, false);
+				MakeFile(FILE_TIMER_RUN, state.CurrentTime.GameTime?.ToString(@"hh\:mm\:ss") ?? "-", TimingMethod.GameTime, false, false);
+
+			}
+		}
+
 		// This is the function where we decide what needs to be displayed at this moment in time,
 		// and tell the internal component to display it. This function is called hundreds to
 		// thousands of times per second.
@@ -292,14 +386,7 @@ namespace LiveSplit.UI.Components
 		{
 			if (Settings.OutputTimer)
 			{
-				Cache.Restart();
-				Cache["RealTimeSeconds"] = state.CurrentTime.RealTime.HasValue ? state.CurrentTime.RealTime.Value.Seconds : -1;
-				Cache["GameTimeSeconds"] = state.CurrentTime.GameTime.HasValue ? state.CurrentTime.GameTime.Value.Seconds : -1;
-				if (Cache.HasChanged)
-				{
-					MakeFile(FILE_TIMER, state.CurrentTime.RealTime.HasValue ? state.CurrentTime.RealTime.Value.ToString(@"hh\:mm\:ss") : "-", TimingMethod.RealTime, false, false);
-					MakeFile(FILE_TIMER, state.CurrentTime.GameTime.HasValue ? state.CurrentTime.GameTime.Value.ToString(@"hh\:mm\:ss") : "-", TimingMethod.GameTime, false, false);
-				}
+				WriteTimer(state);
 			}
 			if (_calculateSegs)
 			{
