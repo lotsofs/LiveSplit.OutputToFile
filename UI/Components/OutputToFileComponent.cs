@@ -39,6 +39,31 @@ namespace LiveSplit.UI.Components
 		// I'm going to be honest, I don't know what this is for, but I know we don't need it.
 		public IDictionary<string, Action> ContextMenuControls => null;
 
+		enum Signs
+		{
+			Undetermined,
+			NotApplicable,
+			Ahead,
+			Behind,
+			Gained,
+			Lost,
+			Gold,
+			GainedAhead,
+			GainedBehind,
+			LostAhead,
+			LostBehind,
+			GoldAhead,
+			GoldBehind,
+			PB,
+			NoPB,
+			PBGained,
+			PBLost,
+			PBGold,
+			NoPBGained,
+			NoPBLost,
+			NoPBGold,
+		}
+
 		bool _writeSplits = false;
 		bool _calculateSegs = false;
 
@@ -47,6 +72,48 @@ namespace LiveSplit.UI.Components
 		Dictionary<TimingMethod, TimeSpan?[]> runDeltae = new Dictionary<TimingMethod, TimeSpan?[]>();
 		Dictionary<TimingMethod, TimeSpan?[]> segmentDeltae = new Dictionary<TimingMethod, TimeSpan?[]>();
 		Dictionary<TimingMethod, TimeSpan?[]> goldDeltae = new Dictionary<TimingMethod, TimeSpan?[]>();
+
+
+
+		const string FILE_CURRENT_SEGMENT_TIME =	@"CurrentSplit\{0}\SegmentTime.txt";
+		const string FILE_CURRENT_GOLD_TIME =		@"CurrentSplit\{0}\GoldTime.txt";
+		const string FILE_CURRENT_RUN_TIME =		@"CurrentSplit\{0}\RunTime.txt";
+		const string FILE_CURRENT_NAME =			@"CurrentSplit\Name.txt";
+		const string FILE_CURRENT_INDEX =			@"CurrentSplit\Index.txt";
+		const string FILE_CURRENT_REVERSEINDEX =	@"CurrentSplit\ReverseIndex.txt";
+
+		const string FILE_INFO_GAMENAME =			@"GameName.txt";
+		const string FILE_INFO_CATEGORYNAME =		@"CategoryName.txt";
+		const string FILE_INFO_SPLITCOUNT =			@"TotalSplits.txt";
+		const string FILE_INFO_ATTEMPTCOUNT =		@"AttemptCount.txt";
+		const string FILE_INFO_FINISHEDRUNSCOUNT =	@"FinishedRunsCount.txt";
+		const string FILE_TIMER =					@"Timer_{0}.txt";
+
+		const string FILE_PREVIOUS_SIGN =				@"PreviousSplit\{0}\Sign.txt";
+		const string FILE_PREVIOUS_SEGMENT_TIME =		@"PreviousSplit\{0}\SegmentTime.txt";
+		const string FILE_PREVIOUS_RUN_TIME =			@"PreviousSplit\{0}\RunTime.txt";
+		const string FILE_PREVIOUS_SEGMENT_DIFFERENCE = @"PreviousSplit\{0}\SegmentDifference.txt";
+		const string FILE_PREVIOUS_GOLD_DIFFERENCE =	@"PreviousSplit\{0}\GoldDifference.txt";
+		const string FILE_PREVIOUS_RUN_DIFFERENCE =		@"PreviousSplit\{0}\RunDifference.txt";
+		const string FILE_PREVIOUS_NAME =				@"PreviousSplit\Name.txt";
+
+		const string FILE_SPLITLIST_NAMES =						@"SplitList\Names.txt";
+		const string FILE_SPLITLIST_FINISH_TIME_LIVE =			@"SplitList\{0}\Time_Run_Current.txt";
+		const string FILE_SPLITLIST_FINISH_TIME_UPCOMING =		@"SplitList\{0}\Time_Run_Upcoming.txt";
+		const string FILE_SPLITLIST_RUN_DELTA =					@"SplitList\{0}\Delta_Run.txt";
+		const string FILE_SPLITLIST_GOLD_DELTA =				@"SplitList\{0}\Delta_Gold.txt";
+		const string FILE_SPLITLIST_GOLD_TIME_UPCOMING =		@"SplitList\{0}\Time_Gold_Upcoming.txt";
+		const string FILE_SPLITLIST_SEGMENT_TIME_UPCOMING =		@"SplitList\{0}\Time_Segment_Upcoming.txt";
+		const string FILE_SPLITLIST_SEGMENT_DELTA =				@"SplitList\{0}\Delta_Segment.txt";
+		const string FILE_SPLITLIST_CURRENT_SPLIT_HIGHLIGHT =	@"SplitList\Highlight_CurrentSplit.txt";
+		const string FILE_SPLITLIST_GOLD_HIGHLIGHT =			@"SplitList\{0}\Highlight_Gold.txt";
+		const string FILE_SPLITLIST_AHEAD_GAINED_HIGHLIGHT =	@"SplitList\{0}\Highlight_AheadGained.txt";
+		const string FILE_SPLITLIST_AHEAD_LOST_HIGHLIGHT =		@"SplitList\{0}\Highlight_AheadLost.txt";
+		const string FILE_SPLITLIST_BEHIND_GAINED_HIGHLIGHT =	@"SplitList\{0}\Highlight_BehindGained.txt";
+		const string FILE_SPLITLIST_BEHIND_LOST_HIGHLIGHT =		@"SplitList\{0}\Highlight_BehindLost.txt";
+
+
+		#region livesplitoverhead
 
 		// This function is called when LiveSplit creates your component. This happens when the
 		// component is added to the layout, or when LiveSplit opens a layout with this component
@@ -105,66 +172,9 @@ namespace LiveSplit.UI.Components
 			_calculateSegs = true;
 		}
 
-		enum Signs {
-			Undetermined,
-			NotApplicable,
-			Ahead,
-			Behind,
-			Gained,
-			Lost,
-			Gold,
-			GainedAhead,
-			GainedBehind,
-			LostAhead,
-			LostBehind,
-			GoldAhead,
-			GoldBehind,
-			PB,
-			NoPB,
-			PBGained,
-			PBLost,
-			PBGold,
-			NoPBGained,
-			NoPBLost,
-			NoPBGold,
-		}
+		#endregion
 
-		const string FILE_CURRENT_SEGMENT_TIME =	"CurrentSplit\\{0}\\SegmentTime.txt";
-		const string FILE_CURRENT_GOLD_TIME =		"CurrentSplit\\{0}\\GoldTime.txt";
-		const string FILE_CURRENT_RUN_TIME =		"CurrentSplit\\{0}\\RunTime.txt";
-		const string FILE_CURRENT_NAME =			"CurrentSplit\\Name.txt";
-		const string FILE_CURRENT_INDEX =			"CurrentSplit\\Index.txt";
-		const string FILE_CURRENT_REVERSEINDEX =	"CurrentSplit\\ReverseIndex.txt";
-
-		const string FILE_INFO_GAMENAME =			"GameName.txt";
-		const string FILE_INFO_CATEGORYNAME =		"CategoryName.txt";
-		const string FILE_INFO_SPLITCOUNT =			"TotalSplits.txt";
-		const string FILE_INFO_ATTEMPTCOUNT =		"AttemptCount.txt";
-		const string FILE_INFO_FINISHEDRUNSCOUNT =	"FinishedRunsCount.txt";
-
-		const string FILE_PREVIOUS_SIGN =				"PreviousSplit\\{0}\\Sign.txt";
-		const string FILE_PREVIOUS_SEGMENT_TIME =		"PreviousSplit\\{0}\\SegmentTime.txt";
-		const string FILE_PREVIOUS_RUN_TIME =			"PreviousSplit\\{0}\\RunTime.txt";
-		const string FILE_PREVIOUS_SEGMENT_DIFFERENCE = "PreviousSplit\\{0}\\SegmentDifference.txt";
-		const string FILE_PREVIOUS_GOLD_DIFFERENCE =	"PreviousSplit\\{0}\\GoldDifference.txt";
-		const string FILE_PREVIOUS_RUN_DIFFERENCE =		"PreviousSplit\\{0}\\RunDifference.txt";
-		const string FILE_PREVIOUS_NAME =				"PreviousSplit\\Name.txt";
-
-		const string FILE_SPLITLIST_NAMES =						"SplitList\\Names.txt";
-		const string FILE_SPLITLIST_FINISH_TIME_LIVE =			"SplitList\\{0}\\Time_Run_Current.txt";
-		const string FILE_SPLITLIST_FINISH_TIME_UPCOMING =		"SplitList\\{0}\\Time_Run_Upcoming.txt";
-		const string FILE_SPLITLIST_RUN_DELTA =					"SplitList\\{0}\\Delta_Run.txt";
-		const string FILE_SPLITLIST_GOLD_DELTA =				"SplitList\\{0}\\Delta_Gold.txt";
-		const string FILE_SPLITLIST_GOLD_TIME_UPCOMING =		"SplitList\\{0}\\Time_Gold_Upcoming.txt";
-		const string FILE_SPLITLIST_SEGMENT_TIME_UPCOMING =		"SplitList\\{0}\\Time_Segment_Upcoming.txt";
-		const string FILE_SPLITLIST_SEGMENT_DELTA =				"SplitList\\{0}\\Delta_Segment.txt";
-		const string FILE_SPLITLIST_CURRENT_SPLIT_HIGHLIGHT =	"SplitList\\Highlight_CurrentSplit.txt";
-		const string FILE_SPLITLIST_GOLD_HIGHLIGHT =			"SplitList\\{0}\\Highlight_Gold.txt";
-		const string FILE_SPLITLIST_AHEAD_GAINED_HIGHLIGHT =	"SplitList\\{0}\\Highlight_AheadGained.txt";
-		const string FILE_SPLITLIST_AHEAD_LOST_HIGHLIGHT =		"SplitList\\{0}\\Highlight_AheadLost.txt";
-		const string FILE_SPLITLIST_BEHIND_GAINED_HIGHLIGHT =	"SplitList\\{0}\\Highlight_BehindGained.txt";
-		const string FILE_SPLITLIST_BEHIND_LOST_HIGHLIGHT =		"SplitList\\{0}\\Highlight_BehindLost.txt";
-
+		#region calculatesplittimes
 
 		/// <summary>
 		/// Calculate a list of segment times for all splits
@@ -273,11 +283,24 @@ namespace LiveSplit.UI.Components
 			return state.Run[index].SplitTime[method] - state.Run[index].PersonalBestSplitTime[method];
 		}
 
+		#endregion
+
 		// This is the function where we decide what needs to be displayed at this moment in time,
 		// and tell the internal component to display it. This function is called hundreds to
 		// thousands of times per second.
 		public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
 		{
+			if (Settings.OutputTimer)
+			{
+				Cache.Restart();
+				Cache["RealTimeSeconds"] = state.CurrentTime.RealTime.HasValue ? state.CurrentTime.RealTime.Value.Seconds : -1;
+				Cache["GameTimeSeconds"] = state.CurrentTime.GameTime.HasValue ? state.CurrentTime.GameTime.Value.Seconds : -1;
+				if (Cache.HasChanged)
+				{
+					MakeFile(FILE_TIMER, state.CurrentTime.RealTime.HasValue ? state.CurrentTime.RealTime.Value.ToString(@"hh\:mm\:ss") : "-", TimingMethod.RealTime, false, false);
+					MakeFile(FILE_TIMER, state.CurrentTime.GameTime.HasValue ? state.CurrentTime.GameTime.Value.ToString(@"hh\:mm\:ss") : "-", TimingMethod.GameTime, false, false);
+				}
+			}
 			if (_calculateSegs)
 			{
 				_calculateSegs = false;
@@ -513,17 +536,22 @@ namespace LiveSplit.UI.Components
 			string settingsPath = Settings.FolderPath;
 			if (string.IsNullOrEmpty(settingsPath)) return;
 			string path = Path.Combine(settingsPath, fileName);
+			if (!Directory.Exists(Path.GetDirectoryName(path)))
+			{
+				Directory.CreateDirectory(Path.GetDirectoryName(path));
+			}
 			File.WriteAllText(path, contents);
 		}
 
 		string CustomTimeFormat(string time, bool showPlus)
 		{
-			// -hh:mm:ss.ddddddd
+			// time is null, return '-'
 			if (time == "-") return time;
+			
 			bool negative = time[0] == '-';
 			if (negative) time = time.Substring(1);
-			// hh:mm:ss.ddddddd
-			if (time.Length < 9) time += ".0000000";
+			
+			if (time.Length < 9) time += ".0000000"; // hh:mm:ss.ddddddd
 
 			if (time.Substring(0, 7) == "00:00:0")
 			{
@@ -560,9 +588,8 @@ namespace LiveSplit.UI.Components
 				time = time.Substring(0, time.Length - 8);
 				// d.hh:mm:ss
 			}
-			if (showPlus) {
-				time = (negative ? "-" : "+") + time;
-			}
+			time = (negative ? "-" : (showPlus ? "+" : "") + time);
+			
 			return time;
 		}
 

@@ -12,6 +12,7 @@ namespace LiveSplit.UI.Components
         public LayoutMode Mode { get; set; }
         public int SplitsBefore { get; set; }
         public int SplitsAfter { get; set; }
+        public bool OutputTimer { get; set; }
 
         public OutputToFileSettings()
         {
@@ -19,10 +20,12 @@ namespace LiveSplit.UI.Components
             FolderPath = string.Empty;
             SplitsBefore = 10;
             SplitsAfter = 10;
+            OutputTimer = false;
 
             this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnPropertyChanged);
             this.numericUpDownSplitListBefore.DataBindings.Add("Value", this, "SplitsBefore", false, DataSourceUpdateMode.OnPropertyChanged);
             this.numericUpDownSplitListAfter.DataBindings.Add("Value", this, "SplitsAfter", false, DataSourceUpdateMode.OnPropertyChanged);
+            this.radioButtonOutputTimer.DataBindings.Add("Checked", this, "OutputTimer", false, DataSourceUpdateMode.OnPropertyChanged);
         }
 
         private void OutputToFileSettings_Load(object sender, EventArgs e)
@@ -35,7 +38,8 @@ namespace LiveSplit.UI.Components
             return SettingsHelper.CreateSetting(document, parent, "Version", "0.1") ^
                 SettingsHelper.CreateSetting(document, parent, "FolderPath", FolderPath) ^
                 SettingsHelper.CreateSetting(document, parent, "SplitsBefore", SplitsBefore) ^
-                SettingsHelper.CreateSetting(document, parent, "SplitsAfter", SplitsAfter)
+                SettingsHelper.CreateSetting(document, parent, "SplitsAfter", SplitsAfter) ^
+                SettingsHelper.CreateSetting(document, parent, "OutputTimer", OutputTimer)
                 ;
         }
 
@@ -59,6 +63,7 @@ namespace LiveSplit.UI.Components
             FolderPath = SettingsHelper.ParseString(element["FolderPath"], string.Empty);
             SplitsBefore = SettingsHelper.ParseInt(element["SplitsBefore"], 3);
             SplitsAfter = SettingsHelper.ParseInt(element["SplitsAfter"], 2);
+            OutputTimer = SettingsHelper.ParseBool(element["OutputTimer"], false);
         }
 
         private void buttonFolderPath_Click(object sender, EventArgs e)
@@ -83,5 +88,10 @@ namespace LiveSplit.UI.Components
         {
             SplitsAfter = (int)numericUpDownSplitListAfter.Value;
         }
-    }
+
+		private void radioButtonOutputTimer_CheckedChanged(object sender, EventArgs e)
+		{
+            OutputTimer = radioButtonOutputTimer.Checked;
+		}
+	}
 }
