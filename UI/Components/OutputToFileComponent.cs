@@ -675,7 +675,8 @@ namespace LiveSplit.UI.Components
 				time = time.Substring(0, time.Length - 8);
 				// d.hh:mm:ss
 			}
-			time = (negative ? "-" : (showPlus ? "+" : "") + time);
+			string prefix = negative ? "-" : (showPlus ? "+" : "");
+			time = prefix + time;
 			
 			return time;
 		}
