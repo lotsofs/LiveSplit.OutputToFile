@@ -20,7 +20,6 @@ In addition to the ``AllSplits`` folder, which takes into consideration every sp
 ```
 |   AttemptCount.txt
 |   CategoryName.txt
-|   dir.txt
 |   FinishedRunsCount.txt
 |   GameName.txt
 |   TotalSplits_AllSplits.txt
