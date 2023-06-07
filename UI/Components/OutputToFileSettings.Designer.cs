@@ -33,22 +33,24 @@
 			this.tableLayoutPanelFolderPath = new System.Windows.Forms.TableLayoutPanel();
 			this.textBoxFolderPath = new System.Windows.Forms.TextBox();
 			this.buttonFolderPath = new System.Windows.Forms.Button();
+			this.groupBoxOutputSelection = new System.Windows.Forms.GroupBox();
+			this.checkBoxOutputSubsplits = new System.Windows.Forms.CheckBox();
+			this.checkBoxOutputSplitList = new System.Windows.Forms.CheckBox();
+			this.checkBoxOutputTimer = new System.Windows.Forms.CheckBox();
 			this.groupBoxSplitList = new System.Windows.Forms.GroupBox();
 			this.tableLayoutPanelSplitList = new System.Windows.Forms.TableLayoutPanel();
 			this.numericUpDownSplitListBefore = new System.Windows.Forms.NumericUpDown();
 			this.numericUpDownSplitListAfter = new System.Windows.Forms.NumericUpDown();
 			this.labelSplitListBefore = new System.Windows.Forms.Label();
 			this.labelSplitListAfter = new System.Windows.Forms.Label();
-			this.groupBoxOutputSelection = new System.Windows.Forms.GroupBox();
-			this.radioButtonOutputTimer = new System.Windows.Forms.RadioButton();
 			this.tableLayoutPanelTop.SuspendLayout();
 			this.groupBoxFolderPath.SuspendLayout();
 			this.tableLayoutPanelFolderPath.SuspendLayout();
+			this.groupBoxOutputSelection.SuspendLayout();
 			this.groupBoxSplitList.SuspendLayout();
 			this.tableLayoutPanelSplitList.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListAfter)).BeginInit();
-			this.groupBoxOutputSelection.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tableLayoutPanelTop
@@ -57,17 +59,17 @@
 			this.tableLayoutPanelTop.ColumnCount = 1;
 			this.tableLayoutPanelTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxFolderPath, 0, 0);
-			this.tableLayoutPanelTop.Controls.Add(this.groupBoxSplitList, 0, 1);
-			this.tableLayoutPanelTop.Controls.Add(this.groupBoxOutputSelection, 0, 2);
+			this.tableLayoutPanelTop.Controls.Add(this.groupBoxOutputSelection, 0, 1);
+			this.tableLayoutPanelTop.Controls.Add(this.groupBoxSplitList, 0, 2);
 			this.tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanelTop.Name = "tableLayoutPanelTop";
 			this.tableLayoutPanelTop.RowCount = 5;
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 51F));
-			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 82F));
-			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 53F));
-			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 74F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 78F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 71F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 8F));
-			this.tableLayoutPanelTop.Size = new System.Drawing.Size(326, 279);
+			this.tableLayoutPanelTop.Size = new System.Drawing.Size(326, 299);
 			this.tableLayoutPanelTop.TabIndex = 0;
 			// 
 			// groupBoxFolderPath
@@ -124,15 +126,67 @@
 			this.buttonFolderPath.UseVisualStyleBackColor = true;
 			this.buttonFolderPath.Click += new System.EventHandler(this.buttonFolderPath_Click);
 			// 
+			// groupBoxOutputSelection
+			// 
+			this.groupBoxOutputSelection.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputSubsplits);
+			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputSplitList);
+			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputTimer);
+			this.groupBoxOutputSelection.Location = new System.Drawing.Point(3, 54);
+			this.groupBoxOutputSelection.Name = "groupBoxOutputSelection";
+			this.groupBoxOutputSelection.Size = new System.Drawing.Size(320, 68);
+			this.groupBoxOutputSelection.TabIndex = 2;
+			this.groupBoxOutputSelection.TabStop = false;
+			this.groupBoxOutputSelection.Text = "Additional Output";
+			// 
+			// checkBoxOutputSubsplits
+			// 
+			this.checkBoxOutputSubsplits.AutoSize = true;
+			this.checkBoxOutputSubsplits.Checked = true;
+			this.checkBoxOutputSubsplits.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxOutputSubsplits.Location = new System.Drawing.Point(119, 19);
+			this.checkBoxOutputSubsplits.Name = "checkBoxOutputSubsplits";
+			this.checkBoxOutputSubsplits.Size = new System.Drawing.Size(68, 17);
+			this.checkBoxOutputSubsplits.TabIndex = 3;
+			this.checkBoxOutputSubsplits.Text = "Subsplits";
+			this.checkBoxOutputSubsplits.UseVisualStyleBackColor = true;
+			this.checkBoxOutputSubsplits.CheckedChanged += new System.EventHandler(this.checkBoxOutputSubsplits_CheckedChanged);
+			// 
+			// checkBoxOutputSplitList
+			// 
+			this.checkBoxOutputSplitList.AutoSize = true;
+			this.checkBoxOutputSplitList.Checked = true;
+			this.checkBoxOutputSplitList.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxOutputSplitList.Location = new System.Drawing.Point(6, 42);
+			this.checkBoxOutputSplitList.Name = "checkBoxOutputSplitList";
+			this.checkBoxOutputSplitList.Size = new System.Drawing.Size(65, 17);
+			this.checkBoxOutputSplitList.TabIndex = 2;
+			this.checkBoxOutputSplitList.Text = "Split List";
+			this.checkBoxOutputSplitList.UseVisualStyleBackColor = true;
+			this.checkBoxOutputSplitList.CheckedChanged += new System.EventHandler(this.checkBoxOutputSplitList_CheckedChanged);
+			// 
+			// checkBoxOutputTimer
+			// 
+			this.checkBoxOutputTimer.AutoSize = true;
+			this.checkBoxOutputTimer.Location = new System.Drawing.Point(6, 19);
+			this.checkBoxOutputTimer.Name = "checkBoxOutputTimer";
+			this.checkBoxOutputTimer.Size = new System.Drawing.Size(52, 17);
+			this.checkBoxOutputTimer.TabIndex = 1;
+			this.checkBoxOutputTimer.Text = "Timer";
+			this.checkBoxOutputTimer.UseVisualStyleBackColor = true;
+			this.checkBoxOutputTimer.CheckedChanged += new System.EventHandler(this.checkBoxOutputTimer_CheckedChanged);
+			// 
 			// groupBoxSplitList
 			// 
 			this.groupBoxSplitList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBoxSplitList.Controls.Add(this.tableLayoutPanelSplitList);
-			this.groupBoxSplitList.Location = new System.Drawing.Point(3, 54);
+			this.groupBoxSplitList.Location = new System.Drawing.Point(3, 128);
 			this.groupBoxSplitList.Name = "groupBoxSplitList";
-			this.groupBoxSplitList.Size = new System.Drawing.Size(320, 76);
+			this.groupBoxSplitList.Size = new System.Drawing.Size(320, 72);
 			this.groupBoxSplitList.TabIndex = 1;
 			this.groupBoxSplitList.TabStop = false;
 			this.groupBoxSplitList.Text = "Split List Writing";
@@ -152,7 +206,7 @@
 			this.tableLayoutPanelSplitList.RowCount = 2;
 			this.tableLayoutPanelSplitList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.tableLayoutPanelSplitList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.tableLayoutPanelSplitList.Size = new System.Drawing.Size(314, 57);
+			this.tableLayoutPanelSplitList.Size = new System.Drawing.Size(314, 53);
 			this.tableLayoutPanelSplitList.TabIndex = 0;
 			// 
 			// numericUpDownSplitListBefore
@@ -172,7 +226,7 @@
 			// numericUpDownSplitListAfter
 			// 
 			this.numericUpDownSplitListAfter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.numericUpDownSplitListAfter.Location = new System.Drawing.Point(191, 31);
+			this.numericUpDownSplitListAfter.Location = new System.Drawing.Point(191, 29);
 			this.numericUpDownSplitListAfter.Name = "numericUpDownSplitListAfter";
 			this.numericUpDownSplitListAfter.Size = new System.Drawing.Size(120, 20);
 			this.numericUpDownSplitListAfter.TabIndex = 1;
@@ -187,7 +241,7 @@
 			// 
 			this.labelSplitListBefore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
 			this.labelSplitListBefore.AutoSize = true;
-			this.labelSplitListBefore.Location = new System.Drawing.Point(3, 7);
+			this.labelSplitListBefore.Location = new System.Drawing.Point(3, 6);
 			this.labelSplitListBefore.Name = "labelSplitListBefore";
 			this.labelSplitListBefore.Size = new System.Drawing.Size(181, 13);
 			this.labelSplitListBefore.TabIndex = 2;
@@ -197,36 +251,11 @@
 			// 
 			this.labelSplitListAfter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
 			this.labelSplitListAfter.AutoSize = true;
-			this.labelSplitListAfter.Location = new System.Drawing.Point(3, 36);
+			this.labelSplitListAfter.Location = new System.Drawing.Point(3, 33);
 			this.labelSplitListAfter.Name = "labelSplitListAfter";
 			this.labelSplitListAfter.Size = new System.Drawing.Size(181, 13);
 			this.labelSplitListAfter.TabIndex = 3;
 			this.labelSplitListAfter.Text = "Splits after current";
-			// 
-			// groupBoxOutputSelection
-			// 
-			this.groupBoxOutputSelection.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBoxOutputSelection.Controls.Add(this.radioButtonOutputTimer);
-			this.groupBoxOutputSelection.Location = new System.Drawing.Point(3, 136);
-			this.groupBoxOutputSelection.Name = "groupBoxOutputSelection";
-			this.groupBoxOutputSelection.Size = new System.Drawing.Size(320, 47);
-			this.groupBoxOutputSelection.TabIndex = 2;
-			this.groupBoxOutputSelection.TabStop = false;
-			this.groupBoxOutputSelection.Text = "Additional Outputs";
-			// 
-			// radioButtonOutputTimer
-			// 
-			this.radioButtonOutputTimer.AutoSize = true;
-			this.radioButtonOutputTimer.Location = new System.Drawing.Point(6, 19);
-			this.radioButtonOutputTimer.Name = "radioButtonOutputTimer";
-			this.radioButtonOutputTimer.Size = new System.Drawing.Size(51, 17);
-			this.radioButtonOutputTimer.TabIndex = 0;
-			this.radioButtonOutputTimer.TabStop = true;
-			this.radioButtonOutputTimer.Text = "Timer";
-			this.radioButtonOutputTimer.UseVisualStyleBackColor = true;
-			this.radioButtonOutputTimer.CheckedChanged += new System.EventHandler(this.radioButtonOutputTimer_CheckedChanged);
 			// 
 			// OutputToFileSettings
 			// 
@@ -243,13 +272,13 @@
 			this.groupBoxFolderPath.PerformLayout();
 			this.tableLayoutPanelFolderPath.ResumeLayout(false);
 			this.tableLayoutPanelFolderPath.PerformLayout();
+			this.groupBoxOutputSelection.ResumeLayout(false);
+			this.groupBoxOutputSelection.PerformLayout();
 			this.groupBoxSplitList.ResumeLayout(false);
 			this.tableLayoutPanelSplitList.ResumeLayout(false);
 			this.tableLayoutPanelSplitList.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListAfter)).EndInit();
-			this.groupBoxOutputSelection.ResumeLayout(false);
-			this.groupBoxOutputSelection.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -262,13 +291,15 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanelFolderPath;
         private System.Windows.Forms.TextBox textBoxFolderPath;
         private System.Windows.Forms.Button buttonFolderPath;
-        private System.Windows.Forms.GroupBox groupBoxSplitList;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelSplitList;
-        private System.Windows.Forms.NumericUpDown numericUpDownSplitListBefore;
-        private System.Windows.Forms.NumericUpDown numericUpDownSplitListAfter;
-        private System.Windows.Forms.Label labelSplitListBefore;
-        private System.Windows.Forms.Label labelSplitListAfter;
 		private System.Windows.Forms.GroupBox groupBoxOutputSelection;
-		private System.Windows.Forms.RadioButton radioButtonOutputTimer;
+		private System.Windows.Forms.CheckBox checkBoxOutputTimer;
+		private System.Windows.Forms.GroupBox groupBoxSplitList;
+		private System.Windows.Forms.TableLayoutPanel tableLayoutPanelSplitList;
+		private System.Windows.Forms.NumericUpDown numericUpDownSplitListBefore;
+		private System.Windows.Forms.NumericUpDown numericUpDownSplitListAfter;
+		private System.Windows.Forms.Label labelSplitListBefore;
+		private System.Windows.Forms.Label labelSplitListAfter;
+		private System.Windows.Forms.CheckBox checkBoxOutputSplitList;
+		private System.Windows.Forms.CheckBox checkBoxOutputSubsplits;
 	}
 }

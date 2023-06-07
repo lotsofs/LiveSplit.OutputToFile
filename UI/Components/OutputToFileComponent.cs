@@ -9,10 +9,8 @@ using System.Linq;
 using System.Windows.Forms;
 using static System.Windows.Forms.AxHost;
 
-namespace LiveSplit.UI.Components
-{
-	public class OutputToFileComponent : IComponent
-	{
+namespace LiveSplit.UI.Components {
+	public class OutputToFileComponent : IComponent {
 		// This internal component does the actual heavy lifting. Whenever we want to do something
 		// like display text, we will call the appropriate function on the internal component.
 		protected InfoTextComponent InternalComponent { get; set; }
@@ -38,8 +36,7 @@ namespace LiveSplit.UI.Components
 
 		public IDictionary<string, Action> ContextMenuControls => null;
 
-		enum Signs
-		{
+		enum Signs {
 			Undetermined,
 			NotApplicable,
 			Ahead,
@@ -66,26 +63,26 @@ namespace LiveSplit.UI.Components
 		bool _writeSplits = false;
 		bool _calculateSegs = false;
 
-		public class SplitLevel
-		{
+		public class SplitLevel {
 			public Dictionary<TimingMethod, TimeSpan?[]> PbSegmentTimes;
 			public Dictionary<TimingMethod, TimeSpan?[]> LiveSegmentTimes;
 			public Dictionary<TimingMethod, TimeSpan?[]> RunDeltae;
 			public Dictionary<TimingMethod, TimeSpan?[]> SegmentDeltae;
 			public Dictionary<TimingMethod, TimeSpan?[]> GoldDeltae;
 
-			public SplitLevel(int count)
-			{
-				PbSegmentTimes = new Dictionary<TimingMethod,TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
-				LiveSegmentTimes = new Dictionary<TimingMethod,TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
-				RunDeltae = new Dictionary<TimingMethod,TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
-				SegmentDeltae = new Dictionary<TimingMethod,TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
+			public SplitLevel(int count) {
+				PbSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
+				LiveSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
+				RunDeltae = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
+				SegmentDeltae = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
 				GoldDeltae = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
 			}
 		}
 
 		SplitLevel[] _splitLevels = new SplitLevel[1];
 		List<List<int>> _splitLevelIndices = new List<List<int>>();
+		int[] _splitDepths;
+		List<List<string>> _splitNamesByLevel;
 
 		//Dictionary<TimingMethod, TimeSpan?[]> pbSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>();
 		//Dictionary<TimingMethod, TimeSpan?[]> liveSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>();
@@ -95,43 +92,47 @@ namespace LiveSplit.UI.Components
 
 		#region filenames
 
-		const string FILE_CURRENT_SEGMENT_TIME =	@"CurrentSplit\{1}\{0}\SegmentTime.txt";
-		const string FILE_CURRENT_GOLD_TIME =		@"CurrentSplit\{1}\{0}\GoldTime.txt";
-		const string FILE_CURRENT_RUN_TIME =		@"CurrentSplit\{1}\{0}\RunTime.txt";
-		const string FILE_CURRENT_NAME =			@"CurrentSplit\{1}\Name.txt";
-		const string FILE_CURRENT_INDEX =			@"CurrentSplit\{1}\Index.txt";
-		const string FILE_CURRENT_REVERSEINDEX =	@"CurrentSplit\{1}\ReverseIndex.txt";
+		const string FILE_CURRENT_SEGMENT_TIME = @"CurrentSplit\{1}\{0}\SegmentTime.txt";
+		const string FILE_CURRENT_GOLD_TIME = @"CurrentSplit\{1}\{0}\GoldTime.txt";
+		const string FILE_CURRENT_RUN_TIME = @"CurrentSplit\{1}\{0}\RunTime.txt";
+		const string FILE_CURRENT_NAME = @"CurrentSplit\{1}\Name.txt";
+		const string FILE_CURRENT_NAME_RAW = @"CurrentSplit\{1}\Name_Raw.txt";
+		const string FILE_CURRENT_INDEX = @"CurrentSplit\{1}\Index.txt";
+		const string FILE_CURRENT_REVERSEINDEX = @"CurrentSplit\{1}\ReverseIndex.txt";
 
-		const string FILE_INFO_GAMENAME =			@"GameName.txt";
-		const string FILE_INFO_CATEGORYNAME =		@"CategoryName.txt";
-		const string FILE_INFO_SPLITCOUNT =			@"TotalSplits_{1}.txt";
-		const string FILE_INFO_ATTEMPTCOUNT =		@"AttemptCount.txt";
-		const string FILE_INFO_FINISHEDRUNSCOUNT =	@"FinishedRunsCount.txt";
-		const string FILE_TIMER_RUN =				@"Timers\{0}\RunTimer.txt";
-		const string FILE_TIMER_SPLIT =				@"Timers\{0}\SegmentTimer_{1}.txt";
+		const string FILE_INFO_GAMENAME = @"GameName.txt";
+		const string FILE_INFO_CATEGORYNAME = @"CategoryName.txt";
+		const string FILE_INFO_SPLITCOUNT = @"TotalSplits_{1}.txt";
+		const string FILE_INFO_ATTEMPTCOUNT = @"AttemptCount.txt";
+		const string FILE_INFO_FINISHEDRUNSCOUNT = @"FinishedRunsCount.txt";
+		const string FILE_TIMER_RUN = @"Timers\{0}\RunTimer.txt";
+		const string FILE_TIMER_SPLIT = @"Timers\{0}\SegmentTimer_{1}.txt";
 
-		const string FILE_PREVIOUS_SIGN =				@"PreviousSplit\{1}\{0}\Sign.txt";
-		const string FILE_PREVIOUS_SEGMENT_TIME =		@"PreviousSplit\{1}\{0}\SegmentTime.txt";
-		const string FILE_PREVIOUS_RUN_TIME =			@"PreviousSplit\{1}\{0}\RunTime.txt";
+		const string FILE_PREVIOUS_SIGN = @"PreviousSplit\{1}\{0}\Sign.txt";
+		const string FILE_PREVIOUS_SEGMENT_TIME = @"PreviousSplit\{1}\{0}\SegmentTime.txt";
+		const string FILE_PREVIOUS_RUN_TIME = @"PreviousSplit\{1}\{0}\RunTime.txt";
 		const string FILE_PREVIOUS_SEGMENT_DIFFERENCE = @"PreviousSplit\{1}\{0}\SegmentDifference.txt";
-		const string FILE_PREVIOUS_GOLD_DIFFERENCE =	@"PreviousSplit\{1}\{0}\GoldDifference.txt";
-		const string FILE_PREVIOUS_RUN_DIFFERENCE =		@"PreviousSplit\{1}\{0}\RunDifference.txt";
-		const string FILE_PREVIOUS_NAME =				@"PreviousSplit\{1}\Name.txt";
+		const string FILE_PREVIOUS_GOLD_DIFFERENCE = @"PreviousSplit\{1}\{0}\GoldDifference.txt";
+		const string FILE_PREVIOUS_RUN_DIFFERENCE = @"PreviousSplit\{1}\{0}\RunDifference.txt";
+		const string FILE_PREVIOUS_NAME = @"PreviousSplit\{1}\Name.txt";
+		const string FILE_PREVIOUS_NAME_RAW = @"PreviousSplit\{1}\Name_Raw.txt";
 
-		const string FILE_SPLITLIST_NAMES =						@"SplitList\{1}\Names.txt";
-		const string FILE_SPLITLIST_FINISH_TIME_LIVE =			@"SplitList\{1}\{0}\Time_Run_Current.txt";
-		const string FILE_SPLITLIST_FINISH_TIME_UPCOMING =		@"SplitList\{1}\{0}\Time_Run_Upcoming.txt";
-		const string FILE_SPLITLIST_RUN_DELTA =					@"SplitList\{1}\{0}\Delta_Run.txt";
-		const string FILE_SPLITLIST_GOLD_DELTA =				@"SplitList\{1}\{0}\Delta_Gold.txt";
-		const string FILE_SPLITLIST_GOLD_TIME_UPCOMING =		@"SplitList\{1}\{0}\Time_Gold_Upcoming.txt";
-		const string FILE_SPLITLIST_SEGMENT_TIME_UPCOMING =		@"SplitList\{1}\{0}\Time_Segment_Upcoming.txt";
-		const string FILE_SPLITLIST_SEGMENT_DELTA =				@"SplitList\{1}\{0}\Delta_Segment.txt";
-		const string FILE_SPLITLIST_CURRENT_SPLIT_HIGHLIGHT =	@"SplitList\{1}\Highlight_CurrentSplit.txt";
-		const string FILE_SPLITLIST_GOLD_HIGHLIGHT =			@"SplitList\{1}\{0}\Highlight_Gold.txt";
-		const string FILE_SPLITLIST_AHEAD_GAINED_HIGHLIGHT =	@"SplitList\{1}\{0}\Highlight_AheadGained.txt";
-		const string FILE_SPLITLIST_AHEAD_LOST_HIGHLIGHT =		@"SplitList\{1}\{0}\Highlight_AheadLost.txt";
-		const string FILE_SPLITLIST_BEHIND_GAINED_HIGHLIGHT =	@"SplitList\{1}\{0}\Highlight_BehindGained.txt";
-		const string FILE_SPLITLIST_BEHIND_LOST_HIGHLIGHT =		@"SplitList\{1}\{0}\Highlight_BehindLost.txt";
+		const string FILE_SPLITLIST_NAMES = @"SplitList\{1}\Names.txt";
+		const string FILE_SPLITLIST_NAMES_RAW = @"SplitList\{1}\Names_Raw.txt";
+		const string FILE_SPLITLIST_WHITESPACE = @"SplitList\{1}\Names_Indent_{2}.txt";
+		const string FILE_SPLITLIST_FINISH_TIME_LIVE = @"SplitList\{1}\{0}\Time_Run_Current.txt";
+		const string FILE_SPLITLIST_FINISH_TIME_UPCOMING = @"SplitList\{1}\{0}\Time_Run_Upcoming.txt";
+		const string FILE_SPLITLIST_RUN_DELTA = @"SplitList\{1}\{0}\Delta_Run.txt";
+		const string FILE_SPLITLIST_GOLD_DELTA = @"SplitList\{1}\{0}\Delta_Gold.txt";
+		const string FILE_SPLITLIST_GOLD_TIME_UPCOMING = @"SplitList\{1}\{0}\Time_Gold_Upcoming.txt";
+		const string FILE_SPLITLIST_SEGMENT_TIME_UPCOMING = @"SplitList\{1}\{0}\Time_Segment_Upcoming.txt";
+		const string FILE_SPLITLIST_SEGMENT_DELTA = @"SplitList\{1}\{0}\Delta_Segment.txt";
+		const string FILE_SPLITLIST_CURRENT_SPLIT_HIGHLIGHT = @"SplitList\{1}\Highlight_CurrentSplit.txt";
+		const string FILE_SPLITLIST_GOLD_HIGHLIGHT = @"SplitList\{1}\{0}\Highlight_Gold.txt";
+		const string FILE_SPLITLIST_AHEAD_GAINED_HIGHLIGHT = @"SplitList\{1}\{0}\Highlight_AheadGained.txt";
+		const string FILE_SPLITLIST_AHEAD_LOST_HIGHLIGHT = @"SplitList\{1}\{0}\Highlight_AheadLost.txt";
+		const string FILE_SPLITLIST_BEHIND_GAINED_HIGHLIGHT = @"SplitList\{1}\{0}\Highlight_BehindGained.txt";
+		const string FILE_SPLITLIST_BEHIND_LOST_HIGHLIGHT = @"SplitList\{1}\{0}\Highlight_BehindLost.txt";
 
 		#endregion
 
@@ -140,8 +141,7 @@ namespace LiveSplit.UI.Components
 		// This function is called when LiveSplit creates your component. This happens when the
 		// component is added to the layout, or when LiveSplit opens a layout with this component
 		// already added.
-		public OutputToFileComponent(LiveSplitState state)
-		{
+		public OutputToFileComponent(LiveSplitState state) {
 			Settings = new OutputToFileSettings();
 			Cache = new GraphicsCache();
 
@@ -161,35 +161,29 @@ namespace LiveSplit.UI.Components
 		// We will be adding the ability to display the component across two rows in our settings menu.
 		public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion) { }
 
-		public Control GetSettingsControl(LayoutMode mode)
-		{
+		public Control GetSettingsControl(LayoutMode mode) {
 			Settings.Mode = mode;
 			return Settings;
 		}
 
-		public System.Xml.XmlNode GetSettings(System.Xml.XmlDocument document)
-		{
+		public System.Xml.XmlNode GetSettings(System.Xml.XmlDocument document) {
 			return Settings.GetSettings(document);
 		}
 
-		public void SetSettings(System.Xml.XmlNode settings)
-		{
+		public void SetSettings(System.Xml.XmlNode settings) {
 			Settings.SetSettings(settings);
 		}
 
-		void state_OnStart(object sender, EventArgs e)
-		{
+		void state_OnStart(object sender, EventArgs e) {
 			_writeSplits = true;
 			_calculateSegs = true;
 		}
 
-		void state_OnSplitChange(object sender, EventArgs e)
-		{
+		void state_OnSplitChange(object sender, EventArgs e) {
 			_writeSplits = true;
 		}
 
-		void state_OnReset(object sender, TimerPhase e)
-		{
+		void state_OnReset(object sender, TimerPhase e) {
 			_writeSplits = true;
 			_calculateSegs = true;
 		}
@@ -200,29 +194,33 @@ namespace LiveSplit.UI.Components
 
 		void GenerateSubsplitLevels(LiveSplitState state, TimingMethod method) {
 			// Count how many levels of subsplits there are (including the main top level). Default subsplits component only supports 2 levels (Main + subsplits)
-			int[] splitDepths = new int[state.Run.Count];
+			_splitDepths = new int[state.Run.Count];
 			for (int i = 0; i < state.Run.Count; i++) {
-				splitDepths[i] = Array.FindIndex<char>(state.Run[i].Name.ToCharArray(), c => c != '-');
-				if (splitDepths[i] == -1) {
-					splitDepths[i] = state.Run[i].Name.Length;
+				if (!Settings.OutputSubsplits) {
+					_splitDepths[i] = 0;
+					continue;
+				}
+				_splitDepths[i] = Array.FindIndex<char>(state.Run[i].Name.ToCharArray(), c => c != '-');
+				if (_splitDepths[i] == -1) {
+					_splitDepths[i] = state.Run[i].Name.Length;
 				}
 			}
 
 			// Count what the highest consecutive present level is
 			int numberOfLevels = 1;
 			for (int i = 1; i <= numberOfLevels; i++) {
-				if (splitDepths.Contains(i)) {
+				if (_splitDepths.Contains(i)) {
 					numberOfLevels++;
 				}
 			}
 
 			// Squish any splits that skip a non-existent level (eg super long headers "-----------------") down to the deepest possible level
-			for (int i = 1; i < splitDepths.Length; i++) {
-				if (splitDepths[i] >= numberOfLevels) {
-					splitDepths[i] = numberOfLevels - 1;
+			for (int i = 1; i < _splitDepths.Length; i++) {
+				if (_splitDepths[i] >= numberOfLevels) {
+					_splitDepths[i] = numberOfLevels - 1;
 				}
 			}
-			splitDepths[splitDepths.Length - 1] = 0; // Last split is always top level
+			_splitDepths[_splitDepths.Length - 1] = 0; // Last split is always top level
 
 			_splitLevelIndices = new List<List<int>>();
 
@@ -230,22 +228,79 @@ namespace LiveSplit.UI.Components
 			for (int lvl = 0; lvl < numberOfLevels; lvl++) {
 				_splitLevelIndices.Add(new List<int>());
 				for (int splitIndex = 0; splitIndex < state.Run.Count; splitIndex++) {
-					if (splitDepths[splitIndex] <= lvl) {
+					if (_splitDepths[splitIndex] <= lvl) {
 						_splitLevelIndices[lvl].Add(splitIndex);
 					}
 				}
 			}
 			// Move the last level to the start so that the output for 'all splits' is reliable to the user
-			var allSplits = _splitLevelIndices[_splitLevelIndices.Count - 1];
-			_splitLevelIndices.RemoveAt(_splitLevelIndices.Count - 1);
-			_splitLevelIndices.Insert(0, allSplits);
+			//var allSplits = _splitLevelIndices[_splitLevelIndices.Count - 1];
+			//_splitLevelIndices.RemoveAt(_splitLevelIndices.Count - 1);
+			//_splitLevelIndices.Insert(0, allSplits);
 
 			// Make a list of times and deltae for each level
 			_splitLevels = new SplitLevel[numberOfLevels];
 			for (int i = 0; i < numberOfLevels; i++) {
 				_splitLevels[i] = new SplitLevel(_splitLevelIndices[i].Count);
 			}
+
+			// Make a list of all the split names by level, taking into consideration removing dashes and {} parts
+			_splitNamesByLevel = new List<List<string>>();
+			for (int split = 0; split < state.Run.Count; split++) {
+				_splitNamesByLevel.Add(new List<string>());
+				string name = state.Run[split].Name;
+				for (int lvl = 0; lvl < _splitLevels.Length; lvl++) {
+					string sectionName = GetSectionHeader(name);
+					if (sectionName != null) {
+						_splitNamesByLevel[split].Add(sectionName);
+						name = name.Substring(sectionName.Length + 2);
+						continue;
+					}
+					_splitNamesByLevel[split].Add(name);
+					if (name[0] == '-') {
+						name = name.Substring(1);
+					}
+				}
+				//var allSplits2 = _splitNamesByLevel[split][_splitNamesByLevel[split].Count - 1];
+				//_splitNamesByLevel[split].RemoveAt(_splitNamesByLevel[split].Count - 1);
+				//_splitNamesByLevel[split].Insert(0, allSplits2);
+			}
 		}
+
+		string GetSectionHeader(string name) {
+			if (name[0] != '{') return null;
+			int closing = name.IndexOf('}');
+			if (closing == -1) return null;
+			return name.Substring(1, closing - 1);
+		}
+
+		//string GetSubsplitName(string name, int level) {
+		//	int levels = _splitLevels.Length;
+		//	if (level != 0) {
+		//		levels = level;
+		//	}
+		//	for (int i = 0; i < levels; i++) {
+		//		if (name[0] != '{') return name;
+		//		int closing = name.IndexOf('}');
+		//		if (closing == -1) return name;
+		//		name = name.Substring(closing + 1);
+		//	}
+		//	return name;
+		//}
+
+		//string GetSubsplitAdjustedSplitName(LiveSplitState state, int globalSplitIndex, int level) {
+		//	string name = state.Run[globalSplitIndex].Name;
+		//	int depth = _splitDepths[globalSplitIndex];
+		//	if (depth < level) {
+		//		name = GetSectionHeader(name.Substring(Math.Min(level, depth)));
+		//	}
+		//	else {
+		//		name = GetSubsplitName(name.Substring(depth), level);
+		//	}
+		//	return name + level.ToString() + depth.ToString();
+		//}
+
+
 
 		/// <summary>
 		/// Calculate a list of segment times for all splits
@@ -289,8 +344,7 @@ namespace LiveSplit.UI.Components
 		/// </summary>
 		/// <param name="state"></param>
 		/// <param name="method"></param>
-		void CalculateLiveSegment(LiveSplitState state, TimingMethod method)
-		{
+		void CalculateLiveSegment(LiveSplitState state, TimingMethod method) {
 			if (state.CurrentPhase == TimerPhase.NotRunning) { return; }
 			else if (state.CurrentSplitIndex == 0) { return; } // Run just started, no previous splits to calculate
 
@@ -329,11 +383,11 @@ namespace LiveSplit.UI.Components
 						int antePrevGlobalIndex = indices[prevLocalIndex - 1];
 						TimeSpan? prevCompletionTime = state.Run[prevGlobalIndex].SplitTime[method];
 						TimeSpan? antePrevCompletionTime = state.Run[antePrevGlobalIndex].SplitTime[method];
-						if (prevCompletionTime == null || antePrevCompletionTime == null) { 
-							prevSegmentTime = null; 
+						if (prevCompletionTime == null || antePrevCompletionTime == null) {
+							prevSegmentTime = null;
 						}
-						else { 
-							prevSegmentTime = state.Run[prevGlobalIndex].SplitTime[method] - state.Run[antePrevGlobalIndex].SplitTime[method]; 
+						else {
+							prevSegmentTime = state.Run[prevGlobalIndex].SplitTime[method] - state.Run[antePrevGlobalIndex].SplitTime[method];
 						}
 					}
 					level.LiveSegmentTimes[method][prevLocalIndex] = prevSegmentTime;
@@ -341,12 +395,11 @@ namespace LiveSplit.UI.Components
 			}
 		}
 
-		TimeSpan? CalculatePreviousGoldDelta(LiveSplitState state, TimingMethod method, int lvl)
-		{
+		TimeSpan? CalculatePreviousGoldDelta(LiveSplitState state, TimingMethod method, int lvl) {
 			if (lvl != 0) { return null; } // No gold splits are being kept (reliably) for multisplit segments. Abandon ship.
 			if (state.CurrentPhase == TimerPhase.NotRunning) { return null; }
 			if (state.CurrentSplitIndex == 0) { return null; } // Run just started, no previous splits to calculate
-			
+
 			int prevIndex = state.CurrentPhase == TimerPhase.Ended ? state.Run.Count - 1 : state.CurrentSplitIndex - 1;
 			TimeSpan? liveSegmentTime = _splitLevels[0].LiveSegmentTimes[method][prevIndex];
 			TimeSpan? goldTime = state.Run[prevIndex].BestSegmentTime[method];
@@ -369,14 +422,13 @@ namespace LiveSplit.UI.Components
 			return liveSegmentTime - pbSegmentTime;
 		}
 
-		TimeSpan? CalculatePreviousRunDelta(LiveSplitState state, TimingMethod method, int lvl, int prevLocalIndex, out TimeSpan? liveRunTime)
-		{
+		TimeSpan? CalculatePreviousRunDelta(LiveSplitState state, TimingMethod method, int lvl, int prevLocalIndex, out TimeSpan? liveRunTime) {
 			if (state.CurrentPhase == TimerPhase.NotRunning) { liveRunTime = null; return null; }
 			if (state.CurrentSplitIndex == 0) { liveRunTime = null; return null; }
 			SplitLevel level = _splitLevels[lvl];
 
 			if (prevLocalIndex == -1) { liveRunTime = null; return null; }
-			
+
 			int prevGlobalIndex = _splitLevelIndices[lvl][prevLocalIndex];
 
 			liveRunTime = state.Run[prevGlobalIndex].SplitTime[method];
@@ -414,6 +466,12 @@ namespace LiveSplit.UI.Components
 				SplitLevel level = _splitLevels[lvl];
 				List<int> indices = _splitLevelIndices[lvl];
 				int prevLocalIndex = GetLocalSplitIndex(state, lvl, true);
+
+				if (prevLocalIndex == -1) {
+					MakeFile(FILE_TIMER_SPLIT, time.ToString(@"hh\:mm\:ss") ?? "-", method, lvl);
+					continue;
+				}
+
 
 				if (state.CurrentPhase == TimerPhase.Ended) {
 					if (indices.Count > 1) {
@@ -467,15 +525,12 @@ namespace LiveSplit.UI.Components
 		// This is the function where we decide what needs to be displayed at this moment in time,
 		// and tell the internal component to display it. This function is called hundreds to
 		// thousands of times per second.
-		public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
-		{
-			if (Settings.OutputTimer)
-			{
+		public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode) {
+			if (Settings.OutputTimer) {
 				WriteTimer(state, TimingMethod.RealTime);
 				WriteTimer(state, TimingMethod.GameTime);
 			}
-			if (_calculateSegs)
-			{
+			if (_calculateSegs) {
 				_calculateSegs = false;
 				GenerateSubsplitLevels(state, TimingMethod.RealTime);
 				GenerateSubsplitLevels(state, TimingMethod.GameTime);
@@ -491,8 +546,7 @@ namespace LiveSplit.UI.Components
 			Cache["SplitsBefore"] = Settings.SplitsBefore;
 			Cache["SplitsAfter"] = Settings.SplitsAfter;
 			Cache["TimerPhase"] = state.CurrentPhase;
-			if (Cache.HasChanged)
-			{
+			if (Cache.HasChanged) {
 				MakeFile(FILE_INFO_GAMENAME, state.Run.GameName);
 				MakeFile(FILE_INFO_CATEGORYNAME, state.Run.CategoryName);
 				MakeFile(FILE_INFO_ATTEMPTCOUNT, state.Run.AttemptCount.ToString());
@@ -503,8 +557,7 @@ namespace LiveSplit.UI.Components
 				}
 				_writeSplits = true;
 			}
-			if (_writeSplits)
-			{
+			if (_writeSplits) {
 				_writeSplits = false;
 				WriteSplitInformation(state);
 				WriteSplitTimes(state, TimingMethod.RealTime);
@@ -515,6 +568,7 @@ namespace LiveSplit.UI.Components
 		}
 
 		void WriteSplitList(LiveSplitState state, TimingMethod method) {
+			if (!Settings.OutputSplitList) return;
 			for (int lvl = 0; lvl < _splitLevels.Length; lvl++) {
 				SplitLevel level = _splitLevels[lvl];
 				List<int> indices = _splitLevelIndices[lvl];
@@ -541,6 +595,7 @@ namespace LiveSplit.UI.Components
 					last = localCurrentSplitIndex + Settings.SplitsAfter;
 				}
 				string splitNames = "";
+				string splitNamesRaw = "";
 				string finishTimeLive = "";
 				string finishTimeUpcoming = "";
 				string runDelta = "";
@@ -555,22 +610,21 @@ namespace LiveSplit.UI.Components
 				string behindGainedHighlights = "";
 				string behindLostHighlights = "";
 
-
-
 				for (int j = first; j <= last; j++) {
 					int globalIndex = indices[j];
 					var split = state.Run[globalIndex];
 
-					splitNames += split.Name;
+					splitNamesRaw += split.Name;
+					splitNames += _splitNamesByLevel[globalIndex][lvl]; 
 
 					if (j == localCurrentSplitIndex) currentSplitHighlight += "███████████████████████████████████████████";
 
 					if (j < localCurrentSplitIndex) {
 						finishTimeLive += CustomTimeFormat(split.SplitTime[method]?.ToString() ?? "-", false);
 						runDelta += CustomTimeFormat(level.RunDeltae[method][j]?.ToString() ?? "-", true);
-						if (lvl == 0) goldDelta += CustomTimeFormat(level.GoldDeltae[method][j]?.ToString() ?? "-", true);
+						if (lvl == _splitLevels.Length - 1) goldDelta += CustomTimeFormat(level.GoldDeltae[method][j]?.ToString() ?? "-", true);
 						segmentDelta += CustomTimeFormat(level.SegmentDeltae[method][j]?.ToString() ?? "-", true);
-						if (lvl == 0 && level.GoldDeltae[method][j] < TimeSpan.Zero) goldHighlights += "███████████████████████████████████████████";
+						if (lvl == _splitLevels.Length - 1 && level.GoldDeltae[method][j] < TimeSpan.Zero) goldHighlights += "███████████████████████████████████████████";
 						else if (level.RunDeltae[method][j] < TimeSpan.Zero && level.SegmentDeltae[method][j] < TimeSpan.Zero) aheadGainedHighlights += "███████████████████████████████████████████";
 						else if (level.RunDeltae[method][j] < TimeSpan.Zero) aheadLostHighlights += "███████████████████████████████████████████";
 						else if (level.SegmentDeltae[method][j] < TimeSpan.Zero) behindGainedHighlights += "███████████████████████████████████████████";
@@ -578,11 +632,12 @@ namespace LiveSplit.UI.Components
 					}
 					else {
 						finishTimeUpcoming += CustomTimeFormat(split.PersonalBestSplitTime[method]?.ToString() ?? "-", false);
-						if (lvl == 0) goldTimeUpcoming += CustomTimeFormat(split.BestSegmentTime[method]?.ToString() ?? "-", false);
+						if (lvl == _splitLevels.Length - 1) goldTimeUpcoming += CustomTimeFormat(split.BestSegmentTime[method]?.ToString() ?? "-", false);
 						segmentTimeUpcoming += CustomTimeFormat(level.PbSegmentTimes[method][j]?.ToString() ?? "-", false);
 					}
 
 					splitNames += "\n";
+					splitNamesRaw += "\n";
 					finishTimeLive += "\n";
 					finishTimeUpcoming += "\n";
 					runDelta += "\n";
@@ -599,6 +654,7 @@ namespace LiveSplit.UI.Components
 				}
 
 				MakeFile(FILE_SPLITLIST_NAMES, splitNames, null, lvl);
+				MakeFile(FILE_SPLITLIST_NAMES_RAW, splitNamesRaw, null, lvl);
 				MakeFile(FILE_SPLITLIST_FINISH_TIME_LIVE, finishTimeLive, method, lvl);
 				MakeFile(FILE_SPLITLIST_FINISH_TIME_UPCOMING, finishTimeUpcoming, method, lvl);
 				MakeFile(FILE_SPLITLIST_RUN_DELTA, runDelta, method, lvl);
@@ -609,9 +665,25 @@ namespace LiveSplit.UI.Components
 				MakeFile(FILE_SPLITLIST_AHEAD_LOST_HIGHLIGHT, aheadLostHighlights, method, lvl);
 				MakeFile(FILE_SPLITLIST_BEHIND_GAINED_HIGHLIGHT, behindGainedHighlights, method, lvl);
 				MakeFile(FILE_SPLITLIST_BEHIND_LOST_HIGHLIGHT, behindLostHighlights, method, lvl);
-				if (lvl == 0) MakeFile(FILE_SPLITLIST_GOLD_DELTA, goldDelta, method, lvl);
-				if (lvl == 0) MakeFile(FILE_SPLITLIST_GOLD_TIME_UPCOMING, goldTimeUpcoming, method, lvl);
-				if (lvl == 0) MakeFile(FILE_SPLITLIST_GOLD_HIGHLIGHT, goldHighlights, method, lvl);
+				if (lvl == _splitLevels.Length - 1) MakeFile(FILE_SPLITLIST_GOLD_DELTA, goldDelta, method, lvl);
+				if (lvl == _splitLevels.Length - 1) MakeFile(FILE_SPLITLIST_GOLD_TIME_UPCOMING, goldTimeUpcoming, method, lvl);
+				if (lvl == _splitLevels.Length - 1) MakeFile(FILE_SPLITLIST_GOLD_HIGHLIGHT, goldHighlights, method, lvl);
+				
+				if (!Settings.OutputSubsplits) continue;
+				string[] whitespacedSplitListNames = new string[_splitLevels.Length];
+				for (int i = lvl; i < whitespacedSplitListNames.Length; i++) {
+					whitespacedSplitListNames[i] = "";
+				}
+				for (int split = 0; split < _splitLevelIndices[lvl].Count; split++) {
+					int globalIndex = _splitLevelIndices[lvl][split];
+					for (int list = 0; list <= lvl; list++) {
+						if (list == _splitDepths[globalIndex]) whitespacedSplitListNames[list] += _splitNamesByLevel[globalIndex][lvl];
+						whitespacedSplitListNames[list] += "\n";
+					}
+				}
+				for (int list = 0; list <= lvl; list++) {
+					MakeFile(string.Format(FILE_SPLITLIST_WHITESPACE, "", "{1}", list), whitespacedSplitListNames[list], method, lvl);
+				}
 			}
 		}
 
@@ -621,7 +693,7 @@ namespace LiveSplit.UI.Components
 				if (getPrevious) return globalIndices.Count - 1;
 				else return -1;
 			}
-			
+
 			if (!getPrevious && !getNextIfNotPresent) {
 				return globalIndices.IndexOf(state.CurrentSplitIndex);
 			}
@@ -640,50 +712,60 @@ namespace LiveSplit.UI.Components
 			for (int lvl = 0; lvl < _splitLevels.Length; lvl++) {
 				SplitLevel level = _splitLevels[lvl];
 				int prevLocalSplitIndex = GetLocalSplitIndex(state, lvl, true);
+				if (prevLocalSplitIndex != -1) {
+					CalculateLiveSegment(state, method);
+					TimeSpan? goldDelta = CalculatePreviousGoldDelta(state, method, lvl);
+					TimeSpan? segmentDelta = CalculatePreviousSegmentDelta(state, method, lvl, prevLocalSplitIndex, out TimeSpan? segmentTime);
+					TimeSpan? runDelta = CalculatePreviousRunDelta(state, method, lvl, prevLocalSplitIndex, out TimeSpan? runTime);
 
-				CalculateLiveSegment(state, method);
-				TimeSpan? goldDelta = CalculatePreviousGoldDelta(state, method, lvl);
-				TimeSpan? segmentDelta = CalculatePreviousSegmentDelta(state, method, lvl, prevLocalSplitIndex, out TimeSpan? segmentTime);
-				TimeSpan? runDelta = CalculatePreviousRunDelta(state, method, lvl, prevLocalSplitIndex, out TimeSpan? runTime);
+					if ((state.CurrentPhase != TimerPhase.NotRunning) && state.CurrentSplitIndex > 0) {
+						level.GoldDeltae[method][prevLocalSplitIndex] = goldDelta;
+						level.SegmentDeltae[method][prevLocalSplitIndex] = segmentDelta;
+						level.RunDeltae[method][prevLocalSplitIndex] = runDelta;
+					}
 
-				if ((state.CurrentPhase != TimerPhase.NotRunning) && state.CurrentSplitIndex > 0) {
-					level.GoldDeltae[method][prevLocalSplitIndex] = goldDelta;
-					level.SegmentDeltae[method][prevLocalSplitIndex] = segmentDelta;
-					level.RunDeltae[method][prevLocalSplitIndex] = runDelta;
+					MakeFile(FILE_PREVIOUS_SEGMENT_TIME, segmentTime?.ToString() ?? "-", method, lvl, true, false);
+					MakeFile(FILE_PREVIOUS_RUN_TIME, runTime?.ToString() ?? "-", method, lvl, true, false);
+					MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, segmentDelta?.ToString() ?? "-", method, lvl, true, true);
+					MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, runDelta?.ToString() ?? "-", method, lvl, true, true);
+					if (lvl == _splitLevels.Length - 1) MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, goldDelta?.ToString() ?? "-", method, lvl, true, true);
+					
+					// Sign
+					if (state.CurrentPhase == TimerPhase.NotRunning) {
+						MakeFile(FILE_PREVIOUS_SIGN, Signs.NotApplicable.ToString(), method, lvl, false);
+					}
+					else if (state.CurrentPhase == TimerPhase.Ended) {
+						if (goldDelta == null || goldDelta < TimeSpan.Zero) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PBGold : Signs.NoPBGold).ToString(), method, lvl, false); }
+						else if (segmentDelta == null) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PB : Signs.NoPB).ToString(), method, lvl, false); }
+						else if (segmentDelta < TimeSpan.Zero) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PBGained : Signs.NoPBGained).ToString(), method, lvl, false); }
+						else { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PBLost : Signs.NoPBLost).ToString(), method, lvl, false); }
+					}
+					else if (runDelta == null) { MakeFile(FILE_PREVIOUS_SIGN, Signs.NotApplicable.ToString(), method, lvl, false); }
+					else if (goldDelta == null || goldDelta < TimeSpan.Zero) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.GoldAhead : Signs.GoldBehind).ToString(), method, lvl, false); }
+					else if (segmentDelta == null) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.Ahead : Signs.Behind).ToString(), method, lvl, false); }
+					else { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.LostAhead : Signs.LostBehind).ToString(), method, lvl, false); }
+				}
+				else {
+					MakeFile(FILE_PREVIOUS_SEGMENT_TIME, "-", method, lvl);
+					MakeFile(FILE_PREVIOUS_RUN_TIME, "-", method, lvl);
+					MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, "-", method, lvl);
+					MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, "-", method, lvl);
+					MakeFile(FILE_PREVIOUS_SIGN, Signs.NotApplicable.ToString(), method, lvl);
 				}
 
-				MakeFile(FILE_PREVIOUS_SEGMENT_TIME, segmentTime?.ToString() ?? "-", method, lvl, true, false);
-				MakeFile(FILE_PREVIOUS_RUN_TIME, runTime?.ToString() ?? "-", method, lvl, true, false);
-				MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, segmentDelta?.ToString() ?? "-", method, lvl, true, true);
-				MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, runDelta?.ToString() ?? "-", method, lvl, true, true);
-				if (lvl == 0) MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, goldDelta?.ToString() ?? "-", method, lvl, true, true);
-				
-				// Sign
-				if (state.CurrentPhase == TimerPhase.NotRunning) {
-					MakeFile(FILE_PREVIOUS_SIGN, Signs.NotApplicable.ToString(), method, lvl, false);
-				}
-				else if (state.CurrentPhase == TimerPhase.Ended) {
-					if (goldDelta == null || goldDelta < TimeSpan.Zero) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PBGold : Signs.NoPBGold).ToString(), method, lvl, false); }
-					else if (segmentDelta == null) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PB : Signs.NoPB).ToString(), method, lvl, false); }
-					else if (segmentDelta < TimeSpan.Zero) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PBGained : Signs.NoPBGained).ToString(), method, lvl, false); }
-					else { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.PBLost : Signs.NoPBLost).ToString(), method, lvl, false); }
-				}
-				else if (runDelta == null) { MakeFile(FILE_PREVIOUS_SIGN, Signs.NotApplicable.ToString(), method, lvl, false); }
-				else if (goldDelta == null || goldDelta < TimeSpan.Zero) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.GoldAhead : Signs.GoldBehind).ToString(), method, lvl, false); }
-				else if (segmentDelta == null) { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.Ahead : Signs.Behind).ToString(), method, lvl, false); }
-				else { MakeFile(FILE_PREVIOUS_SIGN, (runDelta < TimeSpan.Zero ? Signs.LostAhead : Signs.LostBehind).ToString(), method, lvl, false); }
 
+				// Current
 				if (state.CurrentPhase == TimerPhase.NotRunning || state.CurrentPhase == TimerPhase.Ended) {
 					MakeFile(FILE_CURRENT_SEGMENT_TIME, "-", method, lvl, true, false);
 					MakeFile(FILE_CURRENT_RUN_TIME, "-", method, lvl, true, false);
-					if (lvl == 0) MakeFile(FILE_CURRENT_GOLD_TIME, "-", method, lvl, true, false);
+					if (lvl == _splitLevels.Length - 1) MakeFile(FILE_CURRENT_GOLD_TIME, "-", method, lvl, true, false);
 				}
 				else {
 					int currLocalSplitIndex = GetLocalSplitIndex(state, lvl, false, true);
 					int currGlobalSplitIndex = _splitLevelIndices[lvl][currLocalSplitIndex];
 					MakeFile(FILE_CURRENT_SEGMENT_TIME, level.PbSegmentTimes[method][currLocalSplitIndex]?.ToString() ?? "-", method, lvl, true, false);
 					MakeFile(FILE_CURRENT_RUN_TIME, state.Run[currGlobalSplitIndex].PersonalBestSplitTime[method]?.ToString() ?? "-", method, lvl, true, false);
-					if (lvl == 0) MakeFile(FILE_CURRENT_GOLD_TIME, state.CurrentSplit.BestSegmentTime[method]?.ToString() ?? "-", method, lvl, true, false);
+					if (lvl == _splitLevels.Length - 1) MakeFile(FILE_CURRENT_GOLD_TIME, state.CurrentSplit.BestSegmentTime[method]?.ToString() ?? "-", method, lvl, true, false);
 				}
 			}
 		}
@@ -692,8 +774,7 @@ namespace LiveSplit.UI.Components
 		/// Write non-timing related information about a split
 		/// </summary>
 		/// <param name="state"></param>
-		void WriteSplitInformation(LiveSplitState state)
-		{
+		void WriteSplitInformation(LiveSplitState state) {
 			for (int lvl = 0; lvl < _splitLevels.Length; lvl++) {
 				SplitLevel level = _splitLevels[lvl];
 
@@ -702,26 +783,31 @@ namespace LiveSplit.UI.Components
 					MakeFile(FILE_CURRENT_INDEX, "-1", null, lvl);
 					MakeFile(FILE_CURRENT_REVERSEINDEX, (_splitLevelIndices[lvl].Count + 1).ToString(), null, lvl);
 					MakeFile(FILE_PREVIOUS_NAME, "-", null, lvl);
+					MakeFile(FILE_PREVIOUS_NAME_RAW, "-", null, lvl);
 					return;
 				}
 				if (state.CurrentPhase == TimerPhase.Ended) {
 					MakeFile(FILE_CURRENT_NAME, "-", null, lvl);
 					MakeFile(FILE_CURRENT_INDEX, _splitLevelIndices[lvl].Count.ToString(), null, lvl);
 					MakeFile(FILE_CURRENT_REVERSEINDEX, "0", null, lvl);
-					MakeFile(FILE_PREVIOUS_NAME, state.Run[state.Run.Count - 1].Name, null, lvl);
+					MakeFile(FILE_PREVIOUS_NAME_RAW, state.Run[state.Run.Count - 1].Name, null, lvl);
+					MakeFile(FILE_PREVIOUS_NAME, _splitNamesByLevel[state.Run.Count - 1][lvl], null, lvl);
 					return;
 				}
 				int prevLocalSplitIndex = GetLocalSplitIndex(state, lvl, true);
 				if (prevLocalSplitIndex == -1) {
 					MakeFile(FILE_PREVIOUS_NAME, "-", null, lvl);
+					MakeFile(FILE_PREVIOUS_NAME_RAW, "-", null, lvl);
 				}
 				else {
 					int prevGlobalSplitIndex = _splitLevelIndices[lvl][prevLocalSplitIndex];
-					MakeFile(FILE_PREVIOUS_NAME, state.Run[prevGlobalSplitIndex].Name, null, lvl);
+					MakeFile(FILE_PREVIOUS_NAME_RAW, state.Run[prevGlobalSplitIndex].Name, null, lvl);
+					MakeFile(FILE_PREVIOUS_NAME, _splitNamesByLevel[prevGlobalSplitIndex][lvl], null, lvl);
 				}
 				int currLocalSplitIndex = GetLocalSplitIndex(state, lvl, false, true);
 				int currGlobalSplitIndex = _splitLevelIndices[lvl][currLocalSplitIndex];
-				MakeFile(FILE_CURRENT_NAME, state.Run[currGlobalSplitIndex].Name, null, lvl);
+				MakeFile(FILE_CURRENT_NAME_RAW, state.Run[currGlobalSplitIndex].Name, null, lvl);
+				MakeFile(FILE_CURRENT_NAME, _splitNamesByLevel[currGlobalSplitIndex][lvl], null, lvl);
 				MakeFile(FILE_CURRENT_INDEX, currLocalSplitIndex.ToString(), null, lvl);
 				MakeFile(FILE_CURRENT_REVERSEINDEX, (_splitLevelIndices[lvl].Count - currLocalSplitIndex).ToString(), null, lvl);
 			}
@@ -731,10 +817,10 @@ namespace LiveSplit.UI.Components
 
 		void MakeFile(string fileName, string contents, TimingMethod? method, int subsplitLevel, bool formatTime = false, bool showPlus = false) {
 			string subsplitLevelTag;
-			if (subsplitLevel == 0) {
+			if (subsplitLevel == _splitLevels.Length - 1) {
 				subsplitLevelTag = "AllSplits";
 			}
-			else if (subsplitLevel == 1) {
+			else if (subsplitLevel == 0) {
 				subsplitLevelTag = "SansSubsplits";
 			}
 			else {
@@ -747,83 +833,71 @@ namespace LiveSplit.UI.Components
 			}
 			MakeFile(file, c);
 		}
-		
+
 		/// <summary>
 		/// Write to file
 		/// </summary>
 		/// <param name="fileName"></param>
 		/// <param name="contents"></param>
-		void MakeFile(string fileName, string contents, TimingMethod method, bool formatTime, bool showPlus = false)
-		{
+		void MakeFile(string fileName, string contents, TimingMethod method, bool formatTime, bool showPlus = false) {
 			string file = string.Format(fileName, method.ToString());
 			string c = contents;
-			if (formatTime)
-			{
+			if (formatTime) {
 				c = CustomTimeFormat(contents, showPlus);
 			}
 			MakeFile(file, c);
 		}
 
-		void MakeFile(string fileName, string contents)
-		{
+		void MakeFile(string fileName, string contents) {
 			string settingsPath = Settings.FolderPath;
 			if (string.IsNullOrEmpty(settingsPath)) return;
 			string path = Path.Combine(settingsPath, fileName);
-			if (!Directory.Exists(Path.GetDirectoryName(path)))
-			{
+			if (!Directory.Exists(Path.GetDirectoryName(path))) {
 				Directory.CreateDirectory(Path.GetDirectoryName(path));
 			}
 			File.WriteAllText(path, contents);
 		}
 
-		string CustomTimeFormat(string time, bool showPlus)
-		{
+		string CustomTimeFormat(string time, bool showPlus) {
 			// time is null, return '-'
 			if (time == "-") return time;
-			
+
 			bool negative = time[0] == '-';
 			if (negative) time = time.Substring(1);
-			
+
 			if (time.Length < 9) time += ".0000000"; // hh:mm:ss.ddddddd
 
-			if (time.Substring(0, 7) == "00:00:0")
-			{
+			if (time.Substring(0, 7) == "00:00:0") {
 				time = time.Substring(7, 4);
 				// s.dd
 			}
-			else if (time.Substring(0, 6) == "00:00:")
-			{
+			else if (time.Substring(0, 6) == "00:00:") {
 				time = time.Substring(6, 4);
 				// ss.d
 			}
-			else if (time.Substring(0, 4) == "00:0")
-			{
+			else if (time.Substring(0, 4) == "00:0") {
 				time = time.Substring(4, 4);
 				// m:ss
 			}
-			else if (time.Substring(0, 3) == "00:")
-			{
+			else if (time.Substring(0, 3) == "00:") {
 				time = time.Substring(3, 5);
 				// mm:ss
 			}
-			else if (time.Substring(0, 1) == "0")
-			{
+			else if (time.Substring(0, 1) == "0") {
 				time = time.Substring(1, 7);
 				// h:mm:ss
 			}
-			else if (time.Length == 16)
-			{
+			else if (time.Length == 16) {
 				time = time.Substring(0, 8);
 				// hh:mm:ss
 			}
-			else
-			{
+			else {
 				time = time.Substring(0, time.Length - 8);
 				// d.hh:mm:ss
 			}
 			string prefix = negative ? "-" : (showPlus ? "+" : "");
 			time = prefix + time;
-			
+
 			return time;
 		}
 
@@ -831,8 +905,7 @@ namespace LiveSplit.UI.Components
 
 		// This function is called when the component is removed from the layout, or when LiveSplit
 		// closes a layout with this component in it.
-		public void Dispose()
-		{
+		public void Dispose() {
 			CurrentState.OnStart -= state_OnStart;
 			CurrentState.OnSplit -= state_OnSplitChange;
 			CurrentState.OnSkipSplit -= state_OnSplitChange;

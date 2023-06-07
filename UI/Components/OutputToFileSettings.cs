@@ -13,22 +13,29 @@ namespace LiveSplit.UI.Components
         public int SplitsBefore { get; set; }
         public int SplitsAfter { get; set; }
         public bool OutputTimer { get; set; }
+        public bool OutputSplitList { get; set; }
+        public bool OutputSubsplits { get; set; }
 
-        public OutputToFileSettings()
+		public OutputToFileSettings()
         {
             InitializeComponent();
             FolderPath = string.Empty;
             SplitsBefore = 10;
             SplitsAfter = 10;
             OutputTimer = false;
+            OutputSplitList = true;
+            OutputSubsplits = true;
 
-            this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnPropertyChanged);
+
+			this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnPropertyChanged);
             this.numericUpDownSplitListBefore.DataBindings.Add("Value", this, "SplitsBefore", false, DataSourceUpdateMode.OnPropertyChanged);
             this.numericUpDownSplitListAfter.DataBindings.Add("Value", this, "SplitsAfter", false, DataSourceUpdateMode.OnPropertyChanged);
-            this.radioButtonOutputTimer.DataBindings.Add("Checked", this, "OutputTimer", false, DataSourceUpdateMode.OnPropertyChanged);
-        }
+            this.checkBoxOutputTimer.DataBindings.Add("Checked", this, "OutputTimer", false, DataSourceUpdateMode.OnPropertyChanged);
+            this.checkBoxOutputSplitList.DataBindings.Add("Checked", this, "OutputSplitList", false, DataSourceUpdateMode.OnPropertyChanged);
+            this.checkBoxOutputSubsplits.DataBindings.Add("Checked", this, "OutputSubsplits", false, DataSourceUpdateMode.OnPropertyChanged);
+		}
 
-        private void OutputToFileSettings_Load(object sender, EventArgs e)
+		private void OutputToFileSettings_Load(object sender, EventArgs e)
         {
 
         }
@@ -39,8 +46,10 @@ namespace LiveSplit.UI.Components
                 SettingsHelper.CreateSetting(document, parent, "FolderPath", FolderPath) ^
                 SettingsHelper.CreateSetting(document, parent, "SplitsBefore", SplitsBefore) ^
                 SettingsHelper.CreateSetting(document, parent, "SplitsAfter", SplitsAfter) ^
-                SettingsHelper.CreateSetting(document, parent, "OutputTimer", OutputTimer)
-                ;
+                SettingsHelper.CreateSetting(document, parent, "OutputTimer", OutputTimer) ^
+                SettingsHelper.CreateSetting(document, parent, "OutputSplitList", OutputSplitList) ^
+                SettingsHelper.CreateSetting(document, parent, "OutputSubsplits", OutputSubsplits)
+				;
         }
 
         public XmlNode GetSettings(XmlDocument document)
@@ -64,7 +73,9 @@ namespace LiveSplit.UI.Components
             SplitsBefore = SettingsHelper.ParseInt(element["SplitsBefore"], 3);
             SplitsAfter = SettingsHelper.ParseInt(element["SplitsAfter"], 2);
             OutputTimer = SettingsHelper.ParseBool(element["OutputTimer"], false);
-        }
+			OutputSplitList = SettingsHelper.ParseBool(element["OutputSplitList"], true);
+			OutputSubsplits = SettingsHelper.ParseBool(element["OutputSubsplits"], true);
+		}
 
         private void buttonFolderPath_Click(object sender, EventArgs e)
         {
@@ -89,9 +100,17 @@ namespace LiveSplit.UI.Components
             SplitsAfter = (int)numericUpDownSplitListAfter.Value;
         }
 
-		private void radioButtonOutputTimer_CheckedChanged(object sender, EventArgs e)
-		{
-            OutputTimer = radioButtonOutputTimer.Checked;
+		private void checkBoxOutputTimer_CheckedChanged(object sender, EventArgs e) {
+			OutputTimer = checkBoxOutputTimer.Checked;
+		}
+
+		private void checkBoxOutputSplitList_CheckedChanged(object sender, EventArgs e) {
+			OutputSplitList = checkBoxOutputSplitList.Checked;
+            groupBoxSplitList.Enabled = checkBoxOutputSplitList.Checked;
+		}
+
+		private void checkBoxOutputSubsplits_CheckedChanged(object sender, EventArgs e) {
+			OutputSplitList = checkBoxOutputSplitList.Checked;
 		}
 	}
 }
