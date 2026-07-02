@@ -128,6 +128,23 @@ namespace LiveSplit.UI.Components {
 		const string FILE_SPLITLIST_BEHIND_GAINED_HIGHLIGHT = @"SplitList\{1}\{0}\Highlight_BehindGained.txt";
 		const string FILE_SPLITLIST_BEHIND_LOST_HIGHLIGHT = @"SplitList\{1}\{0}\Highlight_BehindLost.txt";
 
+		const string FILE_FINISHEDLIST_NAMES = @"CompletedSplits\{1}\Names.txt";
+		const string FILE_FINISHEDLIST_NAMES_RAW = @"CompletedSplits\{1}\Names_Raw.txt";
+		const string FILE_FINISHEDLIST_WHITESPACE = @"CompletedSplits\{1}\Names_Indent_{2}.txt";
+		const string FILE_FINISHEDLIST_FINISH_TIME_LIVE = @"CompletedSplits\{1}\{0}\Time_Run_Current.txt";
+		const string FILE_FINISHEDLIST_FINISH_TIME_UPCOMING = @"CompletedSplits\{1}\{0}\Time_Run_Upcoming.txt";
+		const string FILE_FINISHEDLIST_RUN_DELTA = @"CompletedSplits\{1}\{0}\Delta_Run.txt";
+		const string FILE_FINISHEDLIST_GOLD_DELTA = @"CompletedSplits\{1}\{0}\Delta_Gold.txt";
+		const string FILE_FINISHEDLIST_GOLD_TIME_UPCOMING = @"CompletedSplits\{1}\{0}\Time_Gold_Upcoming.txt";
+		const string FILE_FINISHEDLIST_SEGMENT_TIME_UPCOMING = @"CompletedSplits\{1}\{0}\Time_Segment_Upcoming.txt";
+		const string FILE_FINISHEDLIST_SEGMENT_DELTA = @"CompletedSplits\{1}\{0}\Delta_Segment.txt";
+		const string FILE_FINISHEDLIST_CURRENT_SPLIT_HIGHLIGHT = @"CompletedSplits\{1}\Highlight_CurrentSplit.txt";
+		const string FILE_FINISHEDLIST_GOLD_HIGHLIGHT = @"CompletedSplits\{1}\{0}\Highlight_Gold.txt";
+		const string FILE_FINISHEDLIST_AHEAD_GAINED_HIGHLIGHT = @"CompletedSplits\{1}\{0}\Highlight_AheadGained.txt";
+		const string FILE_FINISHEDLIST_AHEAD_LOST_HIGHLIGHT = @"CompletedSplits\{1}\{0}\Highlight_AheadLost.txt";
+		const string FILE_FINISHEDLIST_BEHIND_GAINED_HIGHLIGHT = @"CompletedSplits\{1}\{0}\Highlight_BehindGained.txt";
+		const string FILE_FINISHEDLIST_BEHIND_LOST_HIGHLIGHT = @"CompletedSplits\{1}\{0}\Highlight_BehindLost.txt";
+
 		#endregion
 
 		#region livesplitoverhead
@@ -484,6 +501,8 @@ namespace LiveSplit.UI.Components {
 			WriteSplitTimes(TimingMethod.GameTime);
 			WriteSplitList(TimingMethod.RealTime);
 			WriteSplitList(TimingMethod.GameTime);
+			WriteCompletedSplitList(TimingMethod.RealTime);
+			WriteCompletedSplitList(TimingMethod.GameTime);
 		}
 
 		// This is the function where we decide what needs to be displayed at this moment in time,
@@ -516,6 +535,121 @@ namespace LiveSplit.UI.Components {
 					MakeFile(FILE_INFO_SPLITCOUNT, _splitLevelIndices[lvl].Count.ToString(), null, lvl);
 				}
 				WriteSplits();
+			}
+		}
+
+		void WriteCompletedSplitList(TimingMethod method) {
+			if (!Settings.OutputCompletedSplits) return;
+
+			int startingLevel = 0;
+			if (!Settings.OutputSubsplits) startingLevel = _splitLevels.Length - 1;
+
+			for (int lvl = startingLevel; lvl < _splitLevels.Length; lvl++) {
+				SplitLevel level = _splitLevels[lvl];
+				List<int> subsplitIndices = _splitLevelIndices[lvl];
+				int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
+
+				int first = 0;
+				int last = currentSubsplitIndex - 1;
+
+				string splitNames = "";
+				string splitNamesRaw = "";
+				string finishTimeLive = "";
+				string finishTimeUpcoming = "";
+				string runDelta = "";
+				string goldDelta = "";
+				string goldTimeUpcoming = "";
+				string segmentTimeUpcoming = "";
+				string segmentDelta = "";
+				string currentSplitHighlight = "";
+				string goldHighlights = "";
+				string aheadGainedHighlights = "";
+				string aheadLostHighlights = "";
+				string behindGainedHighlights = "";
+				string behindLostHighlights = "";
+
+				// Build the strings
+				for (int spl = first; spl <= last; spl++) {
+					int allSplitsIndex = subsplitIndices[spl];
+					var split = State.Run[allSplitsIndex];
+
+					splitNamesRaw += split.Name;
+					splitNames += _splitNamesByLevel[allSplitsIndex][lvl];
+
+					if (spl == currentSubsplitIndex) currentSplitHighlight += HIGHLIGHT_FILL;
+
+					if (spl < currentSubsplitIndex) {
+						finishTimeLive += TimeFormatter.DurationString(split.SplitTime[method]);
+						runDelta += TimeFormatter.DeltaString(level.RunDeltae[method][spl]);
+						goldDelta += lvl == _splitLevels.Length - 1 ? TimeFormatter.DeltaString(level.GoldDeltae[method][spl]) : "";
+						segmentDelta += TimeFormatter.DeltaString(level.SegmentDeltae[method][spl]);
+						// highlight fills
+						if (lvl == _splitLevels.Length - 1 && level.GoldDeltae[method][spl] < TimeSpan.Zero)
+							goldHighlights += HIGHLIGHT_FILL;
+						else if (level.RunDeltae[method][spl] < TimeSpan.Zero && level.SegmentDeltae[method][spl] < TimeSpan.Zero)
+							aheadGainedHighlights += HIGHLIGHT_FILL;
+						else if (level.RunDeltae[method][spl] < TimeSpan.Zero)
+							aheadLostHighlights += HIGHLIGHT_FILL;
+						else if (level.SegmentDeltae[method][spl] < TimeSpan.Zero)
+							behindGainedHighlights += HIGHLIGHT_FILL;
+						else if (split.PersonalBestSplitTime[method] != null)
+							behindLostHighlights += HIGHLIGHT_FILL;
+					}
+					else {
+						finishTimeUpcoming += TimeFormatter.DurationString(split.PersonalBestSplitTime[method]);
+						goldTimeUpcoming += lvl == _splitLevels.Length - 1 ? TimeFormatter.DurationString(split.BestSegmentTime[method]) : "";
+						segmentTimeUpcoming += TimeFormatter.DurationString(level.PbSegmentTimes[method][spl]);
+					}
+
+					splitNames += "\n";
+					splitNamesRaw += "\n";
+					finishTimeLive += "\n";
+					finishTimeUpcoming += "\n";
+					runDelta += "\n";
+					goldDelta += "\n";
+					goldTimeUpcoming += "\n";
+					segmentTimeUpcoming += "\n";
+					segmentDelta += "\n";
+					currentSplitHighlight += "\n";
+					goldHighlights += "\n";
+					aheadGainedHighlights += "\n";
+					behindGainedHighlights += "\n";
+					aheadLostHighlights += "\n";
+					behindLostHighlights += "\n";
+				}
+
+				// Output
+				MakeFile(FILE_FINISHEDLIST_NAMES, splitNames, null, lvl);
+				MakeFile(FILE_FINISHEDLIST_NAMES_RAW, splitNamesRaw, null, lvl);
+				MakeFile(FILE_FINISHEDLIST_FINISH_TIME_LIVE, finishTimeLive, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_FINISH_TIME_UPCOMING, finishTimeUpcoming, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_RUN_DELTA, runDelta, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_SEGMENT_TIME_UPCOMING, segmentTimeUpcoming, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_SEGMENT_DELTA, segmentDelta, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_CURRENT_SPLIT_HIGHLIGHT, currentSplitHighlight, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_AHEAD_GAINED_HIGHLIGHT, aheadGainedHighlights, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_AHEAD_LOST_HIGHLIGHT, aheadLostHighlights, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_BEHIND_GAINED_HIGHLIGHT, behindGainedHighlights, method, lvl);
+				MakeFile(FILE_FINISHEDLIST_BEHIND_LOST_HIGHLIGHT, behindLostHighlights, method, lvl);
+				if (lvl == _splitLevels.Length - 1) MakeFile(FILE_FINISHEDLIST_GOLD_DELTA, goldDelta, method, lvl);
+				if (lvl == _splitLevels.Length - 1) MakeFile(FILE_FINISHEDLIST_GOLD_TIME_UPCOMING, goldTimeUpcoming, method, lvl);
+				if (lvl == _splitLevels.Length - 1) MakeFile(FILE_FINISHEDLIST_GOLD_HIGHLIGHT, goldHighlights, method, lvl);
+
+				// Write differnet levels of subsplits to different files, allowing the user to indent them in their OBS etc.
+				string[] whitespacedSplitListNames = new string[_splitLevels.Length];
+				for (int i = lvl; i < whitespacedSplitListNames.Length; i++) {
+					whitespacedSplitListNames[i] = "";
+				}
+				for (int split = first; split <= last; split++) {
+					int globalIndex = _splitLevelIndices[lvl][split];
+					for (int list = 0; list <= lvl; list++) {
+						if (list == _splitDepths[globalIndex]) whitespacedSplitListNames[list] += _splitNamesByLevel[globalIndex][lvl];
+						whitespacedSplitListNames[list] += "\n";
+					}
+				}
+				for (int list = 0; list <= lvl; list++) {
+					MakeFile(string.Format(FILE_FINISHEDLIST_WHITESPACE, "", "{1}", list), whitespacedSplitListNames[list], method, lvl);
+				}
 			}
 		}
 

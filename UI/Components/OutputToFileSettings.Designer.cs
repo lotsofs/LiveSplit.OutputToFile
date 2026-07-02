@@ -35,6 +35,7 @@
 			this.buttonFolderPath = new System.Windows.Forms.Button();
 			this.groupBoxOutputSelection = new System.Windows.Forms.GroupBox();
 			this.checkBoxOutputSubsplits = new System.Windows.Forms.CheckBox();
+			this.checkBoxOutputCompletedSplits = new System.Windows.Forms.CheckBox();
 			this.checkBoxOutputSplitList = new System.Windows.Forms.CheckBox();
 			this.checkBoxOutputTimer = new System.Windows.Forms.CheckBox();
 			this.groupBoxSplitList = new System.Windows.Forms.GroupBox();
@@ -43,7 +44,6 @@
 			this.numericUpDownSplitListAfter = new System.Windows.Forms.NumericUpDown();
 			this.labelSplitListBefore = new System.Windows.Forms.Label();
 			this.labelSplitListAfter = new System.Windows.Forms.Label();
-			this.groupBoxTimeFormats = new System.Windows.Forms.GroupBox();
 			this.tableLayoutPanelTop.SuspendLayout();
 			this.groupBoxFolderPath.SuspendLayout();
 			this.tableLayoutPanelFolderPath.SuspendLayout();
@@ -62,16 +62,15 @@
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxFolderPath, 0, 0);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxOutputSelection, 0, 1);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxSplitList, 0, 2);
-			this.tableLayoutPanelTop.Controls.Add(this.groupBoxTimeFormats, 0, 3);
 			this.tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanelTop.Name = "tableLayoutPanelTop";
 			this.tableLayoutPanelTop.RowCount = 5;
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 51F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 74F));
-			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 80F));
-			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 118F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 77F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 170F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 8F));
-			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 331);
+			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 549);
 			this.tableLayoutPanelTop.TabIndex = 0;
 			// 
 			// groupBoxFolderPath
@@ -134,6 +133,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputSubsplits);
+			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputCompletedSplits);
 			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputSplitList);
 			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputTimer);
 			this.groupBoxOutputSelection.Location = new System.Drawing.Point(3, 54);
@@ -154,7 +154,18 @@
 			this.checkBoxOutputSubsplits.TabIndex = 3;
 			this.checkBoxOutputSubsplits.Text = "Subsplits";
 			this.checkBoxOutputSubsplits.UseVisualStyleBackColor = true;
-			this.checkBoxOutputSubsplits.CheckedChanged += new System.EventHandler(this.checkBoxOutputSubsplits_CheckedChanged);
+			// 
+			// checkBoxOutputCompletedSplits
+			// 
+			this.checkBoxOutputCompletedSplits.AutoSize = true;
+			this.checkBoxOutputCompletedSplits.Checked = true;
+			this.checkBoxOutputCompletedSplits.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxOutputCompletedSplits.Location = new System.Drawing.Point(245, 19);
+			this.checkBoxOutputCompletedSplits.Name = "checkBoxOutputCompletedSplits";
+			this.checkBoxOutputCompletedSplits.Size = new System.Drawing.Size(102, 17);
+			this.checkBoxOutputCompletedSplits.TabIndex = 4;
+			this.checkBoxOutputCompletedSplits.Text = "Completed splits";
+			this.checkBoxOutputCompletedSplits.UseVisualStyleBackColor = true;
 			// 
 			// checkBoxOutputSplitList
 			// 
@@ -178,7 +189,6 @@
 			this.checkBoxOutputTimer.TabIndex = 1;
 			this.checkBoxOutputTimer.Text = "Timer";
 			this.checkBoxOutputTimer.UseVisualStyleBackColor = true;
-			this.checkBoxOutputTimer.CheckedChanged += new System.EventHandler(this.checkBoxOutputTimer_CheckedChanged);
 			// 
 			// groupBoxSplitList
 			// 
@@ -188,7 +198,7 @@
 			this.groupBoxSplitList.Controls.Add(this.tableLayoutPanelSplitList);
 			this.groupBoxSplitList.Location = new System.Drawing.Point(3, 128);
 			this.groupBoxSplitList.Name = "groupBoxSplitList";
-			this.groupBoxSplitList.Size = new System.Drawing.Size(448, 74);
+			this.groupBoxSplitList.Size = new System.Drawing.Size(448, 71);
 			this.groupBoxSplitList.TabIndex = 1;
 			this.groupBoxSplitList.TabStop = false;
 			this.groupBoxSplitList.Text = "Split List Writing";
@@ -223,7 +233,6 @@
             0,
             0,
             0});
-			this.numericUpDownSplitListBefore.ValueChanged += new System.EventHandler(this.numericUpDownSplitListBefore_ValueChanged);
 			// 
 			// numericUpDownSplitListAfter
 			// 
@@ -237,7 +246,6 @@
             0,
             0,
             0});
-			this.numericUpDownSplitListAfter.ValueChanged += new System.EventHandler(this.numericUpDownSplitListAfter_ValueChanged);
 			// 
 			// labelSplitListBefore
 			// 
@@ -258,18 +266,6 @@
 			this.labelSplitListAfter.Size = new System.Drawing.Size(257, 13);
 			this.labelSplitListAfter.TabIndex = 3;
 			this.labelSplitListAfter.Text = "Splits after current";
-			// 
-			// groupBoxTimeFormats
-			// 
-			this.groupBoxTimeFormats.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBoxTimeFormats.Location = new System.Drawing.Point(3, 208);
-			this.groupBoxTimeFormats.Name = "groupBoxTimeFormats";
-			this.groupBoxTimeFormats.Size = new System.Drawing.Size(448, 112);
-			this.groupBoxTimeFormats.TabIndex = 2;
-			this.groupBoxTimeFormats.TabStop = false;
-			this.groupBoxTimeFormats.Text = "Time Formats";
 			// 
 			// OutputToFileSettings
 			// 
@@ -315,6 +311,6 @@
 		private System.Windows.Forms.Label labelSplitListAfter;
 		private System.Windows.Forms.CheckBox checkBoxOutputSplitList;
 		private System.Windows.Forms.CheckBox checkBoxOutputSubsplits;
-		private System.Windows.Forms.GroupBox groupBoxTimeFormats;
+		private System.Windows.Forms.CheckBox checkBoxOutputCompletedSplits;
 	}
 }
