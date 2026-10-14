@@ -4,7 +4,7 @@ Things the component doesn't do yet. The index is [TODO.md](TODO.md). Line numbe
 
 TST makes the Verify steps in the other detail docs repeatable, so it pays to do it early. Its test project will need [HNT](Project.md#hnt--livesplit-references-only-resolve-on-this-machine) to build anywhere but this machine.
 
-GLD needs [FIN](Defects.md#fin--final-splits-segment-time-and-deltas-are-lost) fixed first, and it extends [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)'s plan from `AllSplits` to every level.
+GLD extends [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)'s plan from `AllSplits` to every level.
 
 ## TST — No automated tests
 
@@ -70,7 +70,6 @@ A section's gold is the fastest time the whole section took **within a single at
 - `CalculatePreviousGoldDelta` takes `prevLocalIndex`, like `CalculatePreviousSegmentDelta` does. It drops the level guard and returns `LiveSegmentTimes − BestSegmentTimes` at that index.
 - Drop the `lvl == _splitLevels.Length - 1` guards on gold output in `WriteSplitTimes`, `WriteSplitList` and `WriteCompletedSplitList`. `GoldTime.txt` and `Time_Gold_Upcoming.txt` read `BestSegmentTimes`. They currently use `State.CurrentSplit.BestSegmentTime`, which is the wrong split above `AllSplits`.
 - Related items:
-  - Do [FIN](Defects.md#fin--final-splits-segment-time-and-deltas-are-lost) first, or the last section's gold delta is wrong at every level.
   - Fix [UND](Defects.md#und--undo-to-the-first-split-leaves-golddifference-stale) in the same change, because it then affects every level.
   - [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)'s plan limits "is a gold" to `AllSplits`. Extend it to every level.
   - [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas) also wipes the stored gold deltas at the new levels.

@@ -119,7 +119,7 @@ Each level holds five `Dictionary<TimingMethod, TimeSpan?[]>`, one array per tim
 
 `CalculateSegments()` throws all of these away and rebuilds them. It also rebuilds the level structure (and builds it twice; see [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice)).
 
-A dictionary's `.Count` is the number of timing methods (2), not the array length. That mistake is in `CalculateLiveSegment` ([FIN](Defects.md#fin--final-splits-segment-time-and-deltas-are-lost)).
+A dictionary's `.Count` is the number of timing methods (2), not the array length; use `[method].Length`.
 
 ## Phase-dependent indexes
 

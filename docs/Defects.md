@@ -6,8 +6,7 @@ Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 b
 
 ## Dependencies between plans
 
-- FIN, NUL, UND and SKP touch the stored deltas, or the `Sign.txt` and highlight chains that use them. PAU's preferred plan (compute deltas when writing instead of storing them at split time) rewrites that code. FIN's one-line fix is still worth doing first. Recheck the others after PAU.
-- NUL's final-split case only goes away once FIN is fixed.
+- NUL, UND and SKP touch the stored deltas, or the `Sign.txt` and highlight chains that use them. PAU's preferred plan (compute deltas when writing instead of storing them at split time) rewrites that code. Recheck them after PAU.
 - NUL and GAI edit the same `Sign.txt` chains. Do them together.
 - SKP edits a highlight chain that exists twice, in `WriteSplitList` and `WriteCompletedSplitList`. Doing [DRY](Cleanup.md#dry--split-list-writers-are-near-duplicates) first halves that edit.
 - CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
@@ -27,33 +26,20 @@ Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 b
 
 **Docs.** architecture.md "Writing files". testing.md WER row. README, if the error gets shown in the settings panel.
 
-## FIN — Final split's segment time and deltas are lost
-
-At the finish, `CalculateLiveSegment` stores the final segment at index `level.LiveSegmentTimes.Count - 1` ([:353](../UI/Components/OutputToFileComponent.cs#L353), [:356](../UI/Components/OutputToFileComponent.cs#L356)). `LiveSegmentTimes` is the `Dictionary<TimingMethod, …>`, so `.Count` is always 2. The final segment overwrites slot 1, and the last slot is never set.
-
-**Evidence.** Reproduced 2026-10-14: with 3+ splits at a level, after finishing, `PreviousSplit\AllSplits\*\SegmentTime.txt`, `SegmentDifference.txt` and `GoldDifference.txt` showed `-`, and `Sign.txt` showed `PBGold`/`NoPBGold` (see NUL).
-
-**Plan.** Use `level.LiveSegmentTimes[method].Length - 1`. If PAU computes segments on demand, this code goes away with it.
-
-**Verify.** The FIN regression check in testing.md (after the finish) shows the last segment's time and differences.
-
-**Docs.** output-files.md "PreviousSplit" (⚠ marks). architecture.md "Per-level data" (the `.Count` note). testing.md FIN row.
-
 ## NUL — Sign reports a gold whenever the gold delta is null
 
 [:855](../UI/Components/OutputToFileComponent.cs#L855) and [:861](../UI/Components/OutputToFileComponent.cs#L861) treat `goldDelta == null` as a gold. It is null in cases that are not golds:
 
 - At every subsplit level, because `CalculatePreviousGoldDelta` returns null there ([:385](../UI/Components/OutputToFileComponent.cs#L385)). So `PreviousSplit\SansSubsplits*\*\Sign.txt` always says `GoldAhead`/`GoldBehind`, or `PBGold`/`NoPBGold` at the finish.
 - On the split after a skipped split.
-- On the final split, because of FIN. Every finished run ends with `PBGold`/`NoPBGold`.
 
 Only "no best segment exists yet" should count as a gold. The highlight code ([:587](../UI/Components/OutputToFileComponent.cs#L587), [:721](../UI/Components/OutputToFileComponent.cs#L721)) treats null as "not a gold", so `Sign.txt` and `Highlight_Gold.txt` also disagree.
 
 **Evidence.** Reproduced 2026-10-14.
 
-**Plan.** Decide "is a gold" separately from `goldDelta`: true only at the `AllSplits` level, when the live segment time exists and either the best segment is null or the delta is negative. Best segments don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)), so this is stable until reset. Use the same rule in the highlight chains. Do this together with GAI. The final-split case needs FIN.
+**Plan.** Decide "is a gold" separately from `goldDelta`: true only at the `AllSplits` level, when the live segment time exists and either the best segment is null or the delta is negative. Best segments don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)), so this is stable until reset. Use the same rule in the highlight chains. Do this together with GAI.
 
-**Verify.** The NUL regression checks in testing.md give the non-gold values. A finish whose last segment isn't a gold isn't `PBGold`/`NoPBGold`. `Sign.txt` and `Highlight_Gold.txt` agree.
+**Verify.** The NUL regression checks in testing.md give the non-gold values. A finish at a subsplit level isn't `PBGold`/`NoPBGold`. `Sign.txt` and `Highlight_Gold.txt` agree.
 
 **Docs.** output-files.md "Sign values" (⚠ marks). architecture.md "How the values are calculated". testing.md NUL rows.
 

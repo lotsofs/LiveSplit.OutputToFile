@@ -350,10 +350,10 @@ namespace LiveSplit.UI.Components {
 					int penultimateSubsplitGlobalIndex = indices[indices.Count - 2];
 					TimeSpan? penultimateFinishTime = state.Run[penultimateSubsplitGlobalIndex].SplitTime[method];
 					if (penultimateFinishTime == null) {
-						level.LiveSegmentTimes[method][level.LiveSegmentTimes.Count - 1] = null;
+						level.LiveSegmentTimes[method][level.LiveSegmentTimes[method].Length - 1] = null;
 					}
 					else {
-						level.LiveSegmentTimes[method][level.LiveSegmentTimes.Count - 1] = ultimateFinishTime - penultimateFinishTime;
+						level.LiveSegmentTimes[method][level.LiveSegmentTimes[method].Length - 1] = ultimateFinishTime - penultimateFinishTime;
 					}
 				}
 				else {

@@ -140,7 +140,6 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | NUL | After A3 (Area A: 28 vs 30) | `PreviousSplit\SansSubsplits\GameTime\Sign.txt` | `GoldAhead` | `GainedAhead` |
 | IDX | Timer at 33.2 s | `Timers\GameTime\SegmentTimer_SansSubsplits.txt` | `0:23` | `0:05` |
 | PAU | Pause after A3, then `Tick()` | `SplitList\AllSplits\GameTime\Delta_Run.txt` | `- \| - \| -2.00 \| \| \|` | `-0.5 \| +1.0 \| -2.0 \| \| \|` |
-| FIN, NUL | After the finish at 48, then `Tick()` | `PreviousSplit\AllSplits\GameTime\` `SegmentTime` / `SegmentDifference` / `GoldDifference` / `Sign` | `-` / `-` / `-` / `PBGold` | `0:09` / `-1.0` / `+.00` / `PBGained` |
 | RET | After the finish | `PreviousSplit\AllSplits\Name.txt` | `B1` | `B2` |
 | RET | Finish, reset, `Tick()` | `CurrentSplit\AllSplits\Index.txt`, `Name.txt` | `4`, `B2` | `-1`, `-` |
 | NUL | Splits `A`, `B`, `C`: skip A, split B at 19 | `PreviousSplit\AllSplits\GameTime\Sign.txt` | `GoldAhead` | `Ahead` |
@@ -150,4 +149,4 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | SEC | Tick every 0.5 s to 60.5 s, then reset | `Timers\GameTime\RunTimer.txt` | `1:00` | `0:00` |
 | WER | An output file held open with `FileShare.None` during `Split()` | `Split()` | throws `IOException` | no exception |
 
-The correct negative values (`-0.5`, `-2.0`, `-1.0`) assume the `DeltaString` precision fix. Before that fix, negatives get centiseconds: `-.50`, `-2.00`, `-1.00`.
+The correct negative values (`-0.5`, `-2.0`) assume the `DeltaString` precision fix. Before that fix, negatives get centiseconds: `-.50`, `-2.00`.

@@ -55,11 +55,11 @@ Written from `Update()`, but only when the run timer's seconds component changes
 | File | Running, nothing completed at this level yet | Running / paused | Finished |
 |---|---|---|---|
 | `Name.txt`, `Name_Raw.txt` | `-` | Previous member's name | Last split's name ⚠ RET (see CurrentSplit note) |
-| `{method}\SegmentTime.txt` | `-` | This attempt's segment time for that member | ⚠ FIN: `-` with 3+ members |
+| `{method}\SegmentTime.txt` | `-` | This attempt's segment time for that member | The last member's segment time |
 | `{method}\RunTime.txt` | `-` | This attempt's split time | Final time |
-| `{method}\SegmentDifference.txt` | `-` | Segment time − PB segment | ⚠ FIN: `-` with 3+ members |
+| `{method}\SegmentDifference.txt` | `-` | Segment time − PB segment | Last segment − PB segment |
 | `{method}\RunDifference.txt` | `-` | Split time − PB split time | Final time − PB |
-| `{method}\GoldDifference.txt` (gold) | ⚠ UND: not rewritten | Segment time − best segment | ⚠ FIN: `-` |
+| `{method}\GoldDifference.txt` (gold) | ⚠ UND: not rewritten | Segment time − best segment | Last segment − best segment |
 | `{method}\Sign.txt` | `NotApplicable` | See below | See below |
 
 When the timer isn't running, every file shows `-`, and `Sign.txt` shows `NotApplicable`.
