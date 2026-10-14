@@ -141,7 +141,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
 - **Run delta:** live split time minus PB split time, for the same split.
 - **Segment delta:** live segment minus PB segment, at this level.
 - **Gold delta:** live segment minus `BestSegmentTime`, at the last level only. Best segments and PB times don't change during a run; LiveSplit updates them on reset. Comparisons made during the run therefore use the values from before the run.
-- **`Sign.txt`** ([:850-871](../UI/Components/OutputToFileComponent.cs#L850-L871)): a decision chain over the run, segment and gold deltas. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values). Known defects: the "gained" branch is missing mid-run ([GAI](Defects.md#gai--sign-never-says-gainedahead-or-gainedbehind)), and a null gold delta counts as a gold ([NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)).
+- **`Sign.txt`** ([:850-871](../UI/Components/OutputToFileComponent.cs#L850-L871)): a decision chain over the run, segment and gold deltas. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values). Known defect: a null gold delta counts as a gold ([NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)).
 - **Highlights** ([:586-596](../UI/Components/OutputToFileComponent.cs#L586-L596)): each completed line gets exactly one highlight, checked in this order:
   1. Gold: gold delta < 0, last level only.
   2. AheadGained: run delta < 0 and segment delta < 0.

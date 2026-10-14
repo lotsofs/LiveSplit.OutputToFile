@@ -155,7 +155,7 @@ Including an accidental `using static System.Windows.Forms.AxHost` ([:2-13](../U
 
 ## SGN — Some Signs values are never written
 
-`Undetermined`, `Gained`, `Lost` and `Gold` ([:38-60](../UI/Components/OutputToFileComponent.cs#L38-L60)). `GainedAhead`/`GainedBehind` are also unwritten until [GAI](Defects.md#gai--sign-never-says-gainedahead-or-gainedbehind) is fixed.
+`Undetermined`, `Gained`, `Lost` and `Gold` ([:38-60](../UI/Components/OutputToFileComponent.cs#L38-L60)).
 
 **Evidence.** Read.
 

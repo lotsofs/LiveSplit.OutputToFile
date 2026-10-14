@@ -136,7 +136,6 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 
 | Code | Check | File | Today | Correct |
 |---|---|---|---|---|
-| GAI | After A1 (segment 9.5 vs PB 10) | `PreviousSplit\AllSplits\GameTime\Sign.txt` | `LostAhead` | `GainedAhead` |
 | NUL | After A3 (Area A: 28 vs 30) | `PreviousSplit\SansSubsplits\GameTime\Sign.txt` | `GoldAhead` | `GainedAhead` |
 | IDX | Timer at 33.2 s | `Timers\GameTime\SegmentTimer_SansSubsplits.txt` | `0:23` | `0:05` |
 | PAU | Pause after A3, then `Tick()` | `SplitList\AllSplits\GameTime\Delta_Run.txt` | `- \| - \| -2.00 \| \| \|` | `-0.5 \| +1.0 \| -2.0 \| \| \|` |

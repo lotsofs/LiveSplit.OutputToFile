@@ -10,7 +10,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 |---|---|---|---|
 | [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit) | File writing | `MakeFile` has no try/catch: a locked output file or an invalid folder path throws into LiveSplit's `Split()`/`Update()` | High |
 | [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null) | Sign.txt | A null gold delta counts as a gold, so subsplit levels (including their finish) and the split after a skip report `Gold*`/`PBGold` | High |
-| [GAI](Defects.md#gai--sign-never-says-gainedahead-or-gainedbehind) | Sign.txt | The mid-run chain has no "gained" branch: a segment faster than PB that isn't a gold is reported `LostAhead`/`LostBehind` | High |
 | [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas) | Split list | Any timer phase change (pause, resume, finish) or list setting change rebuilds the levels and wipes stored deltas: earlier splits show `-` and BehindLost | High |
 | [RET](Defects.md#ret--allsplits-current-and-previous-files-stop-updating-at-finish-and-reset) | CurrentSplit, PreviousSplit | At finish and reset `WriteSplitInformation` returns after level 0, so other levels go stale, and `Name_Raw.txt` is never reset | Medium |
 | [IDX](Defects.md#idx--sanssubsplits-segment-timer-measures-from-the-wrong-split) | Timers | `SegmentTimer_SansSubsplits*` indexes the run with a level-local index, so it measures from the wrong split | Medium |

@@ -7,7 +7,6 @@ Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 b
 ## Dependencies between plans
 
 - NUL, UND and SKP touch the stored deltas, or the `Sign.txt` and highlight chains that use them. PAU's preferred plan (compute deltas when writing instead of storing them at split time) rewrites that code. Recheck them after PAU.
-- NUL and GAI edit the same `Sign.txt` chains. Do them together.
 - SKP edits a highlight chain that exists twice, in `WriteSplitList` and `WriteCompletedSplitList`. Doing [DRY](Cleanup.md#dry--split-list-writers-are-near-duplicates) first halves that edit.
 - CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - PAU's minimal plan, EDT, KEY and CHK all change the cache keys in `Update()`.
@@ -37,23 +36,11 @@ Only "no best segment exists yet" should count as a gold. The highlight code ([:
 
 **Evidence.** Reproduced 2026-10-14.
 
-**Plan.** Decide "is a gold" separately from `goldDelta`: true only at the `AllSplits` level, when the live segment time exists and either the best segment is null or the delta is negative. Best segments don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)), so this is stable until reset. Use the same rule in the highlight chains. Do this together with GAI.
+**Plan.** Decide "is a gold" separately from `goldDelta`: true only at the `AllSplits` level, when the live segment time exists and either the best segment is null or the delta is negative. Best segments don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)), so this is stable until reset. Use the same rule in the highlight chains.
 
 **Verify.** The NUL regression checks in testing.md give the non-gold values. A finish at a subsplit level isn't `PBGold`/`NoPBGold`. `Sign.txt` and `Highlight_Gold.txt` agree.
 
 **Docs.** output-files.md "Sign values" (⚠ marks). architecture.md "How the values are calculated". testing.md NUL rows.
-
-## GAI — Sign never says GainedAhead or GainedBehind
-
-The mid-run chain at [:860-863](../UI/Components/OutputToFileComponent.cs#L860-L863) has no `segmentDelta < 0` branch; the end-of-run chain does ([:857](../UI/Components/OutputToFileComponent.cs#L857)). A split that gains time without being a gold is reported as `LostAhead`/`LostBehind`. Example: segment 9.5 s vs PB 10 s, run −0.5 s gives `LostAhead`.
-
-**Evidence.** Reproduced 2026-10-14.
-
-**Plan.** Add a `segmentDelta < TimeSpan.Zero` branch giving `GainedAhead`/`GainedBehind` before the final `else`, mirroring the end-of-run chain. Do this together with NUL.
-
-**Verify.** The GAI regression check in testing.md gives `GainedAhead`.
-
-**Docs.** output-files.md "Sign values" (⚠ marks). architecture.md "How the values are calculated". testing.md GAI row. [SGN](Cleanup.md#sgn--some-signs-values-are-never-written) loses `GainedAhead`/`GainedBehind`.
 
 ## PAU — Pausing or finishing wipes stored deltas
 

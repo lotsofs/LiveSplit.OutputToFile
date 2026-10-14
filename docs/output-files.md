@@ -73,8 +73,8 @@ These are the names of the `Signs` enum. "Ahead" and "PB" mean the run delta is 
 | `NotApplicable` | | No run delta: no PB time, a skipped split, or the timer isn't running |
 | `GoldAhead` / `GoldBehind` | `PBGold` / `NoPBGold` | The segment beat the best segment ⚠ NUL: also given whenever the gold delta is null, which is always the case below `AllSplits` |
 | `Ahead` / `Behind` | `PB` / `NoPB` | No segment delta |
-| ⚠ GAI: never produced (`GainedAhead` / `GainedBehind`) | `PBGained` / `NoPBGained` | The segment beat the PB segment |
-| `LostAhead` / `LostBehind` | `PBLost` / `NoPBLost` | The segment was slower than the PB segment ⚠ GAI: mid-run, also given for gained segments |
+| `GainedAhead` / `GainedBehind` | `PBGained` / `NoPBGained` | The segment beat the PB segment |
+| `LostAhead` / `LostBehind` | `PBLost` / `NoPBLost` | The segment was slower than the PB segment |
 
 `Undetermined`, `Gained`, `Lost` and `Gold` exist in the enum but are never written.
 
