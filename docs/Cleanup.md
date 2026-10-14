@@ -120,7 +120,7 @@ The saved `Version` (`0.1`) is read into a variable that's never used ([OutputTo
 
 **Evidence.** Read.
 
-**Plan.** If settings will ever need migrating, bump the version whenever keys change ([SAV](Defects.md#sav--completed-splits-setting-is-never-saved) adds one) and branch on it in `SetSettings`. Otherwise drop the read.
+**Plan.** If settings will ever need migrating, bump the version whenever keys change and branch on it in `SetSettings`. Otherwise drop the read.
 
 **Verify.** A layout saved with the old version still loads with the right values.
 
@@ -181,7 +181,7 @@ At [:250-253](../UI/Components/OutputToFileComponent.cs#L250-L253), [:278-280](.
 
 - `DrawVertical` says "two rows" ([:168](../UI/Components/OutputToFileComponent.cs#L168)).
 - `Update` says "tell the internal component to display it" ([:508-510](../UI/Components/OutputToFileComponent.cs#L508-L510)).
-- `GetSettingsHashCode` says "I do not know what this is for" ([:998](../UI/Components/OutputToFileComponent.cs#L998)). LiveSplit uses that hash to detect unsaved layout changes.
+- `GetSettingsHashCode` says "I do not know what this is for" ([:998](../UI/Components/OutputToFileComponent.cs#L998)). LiveSplit uses that hash only to decide whether to redraw the layout.
 - The factory's "Fill in this empty string" comments ([OutputToFileFactory.cs:25-27](../UI/Components/OutputToFileFactory.cs#L25-L27)).
 
 **Evidence.** Read.

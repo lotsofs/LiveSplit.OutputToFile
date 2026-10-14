@@ -51,12 +51,22 @@ An exception thrown by a state-event handler comes out of the `TimerModel` call 
 - `new StandardSettingsFactory().Create()` throws `NullReferenceException` outside the app. Use `new LiveSplit.Options.Settings()` instead.
 - `new StandardLayoutSettingsFactory().Create()`, `new Layout()`, `new Run(new StandardComparisonGeneratorsFactory())` and `new LiveSplitState(run, null, layout, layoutSettings, settings)` all work with a `null` form.
 
+## Layout save prompt and the settings hash (read in source)
+
+Read in the LiveSplit source at the installed commit `e16f72c` on 2026-10-15. These facts weren't checked by running LiveSplit.
+
+- The "save your layout?" prompt on close depends only on `Layout.HasChanged`. The Layout Editor sets it when:
+  - a component is added, removed or moved;
+  - the orientation changes;
+  - the Layout Settings dialog, where component settings are edited, closes with OK, whether or not anything changed ([LayoutEditorDialog.cs:242](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/LayoutEditorDialog.cs#L242)).
+- `GetSettingsHashCode()` plays no part in that prompt. On each refresh, `TimerForm` combines the layout settings and every component's `GetSettingsHashCode()` into one value, and redraws when it changes ([TimerForm.cs:1183](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/TimerForm.cs#L1183)). For this component, which draws nothing, the hash has no visible effect.
+- `SettingsHelper.CreateSetting` returns `value.GetHashCode()`, so a bool contributes 0 or 1. The layout hash, and the built-in Splits, Subsplits, Timer and Title components, combine values with the same `^` chain as this component, so two changes can cancel out there too.
+
 ## Not verified
 
 These come from LiveSplit conventions and from this component working in practice:
 
 - LiveSplit calls `Update()` on every layout component on each refresh, including zero-size components like this one.
 - `SetSettings` is called after the constructor when a layout loads.
-- LiveSplit compares `GetSettingsHashCode()` values to decide whether the layout has unsaved changes.
 - While LiveSplit is running, it holds a lock on the component DLL in `Components\`.
 - Whether every caller of `TimerModel` (hotkeys, auto splitters, the LiveSplit Server component) does so on the UI thread. If some don't, `WriteSplits()` can run at the same time as `Update()`. Tracked as [THR](Defects.md#thr--timer-events-may-arrive-off-the-ui-thread).

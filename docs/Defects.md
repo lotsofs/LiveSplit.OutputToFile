@@ -15,18 +15,6 @@ Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 b
 - SEC and LAG both change `HasTimerChanged`.
 - WER and [WRT](Performance.md#wrt--every-split-rewrites-about-160-files) both change `MakeFile`.
 
-## SAV — Completed splits setting is never saved
-
-`OutputCompletedSplits` is missing from `CreateSettingsNode` ([OutputToFileSettings.cs:45-55](../UI/Components/OutputToFileSettings.cs#L45-L55)) and `SetSettings` ([:69-80](../UI/Components/OutputToFileSettings.cs#L69-L80)). It turns off again on every layout load. Toggling it also doesn't change the settings hash, so LiveSplit doesn't offer to save the layout.
-
-**Evidence.** Reproduced 2026-10-14.
-
-**Plan.** Add the key to `CreateSettingsNode`, and to `SetSettings` with a fallback of `false` for layouts saved before it existed. Making the toggle trigger a rewrite is CHK.
-
-**Verify.** The SAV regression check in testing.md gives `True`. In LiveSplit, toggling it makes LiveSplit ask to save the layout on close.
-
-**Docs.** architecture.md "Settings" (the XML key list). testing.md SAV row.
-
 ## WER — File write errors are thrown into LiveSplit
 
 `MakeFile` ([OutputToFileComponent.cs:976-984](../UI/Components/OutputToFileComponent.cs#L976-L984)) has no try/catch, so any I/O error escapes into whichever LiveSplit call triggered the write. LiveSplit then skips any event handlers registered after this component's (see [livesplit-notes.md](livesplit-notes.md#exceptions-verified)).

@@ -19,8 +19,9 @@ Read the doc that matches the task before editing:
 | [docs/livesplit-notes.md](docs/livesplit-notes.md) | LiveSplit behavior the code relies on: event order, when PB and best segments update, `GraphicsCache`. Each fact is marked verified or not. |
 | [docs/testing.md](docs/testing.md) | Testing in LiveSplit by hand, or headless with a copy-paste test program, plus regression checks for the known bugs |
 | [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
+| [docs/DONE.md](docs/DONE.md) | Log of finished TODO items: what was done and when, newest first |
 
-Line numbers in the docs are as of commit `30d30fa`. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section. When you find a defect you aren't fixing now, add both.
+Line numbers in the docs are as of commit `30d30fa`. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section, and add a row to docs/DONE.md. When you find a defect you aren't fixing now, add both.
 
 ## Build / deploy
 
@@ -60,6 +61,6 @@ All logic is in `UI/Components/OutputToFileComponent.cs`.
 **Adding a setting** (`OutputToFileSettings`, a WinForms `UserControl` with its layout in `.Designer.cs`/`.resx`):
 1. Add the property, plus its default and `DataBindings.Add` call in the constructor. Binding is what updates the property from the control.
 2. Add the control in the Designer file. A `*_Changed` handler is only needed for side effects, like enabling a group box.
-3. Add it to `CreateSettingsNode`. That method handles both the XML save and `GetSettingsHashCode`, which LiveSplit uses to detect unsaved layout changes.
+3. Add it to `CreateSettingsNode`. That method handles both the XML save and `GetSettingsHashCode`. LiveSplit uses the hash only to decide whether to redraw. The save-on-close prompt doesn't depend on it.
 4. Add it to `SetSettings`, which loads the XML. The fallback value applies to layouts saved before the key existed.
 5. If the setting affects output, add it to the `Cache[...]` keys in `Update()`.

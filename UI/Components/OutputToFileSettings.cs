@@ -50,7 +50,8 @@ namespace LiveSplit.UI.Components
 				SettingsHelper.CreateSetting(document, parent, "SplitsAfter", SplitsAfter) ^
 				SettingsHelper.CreateSetting(document, parent, "OutputTimer", OutputTimer) ^
 				SettingsHelper.CreateSetting(document, parent, "OutputSplitList", OutputSplitList) ^
-				SettingsHelper.CreateSetting(document, parent, "OutputSubsplits", OutputSubsplits)
+				SettingsHelper.CreateSetting(document, parent, "OutputSubsplits", OutputSubsplits) ^
+				SettingsHelper.CreateSetting(document, parent, "OutputCompletedSplits", OutputCompletedSplits)
 				;
 		}
 
@@ -77,6 +78,7 @@ namespace LiveSplit.UI.Components
 			OutputTimer = SettingsHelper.ParseBool(element["OutputTimer"], false);
 			OutputSplitList = SettingsHelper.ParseBool(element["OutputSplitList"], true);
 			OutputSubsplits = SettingsHelper.ParseBool(element["OutputSubsplits"], true);
+			OutputCompletedSplits = SettingsHelper.ParseBool(element["OutputCompletedSplits"], false);
 		}
 
 		private void buttonFolderPath_Click(object sender, EventArgs e)

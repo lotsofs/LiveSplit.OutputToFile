@@ -2,13 +2,12 @@
 
 Open work in this repo, by three-letter code. Each code links to its section in the detail doc named in the group heading: what's wrong or wanted, the evidence, a plan, how to verify it, and which docs to update. Within a group, rows are in suggested order of work. Each detail doc notes the dependencies between its plans.
 
-When an item is finished, delete its row here and its section in the detail doc. When work turns up a new defect that isn't being fixed now, add both.
+When an item is finished, delete its row here and its section in the detail doc, and log it in [DONE.md](DONE.md). When work turns up a new defect that isn't being fixed now, add both.
 
 ## Defects — [Defects.md](Defects.md)
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [SAV](Defects.md#sav--completed-splits-setting-is-never-saved) | Settings | "Completed splits" isn't saved to the layout or included in the settings hash, so it turns off on every layout load | High |
 | [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit) | File writing | `MakeFile` has no try/catch: a locked output file or an invalid folder path throws into LiveSplit's `Split()`/`Update()` | High |
 | [FIN](Defects.md#fin--final-splits-segment-time-and-deltas-are-lost) | PreviousSplit | At the finish the last segment is stored at the dictionary's `.Count - 1` (always 1), so the final split's segment time and deltas show `-` | High |
 | [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null) | Sign.txt | A null gold delta counts as a gold, so subsplit levels, the split after a skip, and every finish report `Gold*`/`PBGold` | High |

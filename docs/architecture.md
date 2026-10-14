@@ -19,7 +19,7 @@ Line references are to `UI/Components/OutputToFileComponent.cs` as of commit `30
 1. LiveSplit loads the layout and calls `OutputToFileFactory.Create(state)`. The constructor ([:152-164](../UI/Components/OutputToFileComponent.cs#L152-L164)) creates the settings control with default values, subscribes to the timer events, and runs `CalculateSegments()`.
 2. LiveSplit then calls `SetSettings(xml)` with the saved settings. This does **not** trigger a recalculation by itself. In practice the first `Update()` does it, because every cache key is new at that point.
 3. `Update()` is called repeatedly for as long as the layout is open. The component has zero size, and `DrawVertical`/`DrawHorizontal` are empty.
-4. `GetSettings()` runs when the layout is saved. LiveSplit compares `GetSettingsHashCode()` values to detect unsaved changes.
+4. `GetSettings()` runs when the layout is saved. `GetSettingsHashCode()` is called on every refresh, but LiveSplit only uses it to decide whether to redraw, not to detect unsaved changes ([livesplit-notes.md](livesplit-notes.md#layout-save-prompt-and-the-settings-hash-read-in-source)).
 5. `Dispose()` unsubscribes from the events.
 
 ## When files get written
@@ -196,5 +196,5 @@ Each one is bound to its control with `DataBindings.Add(..., DataSourceUpdateMod
 
 - Binding is the only thing that updates these properties from the UI. Most of the `*_Changed` handlers in the .cs file aren't connected to any control. The two connected handlers are `checkBoxOutputSplitList_CheckedChanged`, which also enables or disables the split-list group, and `buttonFolderPath_Click`.
 - The class doesn't implement `INotifyPropertyChanged`, so setting a property in code won't update its control. `buttonFolderPath_Click` updates the textbox itself for this reason.
-- XML keys: `Version` (`0.1`), `FolderPath`, `SplitsBefore`, `SplitsAfter`, `OutputTimer`, `OutputSplitList`, `OutputSubsplits`. `OutputCompletedSplits` is missing ([SAV](Defects.md#sav--completed-splits-setting-is-never-saved)).
-- `GetSettingsHashCode()` reuses `CreateSettingsNode(null, null)`, which XORs the hashes of the saved values. Anything not saved isn't part of the hash.
+- XML keys: `Version` (`0.1`), `FolderPath`, `SplitsBefore`, `SplitsAfter`, `OutputTimer`, `OutputSplitList`, `OutputSubsplits`, `OutputCompletedSplits`.
+- `GetSettingsHashCode()` reuses `CreateSettingsNode(null, null)`, which XORs the hashes of the saved values, so two changes can cancel out. That's harmless here: LiveSplit only uses the hash to decide whether to redraw, and this component draws nothing.
