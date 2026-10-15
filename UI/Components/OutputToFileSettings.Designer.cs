@@ -120,6 +120,7 @@
 			// 
 			this.buttonFolderPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
 			this.buttonFolderPath.AutoSize = true;
+			this.buttonFolderPath.CausesValidation = false;
 			this.buttonFolderPath.Location = new System.Drawing.Point(307, 3);
 			this.buttonFolderPath.MinimumSize = new System.Drawing.Size(75, 15);
 			this.buttonFolderPath.Name = "buttonFolderPath";

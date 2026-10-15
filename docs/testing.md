@@ -133,6 +133,7 @@ Things to know:
 - **Don't delete output files mid-run.** `FileQueue` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
 - **Rebuild the component first.** The harness references `bin\Debug`, so it tests whatever was last built.
 - **Don't run it from the repo.** LiveSplit.Core saves speedrun.com's game list (about 2 MB) as `speedruncom_game_names.json` in the current directory once a run has a game name. Seen 2026-10-15.
+- **The settings control.** To test the settings UI, add `comp.Settings` to a `Form` you `Show()`, reach its private controls by reflection, type with `PostMessage(textBox.Handle, WM_CHAR, c, 0)`, and pump with `Application.DoEvents()`. Bindings only see focus changes and keys that go through the message loop. Remove the control before closing the form, which would dispose it. These forms appear on screen and take focus from whatever else is open, so warn whoever is at the machine first.
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.OutputToFile.UI.Components.OutputToFile.TimeFormatter")`.
 
 ## Regression checks

@@ -7,7 +7,7 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 ## Dependencies between plans
 
 - CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
-- EDT, KEY and CHK all change the cache keys in `Update()`.
+- EDT and CHK both change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
 
 ## IDX — SansSubsplits segment timer measures from the wrong split
@@ -57,18 +57,6 @@ The cache keys in `Update()` don't cover split count, names or PB times.
 **Verify.** With the timer stopped, add a split and rename one: `TotalSplits_*.txt` and `Names.txt` update without starting a run.
 
 **Docs.** architecture.md "When files get written" (the cache keys).
-
-## KEY — Typing a folder path creates a folder per keystroke
-
-The textbox updates `FolderPath` on every change (its `OnPropertyChanged` binding in the `OutputToFileSettings` constructor, [OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)), and `FolderPath` is a cache key, so each keystroke writes a full set of files to a new path.
-
-**Evidence.** Reproduced 2026-10-14: typing `…\Stream` created `S`, `St`, `Str` and `Stream`, each holding a full set of output files.
-
-**Plan.** Apply the path on Browse or when the textbox loses focus, or only write when the chosen folder already exists (creating subfolders inside it is still fine).
-
-**Verify.** Type a new path one character at a time: no partial folders appear. Browse still applies at once.
-
-**Docs.** architecture.md "Settings". README, if writing starts to require an existing folder.
 
 ## NEG — Negative deltas get a different precision from positive ones
 

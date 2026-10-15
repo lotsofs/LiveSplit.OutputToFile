@@ -31,7 +31,8 @@ namespace LiveSplit.UI.Components
 			OutputSubsplits = true;
 			OutputCompletedSplits = false;
 
-			this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnPropertyChanged);
+			// Applied when the textbox loses focus, not per keystroke: FolderPath is a cache key, so every partial path would get a full set of files
+			this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnValidation);
 			this.numericUpDownSplitListBefore.DataBindings.Add("Value", this, "SplitsBefore", false, DataSourceUpdateMode.OnPropertyChanged);
 			this.numericUpDownSplitListAfter.DataBindings.Add("Value", this, "SplitsAfter", false, DataSourceUpdateMode.OnPropertyChanged);
 			this.checkBoxOutputTimer.DataBindings.Add("Checked", this, "OutputTimer", false, DataSourceUpdateMode.OnPropertyChanged);

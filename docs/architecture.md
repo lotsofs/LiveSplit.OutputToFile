@@ -218,10 +218,13 @@ The functions branch on the phase separately and inconsistently. For example, `W
 | `OutputSubsplits` | bool |
 | `OutputCompletedSplits` | bool |
 
-Each one is bound to its control with `DataBindings.Add(..., DataSourceUpdateMode.OnPropertyChanged)` in the constructor.
+Each one is bound to its control with `DataBindings.Add` in the constructor. All but `FolderPath` use `DataSourceUpdateMode.OnPropertyChanged`, so a change applies at once.
 
-- Binding is the only thing that updates these properties from the UI. Most of the `*_Changed` handlers in the .cs file aren't connected to any control. The two connected handlers are `checkBoxOutputSplitList_CheckedChanged`, which also enables or disables the split-list group, and `buttonFolderPath_Click`.
-- The class doesn't implement `INotifyPropertyChanged`, so setting a property in code won't update its control. `buttonFolderPath_Click` updates the textbox itself for this reason.
+- `FolderPath` uses `OnValidation`: a typed path applies only when focus leaves the textbox, through Tab, a click on another control, OK, or Enter (which clicks the dialog's AcceptButton; see [livesplit-notes.md](livesplit-notes.md#layout-settings-dialog-read-in-source)). Applying every keystroke would write a full set of files to each partial path, because `FolderPath` is a cache key.
+  - The Browse button has `CausesValidation = false`, so moving focus to it doesn't apply a partly typed path. Its handler sets `FolderPath` and the textbox itself. A path typed and then left unbrowsed applies at the next focus change to another control.
+  - Closing a modal dialog with X doesn't validate the focused control (seen headless, 2026-10-15), so a path typed but never left is dropped.
+- Binding is the only thing that updates these properties from the UI, apart from Browse. Most of the `*_Changed` handlers in the .cs file aren't connected to any control. The two connected handlers are `checkBoxOutputSplitList_CheckedChanged`, which also enables or disables the split-list group, and `buttonFolderPath_Click`.
+- The class doesn't implement `INotifyPropertyChanged`, so setting a property in code won't update its control while it is shown. `buttonFolderPath_Click` updates the textbox itself for this reason. The next time the control is shown in a new dialog, the bindings read the properties again (seen headless for the textbox, 2026-10-15), so after Cancel restores the settings the dialog shows them on reopening.
 - XML keys: `Version` (`0.1`), `FolderPath`, `SplitsBefore`, `SplitsAfter`, `OutputTimer`, `OutputSplitList`, `OutputSubsplits`, `OutputCompletedSplits`.
 - `WriteError` isn't a setting: it holds the latest failed file write, shown in red in `labelWriteError` under the split-list group, and is neither saved nor hashed. `Update()` sets and clears it through `ShowWriteError` (see "Writing files").
 - `GetSettingsHashCode()` reuses `CreateSettingsNode(null, null)`, which XORs the hashes of the saved values, so two changes can cancel out. That's harmless here: LiveSplit only uses the hash to decide whether to redraw, and this component draws nothing.

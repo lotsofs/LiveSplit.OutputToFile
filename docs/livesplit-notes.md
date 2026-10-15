@@ -62,6 +62,15 @@ Read in the LiveSplit source at the installed commit `e16f72c` on 2026-10-15. Th
 - `GetSettingsHashCode()` plays no part in that prompt. On each refresh, `TimerForm` combines the layout settings and every component's `GetSettingsHashCode()` into one value, and redraws when it changes ([TimerForm.cs:1183](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/TimerForm.cs#L1183)). For this component, which draws nothing, the hash has no visible effect.
 - `SettingsHelper.CreateSetting` returns `value.GetHashCode()`, so a bool contributes 0 or 1. The layout hash, and the built-in Splits, Subsplits, Timer and Title components, combine values with the same `^` chain as this component, so two changes can cancel out there too.
 
+## Layout Settings dialog (read in source)
+
+Read in the LiveSplit source at the installed commit `e16f72c` on 2026-10-15, and matched against the method calls in the installed `LiveSplit.View.dll`. Not checked by running LiveSplit.
+
+- Component settings controls are edited in `LayoutSettingsDialog`, one tab per component, holding the control that `GetSettingsControl` returns ([LayoutSettingsDialog.cs](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/LayoutSettingsDialog.cs)). The same control instance comes back each time the dialog opens.
+- When it opens, the dialog saves each component's `GetSettings()`. Cancel calls `SetSettings` with that saved XML on every component, then closes.
+- OK only closes. It is the dialog's AcceptButton, so Enter in a textbox clicks it ([LayoutSettingsDialog.Designer.cs:92](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/LayoutSettingsDialog.Designer.cs#L92)).
+- There is no CancelButton and no closing handler, so closing with X restores nothing and Escape doesn't cancel.
+
 ## Not verified
 
 These come from LiveSplit conventions and from this component working in practice:

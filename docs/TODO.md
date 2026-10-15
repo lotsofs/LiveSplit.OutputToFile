@@ -12,7 +12,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 | [CLM](Defects.md#clm--a-first-split-with-two-or-more-dashes-is-dropped) | Subsplits | The depth clamp skips split 0: a first split with 2+ dashes (and no 1-dash split) vanishes from every output, and the next split's segment absorbs its time | Medium |
 | [EMP](Defects.md#emp--an-empty-or-dash-only-split-name-crashes-the-component) | Subsplits | A split named `""` or `-` crashes on `name[0]` | Medium |
 | [EDT](Defects.md#edt--editing-splits-isnt-picked-up-until-the-next-run-starts) | Change detection | Split count, names and PB times aren't cache keys, so edited splits stay stale in the files until the next run starts | Medium |
-| [KEY](Defects.md#key--typing-a-folder-path-creates-a-folder-per-keystroke) | Settings | The folder textbox applies every keystroke, so typing a path creates a full output folder for each prefix | Medium |
 | [NEG](Defects.md#neg--negative-deltas-get-a-different-precision-from-positive-ones) | Time format | Negative deltas choose precision from the negative value, so `-5.23` but `+5.2` | Low |
 | [UND](Defects.md#und--undo-to-the-first-split-leaves-golddifference-stale) | PreviousSplit | Undoing to the first split resets every `PreviousSplit` file except `GoldDifference.txt` | Low |
 | [SKP](Defects.md#skp--skipped-splits-are-highlighted-as-behindlost) | Split list | Skipped splits get a BehindLost highlight instead of none | Low |
