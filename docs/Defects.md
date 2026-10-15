@@ -9,18 +9,6 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 - DUP and DSH both edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - SEC and LAG both change `HasTimerChanged`.
 
-## NEG — Negative deltas get a different precision from positive ones
-
-`DeltaString` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)) passes the negative value to `DetermineTimeFormat`, so every negative delta counts as "under 100 ms" and gets centiseconds.
-
-**Evidence.** Reproduced 2026-10-14: `+5.2` vs `-5.23`, and `+1:05` vs `-1:05.20`.
-
-**Plan.** Pass `t.Value.Negate()`.
-
-**Verify.** The NEG regression check in testing.md gives `-5.2`, and −65.2 s gives `-1:05`.
-
-**Docs.** output-files.md "Formatting" (⚠ mark). testing.md NEG row.
-
 ## UND — Undo to the first split leaves GoldDifference stale
 
 The "no previous split" branch of `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) resets every other `PreviousSplit` file, but not `PreviousSplit\AllSplits\*\GoldDifference.txt`.

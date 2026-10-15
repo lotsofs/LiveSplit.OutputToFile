@@ -11,9 +11,8 @@ What changed in Output to File between releases: the files it writes, what they 
   - `Timers\RealTime\SegmentTimer.txt` is now `Timers\RealTime\SegmentTimer_AllSplits.txt`, and likewise under `GameTime`.
 - **Times are formatted differently.**
   - Times are always minutes and seconds without decimals: `0:09`, `1:05`, `1:02:05`. Release 6 showed times under a minute with decimals, like `9.50` and `15.2`.
-  - Differences under a minute have one decimal: `+5.2` (release 6: `+5.23`), `+15.2`.
+  - Differences under a minute have one decimal: `+5.2` and `-5.2` (release 6: `+5.23` and `-5.23`), `+15.2`.
   - Differences under a tenth of a second drop the leading zero: `+.05`.
-  - Negative differences still have two decimals at every size, like `-5.23` and `-1:05.20`. This is a known bug.
 - **Splitting no longer waits for the files to be written.** They are written in the background, so LiveSplit stays responsive. A file whose contents haven't changed isn't rewritten.
 
 ### Added

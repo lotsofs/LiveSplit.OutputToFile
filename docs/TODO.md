@@ -8,7 +8,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [NEG](Defects.md#neg--negative-deltas-get-a-different-precision-from-positive-ones) | Time format | Negative deltas choose precision from the negative value, so `-5.23` but `+5.2` | Low |
 | [UND](Defects.md#und--undo-to-the-first-split-leaves-golddifference-stale) | PreviousSplit | Undoing to the first split resets every `PreviousSplit` file except `GoldDifference.txt` | Low |
 | [SKP](Defects.md#skp--skipped-splits-are-highlighted-as-behindlost) | Split list | Skipped splits get a BehindLost highlight instead of none | Low |
 | [SEC](Defects.md#sec--run-timer-file-can-get-stuck-after-a-reset) | Timers | `HasTimerChanged` compares the 0–59 seconds component, so a reset at 1:00.x leaves `RunTimer.txt` at `1:00` | Low |

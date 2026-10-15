@@ -52,7 +52,7 @@ namespace LiveSplit.OutputToFile.UI.Components.OutputToFile {
 		public static string DeltaString(TimeSpan? t) {
 			if (t == null) return "-";
 			if (t.Value < TimeSpan.Zero) {
-				return "-" + FormatTime(t.Value.Negate(), DetermineTimeFormat(t.Value));
+				return "-" + FormatTime(t.Value.Negate(), DetermineTimeFormat(t.Value.Negate()));
 			}
 			else {
 				return "+" + FormatTime(t.Value, DetermineTimeFormat(t.Value)); 
