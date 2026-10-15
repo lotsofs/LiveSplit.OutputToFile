@@ -12,7 +12,7 @@ Code is referred to by member name. The table below says which file each class i
 | `UI/Components/OutputToFileFactory.cs` | Name, description and category (Other) shown in the Layout Editor. `Create(state)` builds the component. |
 | `UI/Components/OutputToFileComponent.cs` | The LiveSplit side: event handling, change detection in `Update()`, and when each writer runs. Owns the one `SplitLevels` instance, the one `FileQueue` and the four writers. |
 | `UI/Components/SplitLevels.cs` | `SplitLevels` (depths, display names, the levels) and `SplitLevel` (one level's members and arrays). Builds the levels and the PB segment times. |
-| `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, and `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`. |
+| `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`, and `IsGold`. |
 | `UI/Components/FileQueue.cs` | Writes the files on a background thread: skips unchanged contents, keeps the latest contents per file, and records the latest write error. |
 | `UI/Components/RunInfoFiles.cs` | Writer for the root files. |
 | `UI/Components/TimerFiles.cs` | Writer for `Timers\`, with its own `GraphicsCache`. |
@@ -148,9 +148,10 @@ The functions branch on the phase separately and inconsistently. For example, `W
 - **Run delta:** live split time minus PB split time, for the same split.
 - **Segment delta:** live segment minus PB segment, at this level.
 - **Gold delta:** live segment minus `BestSegmentTime`, at the last level only. Best segments and PB times don't change during a run; LiveSplit updates them on reset. Comparisons made during the run therefore use the values from before the run.
-- **`Sign.txt`** (in `SplitFiles.WriteSplitTimes`): a decision chain over the run, segment and gold deltas. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values). Known defect: a null gold delta counts as a gold ([NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)).
+- **Gold** (`OutputWriter.IsGold`): at the last level only, the live segment exists and either the split has no best segment yet or the live segment beats it. A skipped split, and the split after it, have no live segment, so they aren't golds. `Sign.txt` and the highlights both use this rule.
+- **`Sign.txt`** (in `SplitFiles.WriteSplitTimes`): a decision chain over gold, run delta and segment delta. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values).
 - **Highlights** (in `SplitListFiles.WriteSplitListLevel`): each completed line gets exactly one highlight, checked in this order:
-  1. Gold: gold delta < 0, last level only.
+  1. Gold: the segment is a gold, last level only.
   2. AheadGained: run delta < 0 and segment delta < 0.
   3. AheadLost: run delta < 0.
   4. BehindGained: segment delta < 0.

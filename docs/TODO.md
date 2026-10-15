@@ -8,7 +8,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null) | Sign.txt | A null gold delta counts as a gold, so subsplit levels (including their finish) and the split after a skip report `Gold*`/`PBGold` | High |
 | [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas) | Split list | Any timer phase change (pause, resume, finish) or list setting change rebuilds the levels and wipes stored deltas: earlier splits show `-` and BehindLost | High |
 | [IDX](Defects.md#idx--sanssubsplits-segment-timer-measures-from-the-wrong-split) | Timers | `SegmentTimer_SansSubsplits*` indexes the run with a level-local index, so it measures from the wrong split | Medium |
 | [CLM](Defects.md#clm--a-first-split-with-two-or-more-dashes-is-dropped) | Subsplits | The depth clamp skips split 0: a first split with 2+ dashes (and no 1-dash split) vanishes from `AllSplits` and the finish throws | Medium |

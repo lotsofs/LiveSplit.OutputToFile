@@ -6,27 +6,10 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## Dependencies between plans
 
-- NUL, UND and SKP touch the stored deltas, or the `Sign.txt` and highlight chains that use them. PAU's preferred plan (compute deltas when writing instead of storing them at split time) rewrites that code. Recheck them after PAU.
+- UND and SKP touch the stored deltas, or the highlight chain that uses them, and `IsGold` reads the stored `LiveSegmentTimes`. PAU's preferred plan (compute deltas when writing instead of storing them at split time) rewrites that code. Recheck them after PAU.
 - CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - PAU's minimal plan, EDT, KEY and CHK all change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
-
-## NUL — Sign reports a gold whenever the gold delta is null
-
-Both `Sign.txt` chains in `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)), mid-run and at the finish, treat `goldDelta == null` as a gold. It is null in cases that are not golds:
-
-- At every subsplit level, because `CalculatePreviousGoldDelta` returns null there. So `PreviousSplit\SansSubsplits*\*\Sign.txt` always says `GoldAhead`/`GoldBehind`, or `PBGold`/`NoPBGold` at the finish.
-- On the split after a skipped split.
-
-Only "no best segment exists yet" should count as a gold. The highlight chain in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) treats null as "not a gold", so `Sign.txt` and `Highlight_Gold.txt` also disagree.
-
-**Evidence.** Reproduced 2026-10-14.
-
-**Plan.** Decide "is a gold" separately from `goldDelta`: true only at the `AllSplits` level, when the live segment time exists and either the best segment is null or the delta is negative. Best segments don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)), so this is stable until reset. Use the same rule in the highlight chains.
-
-**Verify.** The NUL regression checks in testing.md give the non-gold values. A finish at a subsplit level isn't `PBGold`/`NoPBGold`. `Sign.txt` and `Highlight_Gold.txt` agree.
-
-**Docs.** output-files.md "Sign values" (⚠ marks). architecture.md "How the values are calculated". testing.md NUL rows.
 
 ## PAU — Pausing or finishing wipes stored deltas
 

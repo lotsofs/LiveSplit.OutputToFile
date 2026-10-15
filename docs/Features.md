@@ -4,8 +4,6 @@ Things the component doesn't do yet. The index is [TODO.md](TODO.md).
 
 TST makes the Verify steps in the other detail docs repeatable, so it pays to do it early. Its test project will need [HNT](Project.md#hnt--livesplit-references-only-resolve-on-this-machine) to build anywhere but this machine.
 
-GLD extends [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)'s plan from `AllSplits` to every level.
-
 ## TST — No automated tests
 
 There is no test project. Changes are checked by hand, in LiveSplit or with a headless harness that lives outside the repo.
@@ -71,7 +69,7 @@ A section's gold is the fastest time the whole section took **within a single at
 - Drop the `lvl == Levels.Count - 1` guards on gold output in `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) and `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)). `GoldTime.txt` and `Time_Gold_Upcoming.txt` read `BestSegmentTimes`. They currently use `State.CurrentSplit.BestSegmentTime`, which is the wrong split above `AllSplits`.
 - Related items:
   - Fix [UND](Defects.md#und--undo-to-the-first-split-leaves-golddifference-stale) in the same change, because it then affects every level.
-  - [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)'s plan limits "is a gold" to `AllSplits`. Extend it to every level.
+  - `IsGold` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) limits golds to `AllSplits` and reads `BestSegmentTime`. Drop its level guard and read `BestSegmentTimes` instead.
   - [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas) also wipes the stored gold deltas at the new levels.
 
 **Verify.**
@@ -93,5 +91,5 @@ A section's gold is the fastest time the whole section took **within a single at
   - the note that gold code relies on local index = global index at the last level.
 - output-files.md, where it says gold files exist only under `AllSplits`.
 - livesplit-notes.md: the `SegmentHistory` facts, once verified.
-- testing.md: the NUL check "After A3 … `SansSubsplits` `Sign.txt`" expects `GainedAhead`. The base run has no history, so Area A will have no gold yet and will count as one. Either give the base run history or change the expected value.
+- testing.md: the regression base run has no history, so every section will have no gold yet and its first completion will count as one. Say so where the base run is described.
 - README: the gold files under the `SansSubsplits*` folders, and what a section's gold means.

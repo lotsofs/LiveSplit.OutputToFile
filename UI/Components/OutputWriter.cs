@@ -59,6 +59,22 @@ namespace LiveSplit.UI.Components {
 
 		#endregion
 
+		#region golds
+
+		/// <summary>
+		/// Whether a completed member's segment is a gold: it beat the best segment, or the split has none yet.
+		/// Golds only exist at the last level. Reads the live segment that WriteSplitTimes stored.
+		/// </summary>
+		protected bool IsGold(TimingMethod method, int lvl, int localIndex) {
+			if (lvl != Levels.Count - 1 || localIndex < 0) return false;
+			TimeSpan? liveSegmentTime = Levels[lvl].LiveSegmentTimes[method][localIndex];
+			if (liveSegmentTime == null) return false;
+			TimeSpan? goldTime = State.Run[Levels[lvl].Indices[localIndex]].BestSegmentTime[method];
+			return goldTime == null || liveSegmentTime < goldTime;
+		}
+
+		#endregion
+
 		#region file writing
 
 		protected void MakeFile(string fileName, string contents, TimingMethod? method, int subsplitLevel) {

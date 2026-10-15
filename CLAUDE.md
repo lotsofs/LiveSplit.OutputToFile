@@ -44,7 +44,7 @@ The code is in `UI/Components/`:
 |---|---|
 | `OutputToFileComponent.cs` | The LiveSplit side: timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
 | `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members, PB segment times and the stored deltas |
-| `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex` |
+| `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex`, `IsGold` |
 | `FileQueue.cs` | Writes the files on a background thread, skipping unchanged contents; keeps the latest write error |
 | `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …) |
 | `TimerFiles.cs` | Writes `Timers\` |
@@ -57,7 +57,7 @@ The code is in `UI/Components/`:
 - **Levels.** A split's depth is its number of leading `-`. Level `lvl` contains the splits with depth ≤ `lvl`.
   - The **last** level holds every split and is tagged `AllSplits`. Level 0 is `SansSubsplits`; levels in between are `SansSubsplits_Level{n}`. With a single level, level 0 is `AllSplits`.
   - `Levels[lvl].Indices` maps **local** index → **global** index, i.e. into `State.Run`. Mixing the two up is a recurring bug source. Only at the last level are they the same.
-  - Golds exist only at the last level. Keep the `lvl == Levels.Count - 1` guard on any gold output.
+  - Golds exist only at the last level. Keep the `lvl == Levels.Count - 1` guard on any gold output. `IsGold` decides what counts as a gold and includes that guard; don't test the gold delta instead, because it is also null when there is no gold.
 - **Timer phases.** `GetCurrentSubsplitIndex` and `GetPreviousSubsplitIndex` return sentinel values depending on the phase (−1/−2 when not running, `Count`/`Count−1` when finished). Every write path needs correct output for NotRunning, Running/Paused and Ended. Otherwise files keep stale values.
 - **Stored deltas.** Deltas are stored at split time by `WriteSplitTimes` and read later by the split lists, so the call order in `WriteSplits()` matters. `CalculateSegments()` regenerates the shared `SplitLevels` in place, rebuilding every array and discarding those stored deltas, and it runs on every cache-key change, including timer phase changes.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own cache, keyed on whole seconds.

@@ -113,7 +113,7 @@ namespace LiveSplit.UI.Components {
 					goldDelta += lvl == Levels.Count - 1 ? TimeFormatter.DeltaString(level.GoldDeltae[method][spl]) : "";
 					segmentDelta += TimeFormatter.DeltaString(level.SegmentDeltae[method][spl]);
 					// highlight fills
-					if (lvl == Levels.Count - 1 && level.GoldDeltae[method][spl] < TimeSpan.Zero)
+					if (IsGold(method, lvl, spl))
 						goldHighlights += HIGHLIGHT_FILL;
 					else if (level.RunDeltae[method][spl] < TimeSpan.Zero && level.SegmentDeltae[method][spl] < TimeSpan.Zero)
 						aheadGainedHighlights += HIGHLIGHT_FILL;

@@ -69,7 +69,7 @@ These are the names of the `Signs` enum. "Ahead" and "PB" mean the run delta is 
 | During the run | At the finish | Meaning |
 |---|---|---|
 | `NotApplicable` | | No run delta: no PB time, a skipped split, or the timer isn't running |
-| `GoldAhead` / `GoldBehind` | `PBGold` / `NoPBGold` | The segment beat the best segment ⚠ NUL: also given whenever the gold delta is null, which is always the case below `AllSplits` |
+| `GoldAhead` / `GoldBehind` | `PBGold` / `NoPBGold` | The segment beat the best segment, or the split has no best segment yet. `AllSplits` only. |
 | `Ahead` / `Behind` | `PB` / `NoPB` | No segment delta |
 | `GainedAhead` / `GainedBehind` | `PBGained` / `NoPBGained` | The segment beat the PB segment |
 | `LostAhead` / `LostBehind` | `PBLost` / `NoPBLost` | The segment was slower than the PB segment |
@@ -100,7 +100,7 @@ Every file has the same number of lines, so separate text sources line up. "Comp
 | `{method}\Delta_Run.txt` | Completed: run delta |
 | `{method}\Delta_Segment.txt` | Completed: segment delta |
 | `{method}\Delta_Gold.txt` (gold) | Completed: gold delta |
-| `{method}\Highlight_Gold.txt` (gold) | Fill on completed lines with gold delta < 0 |
+| `{method}\Highlight_Gold.txt` (gold) | Fill on completed lines that are golds (see [Sign values](#sign-values)) |
 | `{method}\Highlight_AheadGained.txt` | Fill: run delta < 0 and segment delta < 0 |
 | `{method}\Highlight_AheadLost.txt` | Fill: run delta < 0, segment not gained |
 | `{method}\Highlight_BehindGained.txt` | Fill: segment delta < 0, run delta not < 0 |
