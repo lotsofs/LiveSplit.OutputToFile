@@ -33,6 +33,7 @@ What changed in Output to File between releases: the files it writes, what they 
 - `Sign.txt` no longer reports a gold for the split after a skipped split.
 - A split that has no best segment yet is now filled in `Highlight_Gold.txt`, matching `Sign.txt`, which already called it a gold.
 - A skipped split is no longer filled in `Highlight_BehindLost.txt` in the split list. Its line is now blank in every highlight file.
+- The `Timers\` files now update whenever what they show changes. They used to wait for the seconds digits to change: resetting at 1:00.5 left `RunTimer.txt` at `1:00` until the next start, and game time that started within its first second showed `-` until a second had passed.
 - A file that can't be written, because it's locked or read-only or its drive is gone, no longer stops the other files from being written. The error is shown in red in the component's settings.
 - Changes made in Edit Splits now show in the files straight away: renamed, added or removed splits, and changed times. So does opening another splits file. They used to wait until the timer was next started.
 - Typing a folder path in the settings no longer creates a folder full of output files for every letter typed. A typed path is used once you leave the box, press Enter or click OK; closing the settings with the X button drops it. Browse still uses the chosen folder at once.

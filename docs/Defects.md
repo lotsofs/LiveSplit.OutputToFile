@@ -7,19 +7,6 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 ## Dependencies between plans
 
 - DUP edits `CalculateDepths` and DSH edits `GenerateNames`. [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) changes `GenerateSubsplitLevels`, which calls both.
-- SEC and LAG both change `HasTimerChanged`.
-
-## SEC — Run timer file can get stuck after a reset
-
-`HasTimerChanged` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)) compares `time.Seconds`, the 0–59 seconds component, rather than total seconds. After resetting at 1:00.5, the seconds component is 0 both before and after, so `Timers\*\RunTimer.txt` stays at `1:00` until the next start.
-
-**Evidence.** Reproduced 2026-10-14.
-
-**Plan.** Cache `(long)time.TotalSeconds` together with the timer phase.
-
-**Verify.** The SEC regression check in testing.md shows `0:00`.
-
-**Docs.** output-files.md "Timers" (⚠ mark). testing.md SEC row, and its tip about advancing the clock in steps of a second or less.
 
 ## CHK — Output checkboxes don't take effect at once
 
@@ -35,11 +22,11 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## LAG — Segment timer ticks over late
 
-Timer files are only rewritten when the *run* timer's seconds change (`HasTimerChanged` in [TimerFiles.cs](../UI/Components/TimerFiles.cs)). The segment timer's second boundaries are offset by the fraction at which the previous split happened, so it can lag by up to about a second. After the run ends it shows `0:00`; it should probably show the last segment's time or `-`.
+Timer files are only rewritten when the *run* timer's whole second or the timer phase changes (`HasTimerChanged` in [TimerFiles.cs](../UI/Components/TimerFiles.cs)), not on a split. The segment timer's second boundaries are offset by the fraction at which the previous split happened, so it can lag by up to about a second. After the run ends it shows `0:00`; it should probably show the last segment's time or `-`. Release 6 wrote the last segment's time there.
 
-**Evidence.** The lag was read. The `0:00` after the finish was reproduced 2026-10-14.
+**Evidence.** The lag was read. The `0:00` after the finish was reproduced 2026-10-14, and again on 2026-10-15 for a finish within the same second as the previous frame. Release 6's finish value was read in its code.
 
-**Plan.** Give each level's segment timer its own whole-seconds cache key, so it ticks on its own boundary. At the finish, write the last segment's time or `-`.
+**Plan.** Add each level's segment timer whole seconds to what `HasTimerChanged` compares, so it ticks on its own boundary. At the finish, write the last segment's time or `-`.
 
 **Verify.** Split at x.7 s: the segment timer ticks over 0.3 s after the run timer does. After the finish it shows the chosen value.
 

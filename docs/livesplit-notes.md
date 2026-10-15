@@ -40,7 +40,7 @@ Each event fires **after** the state change, so a handler sees the new state:
 
 - The indexer setter sets `HasChanged` when the key is new or the value differs (by `Equals`, so boxed enums compare by value).
 - `Restart()` only clears the flag.
-- One instance can serve unrelated keys. This component uses two: the component's own for the change detection in `Update()`, and one in `TimerFiles` for `HasTimerChanged`.
+- One instance can serve unrelated keys. This component uses one, for the change detection in `Update()`.
 
 ## Exceptions (verified)
 

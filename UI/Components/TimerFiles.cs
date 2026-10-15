@@ -11,16 +11,20 @@ namespace LiveSplit.UI.Components {
 		const string FILE_TIMER_RUN = @"Timers\{0}\RunTimer.txt";
 		const string FILE_TIMER_SPLIT = @"Timers\{0}\SegmentTimer_{1}.txt";
 
-		GraphicsCache Cache { get; } = new GraphicsCache();
+		// What the files were last written for, per timing method (indexed by it). Null before the first write.
+		readonly (long? Seconds, bool Negative, TimerPhase Phase)?[] _writtenFor = new (long?, bool, TimerPhase)?[2];
 
 		public TimerFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) : base(state, settings, levels, files) { }
 
+		// Whether the files would change: the whole seconds as DurationString shows them, or the phase, which the segment timers depend on.
+		// Runs every frame, so it compares a value tuple rather than boxing values into a GraphicsCache.
 		bool HasTimerChanged(TimingMethod method) {
-			Cache.Restart();
-			TimeSpan time = (method == TimingMethod.RealTime ? State.CurrentTime.RealTime : State.CurrentTime.GameTime) ?? TimeSpan.Zero;
-			string cacheString = method == TimingMethod.RealTime ? "RealTimeSeconds" : "GameTimeSeconds";
-			Cache[cacheString] = time.Seconds;
-			return Cache.HasChanged;
+			TimeSpan? time = State.CurrentTime[method];
+			// Truncated toward zero, like DurationString, so -0.5 s and 0.5 s differ only in sign. Null without a time.
+			var key = (time?.Ticks / TimeSpan.TicksPerSecond, time < TimeSpan.Zero, State.CurrentPhase);
+			if (_writtenFor[(int)method] == key) return false;
+			_writtenFor[(int)method] = key;
+			return true;
 		}
 
 		public void WriteTimer(TimingMethod method) {

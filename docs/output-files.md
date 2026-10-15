@@ -27,11 +27,11 @@ Rewritten whenever one of `Update()`'s cache keys changes (run loaded or edited,
 
 ## `Timers\{method}\` (Timer setting)
 
-Written from `Update()`, but only when the run timer's seconds component changes. Times have no decimals.
+Written from `Update()`, but only when the run timer's whole second as shown (sign included) or the timer phase changes. Times have no decimals.
 
 | File | Contents |
 |---|---|
-| `RunTimer.txt` | The current time, or `-` if that method has no time (game time not initialized) ⚠ SEC: can get stuck after a reset |
+| `RunTimer.txt` | The current time, or `-` if that method has no time (game time not initialized) |
 | `SegmentTimer_{level}.txt` | The current time minus the previous member's split time. Equals the run timer on the level's first member and when the timer isn't running. `-` if the previous member was skipped. ⚠ LAG: shows `0:00` after the finish. |
 
 ## `CurrentSplit\{level}\`
