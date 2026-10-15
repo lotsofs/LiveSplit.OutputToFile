@@ -62,6 +62,7 @@ The code is in `UI/Components/`:
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own cache, keyed on whole seconds.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
   - `MakeFile` skips a file when its writer last wrote the same contents there, and `OnReset` clears that record. The record is per writer, so a path must belong to one writer only.
+  - `MakeFile` catches I/O errors per file and shows the latest in the settings panel (`ShowWriteError`). Don't add file access that bypasses it: an exception would escape into LiveSplit's `Split()`/`Update()`.
 - **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`.
 
 ## Making changes

@@ -17,6 +17,10 @@ namespace LiveSplit.UI.Components
 		public bool OutputSubsplits { get; set; }
 		public bool OutputCompletedSplits { get; set; }
 
+		// The latest failed file write, as shown in the settings, or null. Not a setting: it isn't saved.
+		public string WriteError { get; private set; }
+		string _writeErrorFile;
+
 		public OutputToFileSettings()
 		{
 			InitializeComponent();
@@ -79,6 +83,31 @@ namespace LiveSplit.UI.Components
 			OutputSplitList = SettingsHelper.ParseBool(element["OutputSplitList"], true);
 			OutputSubsplits = SettingsHelper.ParseBool(element["OutputSubsplits"], true);
 			OutputCompletedSplits = SettingsHelper.ParseBool(element["OutputCompletedSplits"], false);
+		}
+
+		/// <summary>
+		/// Show a failed file write. It stays until that file is written successfully, or another write fails.
+		/// </summary>
+		/// <param name="fileName">Path relative to the folder</param>
+		public void ShowWriteError(string fileName, Exception ex)
+		{
+			_writeErrorFile = fileName;
+			WriteError = $"Couldn't write {fileName} ({DateTime.Now:T}): {ex.Message}";
+			labelWriteError.Text = WriteError;
+			labelWriteError.Visible = true;
+		}
+
+		/// <summary>
+		/// A file was written successfully. Hide the error if it was about that file.
+		/// </summary>
+		/// <param name="fileName">Path relative to the folder</param>
+		public void ClearWriteError(string fileName)
+		{
+			if (fileName != _writeErrorFile) return;
+			_writeErrorFile = null;
+			WriteError = null;
+			labelWriteError.Text = string.Empty;
+			labelWriteError.Visible = false;
 		}
 
 		private void buttonFolderPath_Click(object sender, EventArgs e)

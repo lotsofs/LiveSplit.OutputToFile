@@ -184,7 +184,7 @@ In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs) unless 
 
 ## LAY — Settings layout leftovers
 
-`tableLayoutPanelTop` has 5 rows for 3 controls ([OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)), and tab order goes Folder → Split list → Output.
+`tableLayoutPanelTop` has 5 rows for 4 controls (the last is the write-error label) ([OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)), and tab order goes Folder → Split list → Output.
 
 **Evidence.** Read.
 

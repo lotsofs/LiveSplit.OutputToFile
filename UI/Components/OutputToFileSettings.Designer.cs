@@ -44,6 +44,7 @@
 			this.numericUpDownSplitListAfter = new System.Windows.Forms.NumericUpDown();
 			this.labelSplitListBefore = new System.Windows.Forms.Label();
 			this.labelSplitListAfter = new System.Windows.Forms.Label();
+			this.labelWriteError = new System.Windows.Forms.Label();
 			this.tableLayoutPanelTop.SuspendLayout();
 			this.groupBoxFolderPath.SuspendLayout();
 			this.tableLayoutPanelFolderPath.SuspendLayout();
@@ -62,6 +63,7 @@
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxFolderPath, 0, 0);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxOutputSelection, 0, 1);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxSplitList, 0, 2);
+			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 3);
 			this.tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanelTop.Name = "tableLayoutPanelTop";
 			this.tableLayoutPanelTop.RowCount = 5;
@@ -267,6 +269,18 @@
 			this.labelSplitListAfter.TabIndex = 3;
 			this.labelSplitListAfter.Text = "Splits after current";
 			// 
+			// labelWriteError
+			// 
+			this.labelWriteError.AutoSize = true;
+			this.labelWriteError.ForeColor = System.Drawing.Color.Firebrick;
+			this.labelWriteError.Location = new System.Drawing.Point(3, 205);
+			this.labelWriteError.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+			this.labelWriteError.MaximumSize = new System.Drawing.Size(448, 0);
+			this.labelWriteError.Name = "labelWriteError";
+			this.labelWriteError.Size = new System.Drawing.Size(0, 13);
+			this.labelWriteError.TabIndex = 3;
+			this.labelWriteError.Visible = false;
+			// 
 			// OutputToFileSettings
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -312,5 +326,6 @@
 		private System.Windows.Forms.CheckBox checkBoxOutputSplitList;
 		private System.Windows.Forms.CheckBox checkBoxOutputSubsplits;
 		private System.Windows.Forms.CheckBox checkBoxOutputCompletedSplits;
+		private System.Windows.Forms.Label labelWriteError;
 	}
 }

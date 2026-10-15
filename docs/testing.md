@@ -148,6 +148,5 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | EMP | Splits named `""` or `-` | constructor | throws | no exception |
 | CLM | Splits `--Intro`, `A`, `B` | `SplitList\AllSplits\Names.txt`; finishing the run | `A \| B`; throws | three names; finishes |
 | SEC | Tick every 0.5 s to 60.5 s, then reset | `Timers\GameTime\RunTimer.txt` | `1:00` | `0:00` |
-| WER | An output file held open with `FileShare.None` during `Split()` | `Split()` | throws `IOException` | no exception |
 
 The correct negative values (`-0.5`, `-2.0`) assume the `DeltaString` precision fix. Before that fix, negatives get centiseconds: `-.50`, `-2.00`.

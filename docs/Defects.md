@@ -10,19 +10,6 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 - CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - PAU's minimal plan, EDT, KEY and CHK all change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
-- WER changes `MakeFile`. [WRT](Performance.md#wrt--changed-files-are-written-on-the-ui-thread)'s background writer needs WER's error handling first.
-
-## WER — File write errors are thrown into LiveSplit
-
-`MakeFile` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) has no try/catch, so any I/O error escapes into whichever LiveSplit call triggered the write. LiveSplit then skips any event handlers registered after this component's (see [livesplit-notes.md](livesplit-notes.md#exceptions-verified)).
-
-**Evidence.** Reproduced 2026-10-14: with one output file locked by another process, `TimerModel.Split()` threw `IOException` to its caller. The split itself still registered. Other triggers, read only: characters that are invalid in a path in the folder setting (on .NET Framework `Path.Combine` throws, and would do so on every `Update()`), a missing drive, or no write permission.
-
-**Plan.** Catch the error per file in `MakeFile`, so one bad file doesn't stop the rest. Keep the `_written` update after the write, so a failed file isn't recorded and is retried on the next write. Report the error once (for example in the settings panel), not on every write.
-
-**Verify.** The WER regression check in testing.md doesn't throw, and the other files still update. Set the folder to `a|b`: no exception from `Update()`.
-
-**Docs.** architecture.md "Writing files". testing.md WER row. README, if the error gets shown in the settings panel.
 
 ## NUL — Sign reports a gold whenever the gold delta is null
 

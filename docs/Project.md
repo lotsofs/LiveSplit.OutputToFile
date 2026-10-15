@@ -23,7 +23,7 @@ Not documented:
 - the `*_Raw.txt` and `Names_Indent_N.txt` files;
 - the `{Header}` section-name syntax;
 - the possible `Sign.txt` values;
-- the settings;
+- the settings, including the red line that shows the latest file that couldn't be written;
 - how to install.
 
 **Evidence.** Read: the README against the `FILE_*` templates and [output-files.md](output-files.md).

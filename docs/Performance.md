@@ -2,7 +2,7 @@
 
 The index is [TODO.md](TODO.md).
 
-WRT's background writer needs [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit)'s error handling first, and could take in ATM. GEN edits `GenerateSubsplitLevels`, as do several items in [Defects.md](Defects.md).
+WRT's background writer could take in ATM. GEN edits `GenerateSubsplitLevels`, as do several items in [Defects.md](Defects.md).
 
 ## LSG — CalculateLiveSegment runs once per level
 
@@ -36,7 +36,7 @@ Every write happens synchronously inside the LiveSplit event, which runs on the 
 
 **Plan.** Move file I/O to a background writer. `MakeFile` keeps its content check, then queues the write, and the worker writes only the latest content for each path. Before starting:
 
-- Do [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit) first. An unhandled exception on a background thread ends LiveSplit, so the worker must catch every write error.
+- The worker must keep `MakeFile`'s catch: an unhandled exception on a background thread ends LiveSplit. `ShowWriteError` and `ClearWriteError` update a label in the settings control, so the worker has to call them on the UI thread (`BeginInvoke`).
 - `Dispose` has to flush pending writes.
 - The headless harness needs a way to wait until the queue is empty before it reads files.
 - See [THR](Defects.md#thr--timer-events-may-arrive-off-the-ui-thread). The worker could also make writes atomic ([ATM](#atm--file-writes-arent-atomic)).

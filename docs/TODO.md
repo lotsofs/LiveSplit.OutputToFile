@@ -8,7 +8,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit) | File writing | `MakeFile` has no try/catch: a locked output file or an invalid folder path throws into LiveSplit's `Split()`/`Update()` | High |
 | [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null) | Sign.txt | A null gold delta counts as a gold, so subsplit levels (including their finish) and the split after a skip report `Gold*`/`PBGold` | High |
 | [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas) | Split list | Any timer phase change (pause, resume, finish) or list setting change rebuilds the levels and wipes stored deltas: earlier splits show `-` and BehindLost | High |
 | [RET](Defects.md#ret--allsplits-current-and-previous-files-stop-updating-at-finish-and-reset) | CurrentSplit, PreviousSplit | At finish and reset `WriteSplitInformation` returns after level 0, so other levels go stale, and `Name_Raw.txt` is never reset | Medium |
@@ -32,7 +31,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 |---|---|---|---|
 | [LSG](Performance.md#lsg--calculatelivesegment-runs-once-per-level) | Split times | `WriteSplitTimes` calls `CalculateLiveSegment`, which already loops over every level, once per level | Low |
 | [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) | Subsplits | `CalculateSegments` runs `GenerateSubsplitLevels` twice; its `method` parameter is unused | Low |
-| [WRT](Performance.md#wrt--changed-files-are-written-on-the-ui-thread) | File writing | Changed files are still written on the UI thread (about 66 files, 38 ms per split with 40 splits); move writing to a background thread, after WER | Low |
+| [WRT](Performance.md#wrt--changed-files-are-written-on-the-ui-thread) | File writing | Changed files are still written on the UI thread (about 66 files, 38 ms per split with 40 splits); move writing to a background thread | Low |
 | [ATM](Performance.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic, so OBS could read a half-written file; check whether it flickers before fixing | Low |
 
 ## Cleanup — [Cleanup.md](Cleanup.md)
@@ -53,7 +52,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 | [SGN](Cleanup.md#sgn--some-signs-values-are-never-written) | Sign.txt | The `Signs` values `Undetermined`, `Gained`, `Lost` and `Gold` are never written | Low |
 | [CMT](Cleanup.md#cmt--commented-out-code) | Code | Commented-out code blocks in the component | Low |
 | [TPL](Cleanup.md#tpl--wrong-or-misleading-template-comments) | Code | Leftover template comments that are wrong (`DrawVertical`, `Update`, `GetSettingsHashCode`, the factory) | Low |
-| [LAY](Cleanup.md#lay--settings-layout-leftovers) | Settings | The top table has 5 rows for 3 controls, and tab order is Folder → Split list → Output | Low |
+| [LAY](Cleanup.md#lay--settings-layout-leftovers) | Settings | The top table has 5 rows for 4 controls, and tab order is Folder → Split list → Output | Low |
 
 ## Features and limitations — [Features.md](Features.md)
 

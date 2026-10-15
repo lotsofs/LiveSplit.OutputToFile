@@ -1,6 +1,8 @@
 ﻿using LiveSplit.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security;
 
 namespace LiveSplit.UI.Components {
 	/// <summary>
@@ -97,16 +99,27 @@ namespace LiveSplit.UI.Components {
 		protected void MakeFile(string fileName, string contents) {
 			string settingsPath = Settings.FolderPath;
 			if (string.IsNullOrEmpty(settingsPath)) return;
-			string path = Path.Combine(settingsPath, fileName);
-			if (_written.TryGetValue(path, out string written) && written == contents) return;
+			string path = null;
 			try {
-				File.WriteAllText(path, contents);
+				path = Path.Combine(settingsPath, fileName);
+				if (_written.TryGetValue(path, out string written) && written == contents) return;
+				try {
+					File.WriteAllText(path, contents);
+				}
+				catch (DirectoryNotFoundException) {
+					Directory.CreateDirectory(Path.GetDirectoryName(path));
+					File.WriteAllText(path, contents);
+				}
 			}
-			catch (DirectoryNotFoundException) {
-				Directory.CreateDirectory(Path.GetDirectoryName(path));
-				File.WriteAllText(path, contents);
+			catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException || ex is NotSupportedException || ex is SecurityException) {
+				// Locked file, bad folder path, no permission, ... Report it and carry on with the other files.
+				// Forgetting the file makes the next write retry it, even with the same contents.
+				if (path != null) _written.Remove(path);
+				Settings.ShowWriteError(fileName, ex);
+				return;
 			}
 			_written[path] = contents;
+			Settings.ClearWriteError(fileName);
 		}
 
 		/// <summary>
