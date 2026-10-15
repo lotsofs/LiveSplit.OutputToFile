@@ -35,10 +35,10 @@ Code is referred to by member name. The table below says which file each class i
 | Trigger | What runs |
 |---|---|
 | `OnStart` | `CalculateSegments()`, then `WriteSplits()` |
-| `OnSplit`, `OnSkipSplit`, `OnUndoSplit` | `WriteSplits()` |
+| `OnSplit`, `OnSkipSplit`, `OnUndoSplit` | `TimerFiles.SegmentStartsChanged()`, then `WriteSplits()` |
 | `OnReset` | `FileQueue.ForgetWrittenFiles()`, `WriteSplits()`, then `CalculateSegments()` |
 | `RunManuallyModified` | Counts the edit (`_runEdits`), a cache key, so the next `Update()` rewrites everything. Several edits in one frame cost one rewrite. |
-| `Update()` (every frame) | 0. If the latest write error changed, show it in the settings (`ShowWriteError`). <br>1. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless that method's whole second as shown (truncated, sign included) or the timer phase changed since its last write. Splits alone don't count. <br>2. If any cache key changed: `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. |
+| `Update()` (every frame) | 0. If the latest write error changed, show it in the settings (`ShowWriteError`). <br>1. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless what one of that method's files shows changed since its last write: the run timer's or a level's segment timer's whole second (truncated, sign included), or the timer phase. `TimerFiles` keeps each level's segment start, the time its segment timer counts from, and finds them again only after `SegmentStartsChanged()`, which the split events and `CalculateSegments()` call. A frame therefore costs a subtraction per level, not a search. <br>2. If any cache key changed: `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. |
 
 The cache keys in `Update()` are attempt count, game name, category name, platform name, the `RunManuallyModified` count, the `Run` object (by reference), `FolderPath`, `SplitsBefore`, `SplitsAfter` and `CurrentPhase`.
 
@@ -173,7 +173,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
 
   A split that matches none of these gets no highlight. `HIGHLIGHT_FILL` is 43 × `█`.
 - **Index / ReverseIndex:** the local index of the current member, i.e. the number of members completed at this level, and `Count − Index − 1`. When the timer isn't running these are −1 / `Count`; after the finish they are `Count` / −1.
-- **Run timer:** `State.CurrentTime[method]`. **Segment timer** (`TimerFiles.SegmentTimer`): the run timer minus the `SplitTime` of the level's previous member. It equals the run timer on the first member and when the timer isn't running.
+- **Run timer:** `State.CurrentTime[method]`. **Segment timer** (`TimerFiles.SegmentTime`): the run timer minus the `SplitTime` of the level's previous member. It equals the run timer on the first member and when the timer isn't running. After the finish it is the last member's `LiveSegmentTime`, frozen.
 - **FinishedRunsCount:** the number of attempts in history with a real time, plus 1 while the timer is `Ended`, because the current attempt joins the history only on reset.
 
 ## Writing files

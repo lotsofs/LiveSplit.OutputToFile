@@ -127,7 +127,6 @@ Things to know:
 - **Check `GameTime` outputs.** Game time is exact, while real time drifts. Usually that is a few milliseconds, but two runs of the same build through a long multi-scenario harness differed by up to 0.3 s in `RealTime` deltas (seen 2026-10-15). When comparing two builds, compare `RealTime` files only by which ones exist.
 - **Call `Tick()` after every event.** Several bugs only appear on the frame after the event, when `Update()` reacts to the phase change.
 - **Files are written in the background.** `Split()` and `Update()` only queue them, so call `comp.WaitForFileWrites()` before reading files; the sample's `Tick()` does. A failed write shows up in `comp.Settings.WriteError` on the next `Update()` after it fails. When timing, a stopwatch around `Split()` measures only the UI thread's part; time `WaitForFileWrites()` separately for the writes.
-- **Timer files change only on a new whole second or phase.** `HasTimerChanged` ignores splits, so after a split the segment timer keeps its old value until the clock reaches the next whole second.
 - **Real time.** Setting `AdjustedStartTime` only affects real time while the timer is `Running`; while paused, real time stays frozen. `model.Pause()` toggles between pause and resume.
 - **Editing splits.** Edit Splits changes the run in place, then raises `RunManuallyModified`. To do the same, change `state.Run` (a name, a time, `Add`, `RemoveAt`), call `state.CallRunManuallyModified()`, then `Tick()`.
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.

@@ -20,18 +20,6 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 **Docs.** architecture.md "When files get written" (the cache keys). output-files.md, on what turning an output off does. README.
 
-## LAG — Segment timer ticks over late
-
-Timer files are only rewritten when the *run* timer's whole second or the timer phase changes (`HasTimerChanged` in [TimerFiles.cs](../UI/Components/TimerFiles.cs)), not on a split. The segment timer's second boundaries are offset by the fraction at which the previous split happened, so it can lag by up to about a second. After the run ends it shows `0:00`; it should probably show the last segment's time or `-`. Release 6 wrote the last segment's time there.
-
-**Evidence.** The lag was read. The `0:00` after the finish was reproduced 2026-10-14, and again on 2026-10-15 for a finish within the same second as the previous frame. Release 6's finish value was read in its code.
-
-**Plan.** Add each level's segment timer whole seconds to what `HasTimerChanged` compares, so it ticks on its own boundary. At the finish, write the last segment's time or `-`.
-
-**Verify.** Split at x.7 s: the segment timer ticks over 0.3 s after the run timer does. After the finish it shows the chosen value.
-
-**Docs.** architecture.md "When files get written". output-files.md "Timers".
-
 ## DUP — An extra duplicate level when only the last split has dashes
 
 In `CalculateDepths` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), levels are counted before the last split is forced to depth 0. Splits `A`, `B`, `-C` therefore produce a `SansSubsplits` folder identical to `AllSplits`.

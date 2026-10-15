@@ -27,12 +27,12 @@ Rewritten whenever one of `Update()`'s cache keys changes (run loaded or edited,
 
 ## `Timers\{method}\` (Timer setting)
 
-Written from `Update()`, but only when the run timer's whole second as shown (sign included) or the timer phase changes. Times have no decimals.
+Written from `Update()`, but only when what one of them shows changes: the run timer's or a segment timer's whole second (sign included), or the timer phase. Times have no decimals.
 
 | File | Contents |
 |---|---|
 | `RunTimer.txt` | The current time, or `-` if that method has no time (game time not initialized) |
-| `SegmentTimer_{level}.txt` | The current time minus the previous member's split time. Equals the run timer on the level's first member and when the timer isn't running. `-` if the previous member was skipped. ⚠ LAG: shows `0:00` after the finish. |
+| `SegmentTimer_{level}.txt` | The current time minus the previous member's split time, so it restarts at `0:00` on each split at that level. Equals the run timer on the level's first member and when the timer isn't running. After the finish, the last member's segment time. `-` if the previous member was skipped (after the finish: the member before the last). |
 
 ## `CurrentSplit\{level}\`
 
