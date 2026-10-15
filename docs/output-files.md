@@ -32,7 +32,7 @@ Written from `Update()`, but only when the run timer's seconds component changes
 | File | Contents |
 |---|---|
 | `RunTimer.txt` | The current time, or `-` if that method has no time (game time not initialized) ⚠ SEC: can get stuck after a reset |
-| `SegmentTimer_{level}.txt` | The current time minus the previous member's split time. Equals the run timer on the level's first member and when the timer isn't running. `-` if the previous member was skipped. ⚠ IDX: wrong split for non-`AllSplits` levels. ⚠ LAG: shows `0:00` after the finish. |
+| `SegmentTimer_{level}.txt` | The current time minus the previous member's split time. Equals the run timer on the level's first member and when the timer isn't running. `-` if the previous member was skipped. ⚠ LAG: shows `0:00` after the finish. |
 
 ## `CurrentSplit\{level}\`
 

@@ -10,18 +10,6 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 - EDT and CHK both change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
 
-## IDX — SansSubsplits segment timer measures from the wrong split
-
-`WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)) uses a level-local index as a global one (`State.Run[previousSplitIndex]`). The `indices` list it fetches for the level is never used.
-
-**Evidence.** Reproduced 2026-10-14: top-level split at 28 s, first subsplit at 9.5 s, timer at 33 s. `SegmentTimer_SansSubsplits.txt` showed `0:23` instead of `0:05`.
-
-**Plan.** `State.Run[indices[previousSplitIndex]]`.
-
-**Verify.** The IDX regression check in testing.md shows `0:05`.
-
-**Docs.** output-files.md "Timers" (⚠ mark). testing.md IDX row.
-
 ## CLM — A first split with two or more dashes is dropped
 
 The depth clamp loop in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) starts at `i = 1`, so split 0 is never clamped. When no split has exactly one dash, a first split with 2+ dashes keeps a depth that no level includes. It is missing from every output, and the next split's segment counts from the start of the run, so it absorbs the missing split's time.

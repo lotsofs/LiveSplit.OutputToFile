@@ -1,7 +1,6 @@
 ﻿using LiveSplit.Model;
 using LiveSplit.OutputToFile.UI.Components.OutputToFile;
 using System;
-using System.Collections.Generic;
 
 namespace LiveSplit.UI.Components {
 	/// <summary>
@@ -55,7 +54,6 @@ namespace LiveSplit.UI.Components {
 			// Split Timer
 			for (int lvl = 0; lvl < Levels.Count; lvl++) {
 				//SplitLevel level = _splitLevels[lvl];
-				List<int> indices = Levels[lvl].Indices;
 				// The timer for the current split is the current full run timer, minus the finish time of the previous split
 				// However, due to subsplits, it is not immediately obvious what 'the previous split' is. So we must figure that out.
 				int previousSplitIndex = GetPreviousSubsplitIndex(lvl);
@@ -67,9 +65,7 @@ namespace LiveSplit.UI.Components {
 				}
 
 				// We know now what the previous split we need to compare against is. Get its time.
-				ISegment previousSplit = State.Run[previousSplitIndex];
-				Time previousTime = previousSplit.SplitTime;
-				TimeSpan? previousSplitFinishTime = method == TimingMethod.RealTime ? previousTime.RealTime : previousTime.GameTime;
+				TimeSpan? previousSplitFinishTime = LiveRunTime(method, lvl, previousSplitIndex);
 
 				if (!previousSplitFinishTime.HasValue) {
 					// We skipped the previous split. No timer can be calculated.
