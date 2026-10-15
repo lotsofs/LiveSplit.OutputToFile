@@ -43,7 +43,7 @@ namespace LiveSplit.UI.Components {
 			}
 
 			// Squish any splits that skip a non-existent level (eg super long headers "-----------------") down to the deepest possible level
-			for (int i = 1; i < Depths.Length; i++) {
+			for (int i = 0; i < Depths.Length; i++) {
 				if (Depths[i] >= numberOfLevels) {
 					Depths[i] = numberOfLevels - 1;
 				}

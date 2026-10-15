@@ -190,6 +190,5 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | Code | Check | File | Today | Correct |
 |---|---|---|---|---|
 | NEG | `DeltaString(-5.234 s)` | (call it directly) | `-5.23` | `-5.2` |
-| CLM | Splits `--Intro`, `A`, `B` | `SplitList\AllSplits\Names.txt` | `A \| B` | three names |
 | SEC | Tick every 0.5 s to 60.5 s, then reset | `Timers\GameTime\RunTimer.txt` | `1:00` | `0:00` |
 | ATM | `FileQueue` rewrites a timer-sized file 10 times a second for 180 s while [OBS-style reads](#reading-files-as-obs-does) with random gaps run | that file | 491 of 726,347 reads empty or short | none |

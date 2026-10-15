@@ -6,21 +6,9 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## Dependencies between plans
 
-- CLM and DUP both edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
+- DUP and DSH both edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - EDT and CHK both change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
-
-## CLM — A first split with two or more dashes is dropped
-
-The depth clamp loop in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) starts at `i = 1`, so split 0 is never clamped. When no split has exactly one dash, a first split with 2+ dashes keeps a depth that no level includes. It is missing from every output, and the next split's segment counts from the start of the run, so it absorbs the missing split's time.
-
-**Evidence.** Reproduced 2026-10-15: with splits `--Intro`, `A`, `B`, the `AllSplits` output contained only A and B, and A split at 21 s against a 9 s best segment showed a gold difference of `+12.0`.
-
-**Plan.** Start the loop at 0.
-
-**Verify.** The CLM regression check in testing.md lists all three names.
-
-**Docs.** architecture.md "Depth" (the note that the loop skips split 0). testing.md CLM row.
 
 ## EDT — Editing splits isn't picked up until the next run starts
 
@@ -117,6 +105,26 @@ In `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)),
 **Verify.** With splits `A`, `B`, `-C`, only `AllSplits` is written.
 
 **Docs.** architecture.md "Depth" and "Levels".
+
+## DSH — Moved splits keep leftover dashes in their names
+
+Building the display names in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) removes one leading `-` per subsplit level. A split's depth normally equals its number of dashes, so they are all gone by the levels it appears at. Two kinds of split end up at a shallower level than their dashes, and keep the dashes that weren't removed:
+
+- a split deeper than the deepest level, which is moved into that level;
+- the last split, which is always top level.
+
+Whether that is wanted is undecided. The code comment on the move mentions long all-dash names like `-----------------`, which keep a line of dashes this way.
+
+**Evidence.** Reproduced 2026-10-15:
+- `A`, `-B`, `---C`, `D`: `AllSplits` shows `--C`.
+- `--Intro`, `A`, `B`: `AllSplits` shows `--Intro`.
+- `A`, `-B`, `-`: `SansSubsplits` shows `-` for the last split.
+
+**Plan.** Decide whether displayed names should lose every leading dash. If so, remove them all in the `Names` loop at the levels a split appears at. A name made only of dashes then shows as an empty line, as `-` already does where its dash is removed. `*_Raw.txt` keeps the name as typed.
+
+**Verify.** The examples above show `C`, `Intro` and an empty line.
+
+**Docs.** architecture.md "Display names". CHANGELOG.md, if Subsplits has been released by then.
 
 ## THR — Timer events may arrive off the UI thread
 

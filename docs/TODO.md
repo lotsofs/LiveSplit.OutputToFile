@@ -8,7 +8,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [CLM](Defects.md#clm--a-first-split-with-two-or-more-dashes-is-dropped) | Subsplits | The depth clamp skips split 0: a first split with 2+ dashes (and no 1-dash split) vanishes from every output, and the next split's segment absorbs its time | Medium |
 | [EDT](Defects.md#edt--editing-splits-isnt-picked-up-until-the-next-run-starts) | Change detection | Split count, names and PB times aren't cache keys, so edited splits stay stale in the files until the next run starts | Medium |
 | [NEG](Defects.md#neg--negative-deltas-get-a-different-precision-from-positive-ones) | Time format | Negative deltas choose precision from the negative value, so `-5.23` but `+5.2` | Low |
 | [UND](Defects.md#und--undo-to-the-first-split-leaves-golddifference-stale) | PreviousSplit | Undoing to the first split resets every `PreviousSplit` file except `GoldDifference.txt` | Low |
@@ -17,6 +16,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 | [CHK](Defects.md#chk--output-checkboxes-dont-take-effect-at-once) | Change detection | The Output checkboxes aren't cache keys, so toggling one does nothing until another change, and outputs turned off leave stale files | Low |
 | [LAG](Defects.md#lag--segment-timer-ticks-over-late) | Timers | The segment timer ticks on the run timer's second boundary, lagging up to about 1 s, and shows `0:00` after the finish | Low |
 | [DUP](Defects.md#dup--an-extra-duplicate-level-when-only-the-last-split-has-dashes) | Subsplits | When only the last split has dashes, an extra `SansSubsplits` level identical to `AllSplits` is written | Low |
+| [DSH](Defects.md#dsh--moved-splits-keep-leftover-dashes-in-their-names) | Subsplits | Undecided: a split moved to a shallower level (deeper than any level, or the last split) keeps the dashes that weren't removed, so `---C` shows as `--C`; decide whether names should lose all their dashes | Low |
 | [THR](Defects.md#thr--timer-events-may-arrive-off-the-ui-thread) | Threading | Not checked: timer events raised off the UI thread (Server component, auto splitters) would race `Update()` on unlocked arrays | Low |
 
 ## Performance — [Performance.md](Performance.md)
