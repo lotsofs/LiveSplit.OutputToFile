@@ -1,10 +1,10 @@
 # Output files
 
-Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against a test run that produced 159 files (5 splits, one subsplit level, all outputs on). The README's tree is incomplete and partly out of date ([LVL](Project.md#lvl--readme-level-folder-names-dont-match-the-code), [DOC](Project.md#doc--readme-is-missing-outputs-and-settings), [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete)).
+Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against a test run that produced 159 files (5 splits, one subsplit level, all outputs on). The README's tree is incomplete ([DOC](Project.md#doc--readme-is-missing-outputs-and-settings), [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete)).
 
 How to read the paths:
 
-- `{level}` is `AllSplits`, `SansSubsplits` or `SansSubsplits_Level{n}`; see [architecture.md](architecture.md#levels). Without subsplits, only `AllSplits` exists.
+- `{level}` is `AllSplits`, `SansSubsplits` or `SansSubsplits_Level{n}`, where `{n}` (2 or more) is the shallowest depth that level leaves out; see [architecture.md](architecture.md#levels). Without subsplits, only `AllSplits` exists.
 - `{method}` is `RealTime` or `GameTime`. Every timed file exists once per method.
 - "Gold" files exist only under `AllSplits`.
 - `-` means no value. Times use the formats in [Formatting](#formatting).

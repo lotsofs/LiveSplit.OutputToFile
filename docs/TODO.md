@@ -63,7 +63,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [LVL](Project.md#lvl--readme-level-folder-names-dont-match-the-code) | README | The README names middle levels `SansSubsplits_Level2`/`_Level3`, but the code writes `_Level1`, …; decide which is intended | Medium |
 | [DOC](Project.md#doc--readme-is-missing-outputs-and-settings) | README | Undocumented: `CompletedSplits\`, `PlatformName.txt`, `*_Raw`/`Names_Indent_N` files, `{Header}` names, `Sign.txt` values, settings, install | Medium |
 | [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete) | README | The `Timers\GameTime` tree lists only `SegmentTimer_AllSplits.txt`, but every level is written | Low |
 | [HNT](Project.md#hnt--livesplit-references-only-resolve-on-this-machine) | Build | The LiveSplit references use a HintPath that only exists on this machine; add an overridable `LiveSplitDir` | Low |

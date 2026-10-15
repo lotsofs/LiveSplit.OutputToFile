@@ -2,18 +2,6 @@
 
 Build setup and end-user documentation. The index is [TODO.md](TODO.md). [output-files.md](output-files.md) is the accurate reference to bring the README in line with.
 
-## LVL — README level folder names don't match the code
-
-The README says two dashes make `SansSubsplits_Level2`, and its tree shows `_Level2` and `_Level3` folders. The code names a middle level by its level number (`MakeFile` in [OutputWriter.cs](../UI/Components/OutputWriter.cs)).
-
-**Evidence.** Reproduced 2026-10-14: with splits at depths 0, 1 and 2, the code produced `SansSubsplits`, `SansSubsplits_Level1` and `AllSplits`.
-
-**Plan.** Decide which is intended. Changing the code renames folders that existing OBS setups point at. Changing the README means rewriting the subsplits paragraph and the tree.
-
-**Verify.** The README's example names match a run with splits at depths 0, 1 and 2.
-
-**Docs.** README. If the folder tags change: CLAUDE.md "Must-know before editing" (the levels bullet), architecture.md "Levels" and output-files.md.
-
 ## DOC — README is missing outputs and settings
 
 Not documented:

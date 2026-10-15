@@ -127,7 +127,8 @@ namespace LiveSplit.UI.Components {
 				subsplitLevelTag = "SansSubsplits";
 			}
 			else {
-				subsplitLevelTag = "SansSubsplits_Level" + subsplitLevel;
+				// Named after the depth it leaves out: level 1 drops the splits with 2+ dashes
+				subsplitLevelTag = "SansSubsplits_Level" + (subsplitLevel + 1);
 			}
 			string file = string.Format(fileName, method.ToString(), subsplitLevelTag);
 			string c = contents;

@@ -58,7 +58,7 @@ The code is in `UI/Components/`:
 | `OutputToFileSettings.cs` | The settings control and its XML save/load |
 
 - **Levels.** A split's depth is its number of leading `-`. Level `lvl` contains the splits with depth ≤ `lvl`.
-  - The **last** level holds every split and is tagged `AllSplits`. Level 0 is `SansSubsplits`; levels in between are `SansSubsplits_Level{n}`. With a single level, level 0 is `AllSplits`.
+  - The **last** level holds every split and is tagged `AllSplits`. Level 0 is `SansSubsplits`; levels in between are `SansSubsplits_Level{lvl+1}`, named after the depth they leave out. With a single level, level 0 is `AllSplits`.
   - `Levels[lvl].Indices` maps **local** index → **global** index, i.e. into `State.Run`. Mixing the two up is a recurring bug source. Only at the last level are they the same.
   - Golds exist only at the last level. Keep the `lvl == Levels.Count - 1` guard on any gold output. `IsGold` decides what counts as a gold and includes that guard; don't test the gold delta instead, because it is also null when there is no gold.
 - **Timer phases.** `GetCurrentSubsplitIndex` and `GetPreviousSubsplitIndex` return sentinel values depending on the phase (−1/−2 when not running, `Count`/`Count−1` when finished). Every write path needs correct output for NotRunning, Running/Paused and Ended. Otherwise files keep stale values.

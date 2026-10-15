@@ -19,7 +19,7 @@ What changed in Output to File between releases: the files it writes, what they 
 ### Added
 
 - **Subsplits.** A split whose name starts with `-` is a subsplit, as in LiveSplit's Subsplits component.
-  - Next to `AllSplits`, the component writes a `SansSubsplits` folder with only the top-level splits. Each further level of dashes (`--`, `---`, …) gets a folder of its own.
+  - Next to `AllSplits`, the component writes a `SansSubsplits` folder with only the top-level splits. Each further level of dashes (`--`, `---`, …) gets a folder of its own, named after the dashes it leaves out: `SansSubsplits_Level2` has every split except those with two or more dashes, `SansSubsplits_Level3` every split except those with three or more, and so on.
   - A name in braces at the start of a split names its section: a split named `{Area A}A3` shows as `Area A` in `SansSubsplits` and as `A3` in `AllSplits`.
   - The new **Subsplits** setting turns this off.
 - `Name_Raw.txt` in `CurrentSplit\` and `PreviousSplit\`, and `Names_Raw.txt` in the split list. These give split names exactly as typed in LiveSplit. The other name files leave out the leading dashes and the `{…}` part.

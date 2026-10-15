@@ -80,7 +80,9 @@ Folder names come from `MakeFile` in `OutputWriter`:
 |---|---|
 | last | `AllSplits` |
 | 0 (when not also the last) | `SansSubsplits` |
-| 1 … last−1 | `SansSubsplits_Level{n}` |
+| 1 … last−1 | `SansSubsplits_Level{lvl+1}` |
+
+A middle level is named after the shallowest depth it leaves out, so level 1, which drops the splits with 2+ dashes, is `SansSubsplits_Level2`. The README documents these names.
 
 With a single level (no subsplits, or the setting off), level 0 *is* the last level, so it's tagged `AllSplits` and there is no `SansSubsplits` folder.
 
@@ -110,7 +112,7 @@ These values were checked against the component's actual output.
 - While the runner is on A1 (global 0), level 0's *current* split is "Area A" (local 0) and it has no previous split.
 - `SplitList\AllSplits\Names_Indent_0.txt` contains only `A3` and `B2`. `Names_Indent_1.txt` contains only `A1`, `A2` and `B1`. Every other line is blank, so each file can be a separately indented OBS text source.
 
-With depths 0/1/2 (splits `A`, `-B`, `--C`, `D`) there are three levels: `SansSubsplits` = A, D; `SansSubsplits_Level1` = A, B, D; `AllSplits` = all four.
+With depths 0/1/2 (splits `A`, `-B`, `--C`, `D`) there are three levels: `SansSubsplits` = A, D; `SansSubsplits_Level2` = A, B, D; `AllSplits` = all four.
 
 ## Per-level data: `SplitLevel`
 
