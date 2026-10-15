@@ -12,11 +12,11 @@ Code is referred to by member name. The table below says which file each class i
 | `UI/Components/OutputToFileFactory.cs` | Name, description and category (Other) shown in the Layout Editor. `Create(state)` builds the component. |
 | `UI/Components/OutputToFileComponent.cs` | The LiveSplit side: event handling, change detection in `Update()`, and when each writer runs. Owns the one `SplitLevels` instance, the one `FileQueue` and the four writers. |
 | `UI/Components/SplitLevels.cs` | `SplitLevels` (depths, display names, the levels) and `SplitLevel` (one level's members and arrays). Builds the levels and the PB segment times. |
-| `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`, and `IsGold`. |
+| `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`, and the live times and deltas (`LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta`, `IsGold`). |
 | `UI/Components/FileQueue.cs` | Writes the files on a background thread: skips unchanged contents, keeps the latest contents per file, and records the latest write error. |
 | `UI/Components/RunInfoFiles.cs` | Writer for the root files. |
 | `UI/Components/TimerFiles.cs` | Writer for `Timers\`, with its own `GraphicsCache`. |
-| `UI/Components/SplitFiles.cs` | Writer for `CurrentSplit\` and `PreviousSplit\`. Calculates the previous split's live segment and deltas, stores them in the level arrays, and picks `Sign.txt`. |
+| `UI/Components/SplitFiles.cs` | Writer for `CurrentSplit\` and `PreviousSplit\`: the previous split's times and deltas, and `Sign.txt`. |
 | `UI/Components/SplitListFiles.cs` | Writer for `SplitList\` and `CompletedSplits\`. |
 | `UI/Components/Signs.cs` | The `Signs` enum, whose names are the `Sign.txt` values. |
 | `UI/Components/OutputToFileSettings.cs` (+ `.Designer.cs`, `.resx`) | The settings `UserControl` and its XML save/load. |
@@ -41,7 +41,7 @@ Code is referred to by member name. The table below says which file each class i
 
 The cache keys in `Update()` are attempt count, game name, category name, platform name, `FolderPath`, `SplitsBefore`, `SplitsAfter` and `CurrentPhase`.
 
-Because the phase is a cache key, every start, pause, resume, finish and reset goes through row 2 of `Update()` one frame after the event handler has run. Because `CalculateSegments()` recreates all the arrays (see below), this wipes the deltas stored during the run. See [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas).
+Because the phase is a cache key, every start, pause, resume, finish and reset goes through row 2 of `Update()` one frame after the event handler has run, and so rebuilds the levels. That is harmless because the levels hold nothing about the current attempt (see [Per-level data](#per-level-data-splitlevel)).
 
 Not cache keys: the `Output*` checkboxes, split names, split count and PB times. Changing any of those does nothing until something else triggers a rewrite.
 
@@ -50,10 +50,10 @@ LiveSplit fires every event *after* it has updated the timer state. A handler th
 `WriteSplits()` runs these in order:
 
 1. `SplitFiles.WriteSplitInformation()`: names and indexes.
-2. `SplitFiles.WriteSplitTimes(RealTime)`, `WriteSplitTimes(GameTime)`: the CurrentSplit and PreviousSplit time files. These also **store** the run, segment and gold deltas of the previous split.
+2. `SplitFiles.WriteSplitTimes(RealTime)`, `WriteSplitTimes(GameTime)`: the CurrentSplit and PreviousSplit time files.
 3. `SplitListFiles.WriteSplitLists(RealTime)`, `WriteSplitLists(GameTime)`: for each level, the `SplitList\` window and the `CompletedSplits\` list. `WriteSplitLists` works out each list's range of splits, and `WriteSplitListLevel` writes the files for that range.
 
-Step 3 reads the deltas stored in step 2, so the order matters.
+The steps don't depend on each other: each computes what it needs from the run.
 
 ## Subsplit levels
 
@@ -72,7 +72,7 @@ A split's depth is its number of leading `-` characters (`SplitLevels.Depths`). 
 Level `lvl` contains every split whose depth is ≤ `lvl`, in order. `Levels[lvl].Indices` lists their **global** indices, meaning indices into `State.Run`. Position within that list is the **local** index.
 
 - Level 0 contains top-level splits only.
-- The last level (`Levels.Count - 1`) contains every split. Local index equals global index there. Gold code and `State.CurrentSplit` lookups rely on this.
+- The last level (`Levels.Count - 1`) contains every split. Local index equals global index there. The current gold time (`State.CurrentSplit.BestSegmentTime` in `WriteSplitTimes`) relies on this.
 
 Folder names come from `MakeFile` in `OutputWriter`:
 
@@ -114,19 +114,26 @@ With depths 0/1/2 (splits `A`, `-B`, `--C`, `D`) there are three levels: `SansSu
 
 ## Per-level data: `SplitLevel`
 
-Each `SplitLevel` holds its members, `Indices` (local index → global index), and five `Dictionary<TimingMethod, TimeSpan?[]>`, one array per timing method, indexed by **local** index:
+Each `SplitLevel` holds its members, `Indices` (local index → global index), and `PbSegmentTimes`, a `Dictionary<TimingMethod, TimeSpan?[]>` with one array per timing method, indexed by **local** index. Each entry is the PB split time of this member minus the PB split time of the previous member. The first member gets its PB split time. An entry is null if either value is missing. `CalculatePBSegments` fills it during `CalculateSegments()`.
 
-| Field | Meaning | Filled by |
-|---|---|---|
-| `PbSegmentTimes` | PB split time of this member minus PB split time of the previous member. The first member gets its PB split time. Null if either value is missing. | `CalculatePBSegments`, during `CalculateSegments()` |
-| `LiveSegmentTimes` | The same calculation using this attempt's `SplitTime`s | `CalculateLiveSegment`, for the previous member, each time `WriteSplitTimes` runs |
-| `RunDeltae` | `SplitTime − PersonalBestSplitTime` | stored by `WriteSplitTimes` at the previous member's index |
-| `SegmentDeltae` | `LiveSegmentTimes − PbSegmentTimes` | same |
-| `GoldDeltae` | `LiveSegmentTimes − BestSegmentTime`, last level only | same |
-
-`CalculateSegments()` throws all of these away and rebuilds them, in place in the one `SplitLevels` instance the writers share. It also rebuilds the level structure (and builds it twice; see [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice)).
+`CalculateSegments()` rebuilds the levels and their arrays in place, in the one `SplitLevels` instance the writers share. It runs on every cache-key change, including every timer phase change, and builds the level structure twice (see [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice)). So a level must hold nothing about the current attempt; anything stored there would be wiped by a pause.
 
 A dictionary's `.Count` is the number of timing methods (2), not the array length; use `[method].Length`.
+
+### Live times and deltas
+
+This attempt's values are computed from the run whenever files are written, by these `OutputWriter` helpers. Each takes a timing method, a level and a local index, and returns null for a negative index, i.e. the sentinels in the table below. Subtracting a null gives null.
+
+| Helper | Value |
+|---|---|
+| `LiveRunTime` | The member's `SplitTime` |
+| `LiveSegmentTime` | `LiveRunTime` minus the previous member's. The first member gets its `LiveRunTime`. |
+| `RunDelta` | `LiveRunTime − PersonalBestSplitTime` |
+| `SegmentDelta` | `LiveSegmentTime − PbSegmentTimes` |
+| `GoldDelta` | `LiveSegmentTime − BestSegmentTime`, last level only |
+| `IsGold` | See [How the values are calculated](#how-the-values-are-calculated) |
+
+Computing them on every write is safe because PB times and best segments don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)). A completed split's `SplitTime` changes only when it is undone, and then it no longer counts as completed.
 
 ## Phase-dependent indexes
 

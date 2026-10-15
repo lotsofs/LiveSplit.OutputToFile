@@ -106,7 +106,7 @@ Every file has the same number of lines, so separate text sources line up. "Comp
 | `{method}\Highlight_BehindGained.txt` | Fill: segment delta < 0, run delta not < 0 |
 | `{method}\Highlight_BehindLost.txt` | Fill: every other completed line that has a PB time ⚠ SKP: includes skipped splits |
 
-Each completed line has a fill in exactly one highlight file, checked in the table's order from top to bottom. The fill is 43 × `█`. ⚠ PAU: After a pause or the finish, the stored deltas are wiped, so most completed lines move to `BehindLost` and their deltas show `-`.
+Each completed line has a fill in exactly one highlight file, checked in the table's order from top to bottom. The fill is 43 × `█`.
 
 ## `CompletedSplits\{level}\` (Completed splits setting)
 

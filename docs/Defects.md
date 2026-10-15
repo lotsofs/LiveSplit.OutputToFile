@@ -2,26 +2,13 @@
 
 Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.md).
 
-"Reproduced" means seen on 2026-10-14 by driving the built DLL headless against the real `LiveSplit.Core.dll` (see [testing.md](testing.md)) and reading back the files it wrote. "Read" means found by reading the code only. Where [testing.md](testing.md#regression-checks) has a regression check for an item, its row is marked with the item's code; update that row when the item is fixed.
+"Reproduced" means seen on the date given by driving the built DLL headless against the real `LiveSplit.Core.dll` (see [testing.md](testing.md)) and reading back the files it wrote. "Read" means found by reading the code only. Where [testing.md](testing.md#regression-checks) has a regression check for an item, its row is marked with the item's code; update that row when the item is fixed.
 
 ## Dependencies between plans
 
-- UND and SKP touch the stored deltas, or the highlight chain that uses them, and `IsGold` reads the stored `LiveSegmentTimes`. PAU's preferred plan (compute deltas when writing instead of storing them at split time) rewrites that code. Recheck them after PAU.
 - CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
-- PAU's minimal plan, EDT, KEY and CHK all change the cache keys in `Update()`.
+- EDT, KEY and CHK all change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
-
-## PAU — Pausing or finishing wipes stored deltas
-
-`TimerPhase` is one of the cache keys in `Update()`. Any phase change (Running→Paused, Paused→Running, Running→Ended) therefore runs `CalculateSegments()`. That recreates every `SplitLevel` array (in `GenerateSubsplitLevels` and `CalculatePBSegments`, [SplitLevels.cs](../UI/Components/SplitLevels.cs)), and with them the deltas `WriteSplitTimes` stored at each split. Changing Splits before/after or the folder mid-run does the same.
-
-**Evidence.** Reproduced 2026-10-14: after one pause, every completed split except the latest showed `-` in `Delta_*.txt` and moved to `Highlight_BehindLost.txt`. After finishing, every split except the last was BehindLost.
-
-**Plan.** Preferred: compute deltas from the segments' `SplitTime`s and PB times whenever files are written, instead of storing them at split time. That drops the stored `RunDeltae`/`SegmentDeltae`/`GoldDeltae`/`LiveSegmentTimes` arrays, removes this whole class of stale-delta bugs, and makes the call order in `WriteSplits()` irrelevant. Minimal: don't rebuild the level structure on a phase change. Let `TimerPhase` and the list settings trigger a rewrite only, and run `CalculateSegments()` only when the run or `OutputSubsplits` changes.
-
-**Verify.** The PAU regression check in testing.md keeps every delta after the pause. Also finish the run, and change Splits before mid-run: `Delta_*.txt` and `Highlight_*.txt` keep every split's values.
-
-**Docs.** CLAUDE.md "Must-know before editing" (the stored-deltas bullet). architecture.md "Lifecycle" and "Per-level data". output-files.md "SplitList" (⚠ under the highlight table). testing.md PAU row.
 
 ## IDX — SansSubsplits segment timer measures from the wrong split
 
@@ -37,13 +24,13 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## CLM — A first split with two or more dashes is dropped
 
-The depth clamp loop in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) starts at `i = 1`, so split 0 is never clamped. When no split has exactly one dash, a first split with 2+ dashes keeps a depth that no level includes, and the run crashes at the finish.
+The depth clamp loop in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) starts at `i = 1`, so split 0 is never clamped. When no split has exactly one dash, a first split with 2+ dashes keeps a depth that no level includes. It is missing from every output, and the next split's segment counts from the start of the run, so it absorbs the missing split's time.
 
-**Evidence.** Reproduced 2026-10-14: with splits `--Intro`, `A`, `B`, the `AllSplits` output contained only A and B. The final split then threw `IndexOutOfRangeException` in `CalculatePreviousGoldDelta`.
+**Evidence.** Reproduced 2026-10-15: with splits `--Intro`, `A`, `B`, the `AllSplits` output contained only A and B, and A split at 21 s against a 9 s best segment showed a gold difference of `+12.0`.
 
 **Plan.** Start the loop at 0.
 
-**Verify.** The CLM regression check in testing.md lists all three names and finishes.
+**Verify.** The CLM regression check in testing.md lists all three names.
 
 **Docs.** architecture.md "Depth" (the note that the loop skips split 0). testing.md CLM row.
 
@@ -93,7 +80,7 @@ The textbox updates `FolderPath` on every change (its `OnPropertyChanged` bindin
 
 **Verify.** The NEG regression check in testing.md gives `-5.2`, and −65.2 s gives `-1:05`.
 
-**Docs.** output-files.md "Formatting" (⚠ mark). testing.md NEG row, and the note under the regression table about negative precision.
+**Docs.** output-files.md "Formatting" (⚠ mark). testing.md NEG row.
 
 ## UND — Undo to the first split leaves GoldDifference stale
 

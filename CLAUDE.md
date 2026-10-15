@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A LiveSplit layout component (.NET Framework 4.8 class library, WinForms) that draws nothing. Instead it writes split and timer information to `.txt` files in a user-chosen folder, for use as OBS text sources. `README.md` is the end-user documentation of the output folder tree.
+A LiveSplit layout component (.NET Framework 4.8 class library, WinForms) that draws nothing. Instead it writes split and timer information to `.txt` files in a user-chosen folder, for use as OBS text sources. `README.md` is the end-user documentation of the output folder tree, and `CHANGELOG.md` the end-user changelog.
 
 Remotes: `origin` is this fork (lotsofs); `joshimuz` is a related fork that changes are sometimes merged from.
 
@@ -20,8 +20,11 @@ Read the doc that matches the task before editing:
 | [docs/testing.md](docs/testing.md) | Testing in LiveSplit by hand, or headless with a copy-paste test program, plus regression checks for the known bugs |
 | [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
 | [docs/DONE.md](docs/DONE.md) | Log of finished TODO items: what was done and when, newest first |
+| [CHANGELOG.md](CHANGELOG.md) | What changed for users in each release, and what is unreleased |
 
-The docs refer to code by member name and file, not by line number. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section, and add a row to docs/DONE.md. When you find a defect you aren't fixing now, add both.
+The docs refer to code by member name and file, not by line number. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section, and add a row to docs/DONE.md. Items finished in the same change share one row. When you find a defect you aren't fixing now, add both.
+
+**Changelog.** When a change is one a user of the latest release would notice (output files, their contents, settings, how LiveSplit behaves), add it under "Unreleased" in CHANGELOG.md, in the same change. Write it for users: what they see in the files or the settings, with no TODO codes or class names. A fix to something added since the latest release isn't an entry of its own; update that feature's entry if needed. Releases are the git tags (`1` … `6`); when one is tagged, "Unreleased" becomes its section.
 
 ## Build / deploy
 
@@ -43,12 +46,12 @@ The code is in `UI/Components/`:
 | File | Holds |
 |---|---|
 | `OutputToFileComponent.cs` | The LiveSplit side: timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
-| `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members, PB segment times and the stored deltas |
-| `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex`, `IsGold` |
+| `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members and PB segment times |
+| `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex`, and this attempt's times and deltas (`LiveSegmentTime`, `RunDelta`, `IsGold`, …) |
 | `FileQueue.cs` | Writes the files on a background thread, skipping unchanged contents; keeps the latest write error |
 | `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …) |
 | `TimerFiles.cs` | Writes `Timers\` |
-| `SplitFiles.cs` | Writes `CurrentSplit\` and `PreviousSplit\`, including the delta calculations and `Sign.txt` |
+| `SplitFiles.cs` | Writes `CurrentSplit\` and `PreviousSplit\`, including `Sign.txt` |
 | `SplitListFiles.cs` | Writes `SplitList\` and `CompletedSplits\` |
 | `Signs.cs` | The `Sign.txt` values |
 | `TimeFormatter.cs` | Time and delta strings |
@@ -59,7 +62,7 @@ The code is in `UI/Components/`:
   - `Levels[lvl].Indices` maps **local** index → **global** index, i.e. into `State.Run`. Mixing the two up is a recurring bug source. Only at the last level are they the same.
   - Golds exist only at the last level. Keep the `lvl == Levels.Count - 1` guard on any gold output. `IsGold` decides what counts as a gold and includes that guard; don't test the gold delta instead, because it is also null when there is no gold.
 - **Timer phases.** `GetCurrentSubsplitIndex` and `GetPreviousSubsplitIndex` return sentinel values depending on the phase (−1/−2 when not running, `Count`/`Count−1` when finished). Every write path needs correct output for NotRunning, Running/Paused and Ended. Otherwise files keep stale values.
-- **Stored deltas.** Deltas are stored at split time by `WriteSplitTimes` and read later by the split lists, so the call order in `WriteSplits()` matters. `CalculateSegments()` regenerates the shared `SplitLevels` in place, rebuilding every array and discarding those stored deltas, and it runs on every cache-key change, including timer phase changes.
+- **Nothing per attempt is stored.** This attempt's times and deltas are computed from the run on every write, by `OutputWriter`'s `LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta` and `IsGold`. `CalculateSegments()` rebuilds the shared `SplitLevels` in place on every cache-key change, including every timer phase change, so don't keep per-attempt state in it: a pause would wipe it.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own cache, keyed on whole seconds.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
   - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. `OnReset` clears that record. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
@@ -73,7 +76,7 @@ The code is in `UI/Components/`:
 2. Write it from that writer's `Write*` function, in every phase branch.
 3. If it's a list column, make it a `FILE_LIST_*` template and write it in `WriteSplitListLevel`. Both lists then get it.
 4. Write it once per timing method only if its path contains `{0}`.
-5. Document it in `docs/output-files.md` and `README.md`.
+5. Document it in `docs/output-files.md`, `README.md` and `CHANGELOG.md`.
 
 A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels` and `_files`, and call it from `WriteSplits()` or `Update()`.
 

@@ -4,15 +4,15 @@ The index is [TODO.md](TODO.md).
 
 GEN edits `GenerateSubsplitLevels`, as do several items in [Defects.md](Defects.md).
 
-## LSG — CalculateLiveSegment runs once per level
+## CAT — CompletedSplits makes long runs split slowly
 
-`CalculateLiveSegment` already loops over every level, but `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) calls it inside its own per-level loop.
+Every split rewrites `CompletedSplits\` for every level and timing method, one line per completed member. `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) builds about fifteen strings per call with `+=` per line, so each call copies on the order of n² characters. All of this runs on the UI thread, inside `Split()`. Only the file writes are on the background thread.
 
-**Evidence.** Read.
+**Evidence.** Measured 2026-10-15, headless: a 1,000-split run with a subsplit level averaged 10.1 ms per `Split()` with `CompletedSplits` on, and 0.2 ms with it off. The cause, string concatenation, was read, not profiled. The largest splits file in `D:\Repositories\Stream-Resources\Splits` has 1,317 splits.
 
-**Plan.** Call it once, before the loop. It goes away entirely if [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas) computes segments on demand.
+**Plan.** Profile first, to confirm where the time goes. If it is the concatenation, build each file with a `StringBuilder`, or a `string.Join` over per-line arrays.
 
-**Verify.** Output unchanged for a full run with subsplits.
+**Verify.** The same 1,000-split timing drops well below 10 ms. Output is identical to the old build.
 
 **Docs.** None.
 

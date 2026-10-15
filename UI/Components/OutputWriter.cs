@@ -59,15 +59,56 @@ namespace LiveSplit.UI.Components {
 
 		#endregion
 
-		#region golds
+		#region live times and deltas
+
+		// This attempt's times and deltas for a member of a level, by local index. They are computed from the run
+		// whenever files are written, never stored: PB times and best segments don't change during a run, and a
+		// completed split's SplitTime only changes when it is undone.
+		// A negative local index (the sentinels of the subsplit index functions) gives null.
+		// Subtracting TimeSpan? values gives null when either is null.
+
+		/// <summary>
+		/// This attempt's split time
+		/// </summary>
+		protected TimeSpan? LiveRunTime(TimingMethod method, int lvl, int localIndex) {
+			if (localIndex < 0) return null;
+			return State.Run[Levels[lvl].Indices[localIndex]].SplitTime[method];
+		}
+
+		/// <summary>
+		/// This attempt's segment time at this level: the split time minus the previous member's.
+		/// The first member's segment time is its split time.
+		/// </summary>
+		protected TimeSpan? LiveSegmentTime(TimingMethod method, int lvl, int localIndex) {
+			if (localIndex <= 0) return LiveRunTime(method, lvl, localIndex);
+			return LiveRunTime(method, lvl, localIndex) - LiveRunTime(method, lvl, localIndex - 1);
+		}
+
+		protected TimeSpan? RunDelta(TimingMethod method, int lvl, int localIndex) {
+			if (localIndex < 0) return null;
+			return LiveRunTime(method, lvl, localIndex) - State.Run[Levels[lvl].Indices[localIndex]].PersonalBestSplitTime[method];
+		}
+
+		protected TimeSpan? SegmentDelta(TimingMethod method, int lvl, int localIndex) {
+			if (localIndex < 0) return null;
+			return LiveSegmentTime(method, lvl, localIndex) - Levels[lvl].PbSegmentTimes[method][localIndex];
+		}
+
+		/// <summary>
+		/// Segment time minus best segment. Golds only exist at the last level.
+		/// </summary>
+		protected TimeSpan? GoldDelta(TimingMethod method, int lvl, int localIndex) {
+			if (lvl != Levels.Count - 1 || localIndex < 0) return null;
+			return LiveSegmentTime(method, lvl, localIndex) - State.Run[Levels[lvl].Indices[localIndex]].BestSegmentTime[method];
+		}
 
 		/// <summary>
 		/// Whether a completed member's segment is a gold: it beat the best segment, or the split has none yet.
-		/// Golds only exist at the last level. Reads the live segment that WriteSplitTimes stored.
+		/// Golds only exist at the last level.
 		/// </summary>
 		protected bool IsGold(TimingMethod method, int lvl, int localIndex) {
 			if (lvl != Levels.Count - 1 || localIndex < 0) return false;
-			TimeSpan? liveSegmentTime = Levels[lvl].LiveSegmentTimes[method][localIndex];
+			TimeSpan? liveSegmentTime = LiveSegmentTime(method, lvl, localIndex);
 			if (liveSegmentTime == null) return false;
 			TimeSpan? goldTime = State.Run[Levels[lvl].Indices[localIndex]].BestSegmentTime[method];
 			return goldTime == null || liveSegmentTime < goldTime;

@@ -8,9 +8,8 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [PAU](Defects.md#pau--pausing-or-finishing-wipes-stored-deltas) | Split list | Any timer phase change (pause, resume, finish) or list setting change rebuilds the levels and wipes stored deltas: earlier splits show `-` and BehindLost | High |
 | [IDX](Defects.md#idx--sanssubsplits-segment-timer-measures-from-the-wrong-split) | Timers | `SegmentTimer_SansSubsplits*` indexes the run with a level-local index, so it measures from the wrong split | Medium |
-| [CLM](Defects.md#clm--a-first-split-with-two-or-more-dashes-is-dropped) | Subsplits | The depth clamp skips split 0: a first split with 2+ dashes (and no 1-dash split) vanishes from `AllSplits` and the finish throws | Medium |
+| [CLM](Defects.md#clm--a-first-split-with-two-or-more-dashes-is-dropped) | Subsplits | The depth clamp skips split 0: a first split with 2+ dashes (and no 1-dash split) vanishes from every output, and the next split's segment absorbs its time | Medium |
 | [EMP](Defects.md#emp--an-empty-or-dash-only-split-name-crashes-the-component) | Subsplits | A split named `""` or `-` crashes on `name[0]` | Medium |
 | [EDT](Defects.md#edt--editing-splits-isnt-picked-up-until-the-next-run-starts) | Change detection | Split count, names and PB times aren't cache keys, so edited splits stay stale in the files until the next run starts | Medium |
 | [KEY](Defects.md#key--typing-a-folder-path-creates-a-folder-per-keystroke) | Settings | The folder textbox applies every keystroke, so typing a path creates a full output folder for each prefix | Medium |
@@ -27,7 +26,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [LSG](Performance.md#lsg--calculatelivesegment-runs-once-per-level) | Split times | `WriteSplitTimes` calls `CalculateLiveSegment`, which already loops over every level, once per level | Low |
+| [CAT](Performance.md#cat--completedsplits-makes-long-runs-split-slowly) | CompletedSplits | With 1,000 splits each `Split()` takes about 10 ms on the UI thread, almost all of it `CompletedSplits` rebuilding every completed line, probably with quadratic string `+=` | Low |
 | [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) | Subsplits | `CalculateSegments` runs `GenerateSubsplitLevels` twice; its `method` parameter is unused | Low |
 | [ATM](Performance.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic, so OBS could read a half-written file; check whether it flickers before fixing | Low |
 

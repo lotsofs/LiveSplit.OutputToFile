@@ -144,10 +144,7 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | Code | Check | File | Today | Correct |
 |---|---|---|---|---|
 | IDX | Timer at 33.2 s | `Timers\GameTime\SegmentTimer_SansSubsplits.txt` | `0:23` | `0:05` |
-| PAU | Pause after A3, then `Tick()` | `SplitList\AllSplits\GameTime\Delta_Run.txt` | `- \| - \| -2.00 \| \| \|` | `-0.5 \| +1.0 \| -2.0 \| \| \|` |
 | NEG | `DeltaString(-5.234 s)` | (call it directly) | `-5.23` | `-5.2` |
 | EMP | Splits named `""` or `-` | constructor | throws | no exception |
-| CLM | Splits `--Intro`, `A`, `B` | `SplitList\AllSplits\Names.txt`; finishing the run | `A \| B`; throws | three names; finishes |
+| CLM | Splits `--Intro`, `A`, `B` | `SplitList\AllSplits\Names.txt` | `A \| B` | three names |
 | SEC | Tick every 0.5 s to 60.5 s, then reset | `Timers\GameTime\RunTimer.txt` | `1:00` | `0:00` |
-
-The correct negative values (`-0.5`, `-2.0`) assume the `DeltaString` precision fix. Before that fix, negatives get centiseconds: `-.50`, `-2.00`.

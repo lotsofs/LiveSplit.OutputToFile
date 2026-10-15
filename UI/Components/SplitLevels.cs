@@ -112,10 +112,6 @@ namespace LiveSplit.UI.Components {
 				SplitLevel level = _levels[lvl];
 				List<int> indices = level.Indices;
 				level.PbSegmentTimes[method] = new TimeSpan?[indices.Count];
-				level.LiveSegmentTimes[method] = new TimeSpan?[indices.Count];
-				level.SegmentDeltae[method] = new TimeSpan?[indices.Count];
-				level.RunDeltae[method] = new TimeSpan?[indices.Count];
-				level.GoldDeltae[method] = new TimeSpan?[indices.Count];
 
 				for (int localIndex = 0; localIndex < indices.Count; localIndex++) {
 					int globalIndex = indices[localIndex];
@@ -141,8 +137,9 @@ namespace LiveSplit.UI.Components {
 	}
 
 	/// <summary>
-	/// One subsplit level: which splits it contains, and its times and deltas.
-	/// Every array is indexed by local index, i.e. position in Indices.
+	/// One subsplit level: which splits it contains, and its PB segment times.
+	/// Arrays are indexed by local index, i.e. position in Indices.
+	/// Nothing here may describe the current attempt: CalculateSegments() rebuilds every level on any cache key change, including timer phase changes.
 	/// </summary>
 	class SplitLevel {
 
@@ -150,19 +147,11 @@ namespace LiveSplit.UI.Components {
 		public List<int> Indices;
 
 		public Dictionary<TimingMethod, TimeSpan?[]> PbSegmentTimes;
-		public Dictionary<TimingMethod, TimeSpan?[]> LiveSegmentTimes;
-		public Dictionary<TimingMethod, TimeSpan?[]> RunDeltae;
-		public Dictionary<TimingMethod, TimeSpan?[]> SegmentDeltae;
-		public Dictionary<TimingMethod, TimeSpan?[]> GoldDeltae;
 
 		public SplitLevel(List<int> indices) {
 			Indices = indices;
 			int count = indices.Count;
 			PbSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
-			LiveSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
-			RunDeltae = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
-			SegmentDeltae = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
-			GoldDeltae = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
 		}
 	}
 }

@@ -108,18 +108,20 @@ namespace LiveSplit.UI.Components {
 				if (spl == currentSubsplitIndex) currentSplitHighlight += HIGHLIGHT_FILL;
 
 				if (spl < currentSubsplitIndex) {
+					TimeSpan? lineRunDelta = RunDelta(method, lvl, spl);
+					TimeSpan? lineSegmentDelta = SegmentDelta(method, lvl, spl);
 					finishTimeLive += TimeFormatter.DurationString(split.SplitTime[method]);
-					runDelta += TimeFormatter.DeltaString(level.RunDeltae[method][spl]);
-					goldDelta += lvl == Levels.Count - 1 ? TimeFormatter.DeltaString(level.GoldDeltae[method][spl]) : "";
-					segmentDelta += TimeFormatter.DeltaString(level.SegmentDeltae[method][spl]);
+					runDelta += TimeFormatter.DeltaString(lineRunDelta);
+					goldDelta += lvl == Levels.Count - 1 ? TimeFormatter.DeltaString(GoldDelta(method, lvl, spl)) : "";
+					segmentDelta += TimeFormatter.DeltaString(lineSegmentDelta);
 					// highlight fills
 					if (IsGold(method, lvl, spl))
 						goldHighlights += HIGHLIGHT_FILL;
-					else if (level.RunDeltae[method][spl] < TimeSpan.Zero && level.SegmentDeltae[method][spl] < TimeSpan.Zero)
+					else if (lineRunDelta < TimeSpan.Zero && lineSegmentDelta < TimeSpan.Zero)
 						aheadGainedHighlights += HIGHLIGHT_FILL;
-					else if (level.RunDeltae[method][spl] < TimeSpan.Zero)
+					else if (lineRunDelta < TimeSpan.Zero)
 						aheadLostHighlights += HIGHLIGHT_FILL;
-					else if (level.SegmentDeltae[method][spl] < TimeSpan.Zero)
+					else if (lineSegmentDelta < TimeSpan.Zero)
 						behindGainedHighlights += HIGHLIGHT_FILL;
 					else if (split.PersonalBestSplitTime[method] != null)
 						behindLostHighlights += HIGHLIGHT_FILL;
