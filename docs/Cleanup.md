@@ -44,7 +44,7 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 ## SNT — Sentinel indices instead of explicit phase handling
 
-`GetPreviousSubsplitIndex` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) returns −2 when the timer isn't running. `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) relies on −2 ≠ −1 to reach the branch that writes `-`. The "shouldn't happen" −3 that both index helpers return would surface as an index crash.
+`GetPreviousSubsplitIndex` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) returns −2 when the timer isn't running. `WritePreviousSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) relies on −2 ≠ −1 to reach the branch that writes `-`. The "shouldn't happen" −3 that both index helpers return would surface as an index crash.
 
 **Evidence.** Read.
 
@@ -60,7 +60,7 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 **Evidence.** Reproduced 2026-10-14.
 
-**Plan.** Stop writing them: skip them in `WriteSplitListLevel` when the folder is `FOLDER_COMPLETEDSPLITS`. Or document that they're blank.
+**Plan.** Stop writing them: don't create them in `ListLines` when the folder is `FOLDER_COMPLETEDSPLITS`. Nothing appends to them there, because every line is completed. Or document that they're blank.
 
 **Verify.** A fresh output folder after a run with Completed splits on doesn't contain them.
 
@@ -68,7 +68,7 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 ## DUR — DurationString and TimerString are identical
 
-`TimeFormatter.TimerString` is the same code as `DurationString` and has no callers. The `HasValue ? … : "-"` check for `GoldTime.txt` in `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) repeats null handling that `DurationString` already does.
+`TimeFormatter.TimerString` is the same code as `DurationString` and has no callers. The `HasValue ? … : "-"` check for `GoldTime.txt` in `WriteCurrentSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) repeats null handling that `DurationString` already does.
 
 **Evidence.** Read.
 
@@ -143,7 +143,7 @@ In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs), includ
 
 ## CMT — Commented-out code
 
-Two blocks in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), one line in `WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)), and one block in each of the two template-filling `MakeFile` overloads ([OutputWriter.cs](../UI/Components/OutputWriter.cs)).
+One block each in `GenerateLevels` and `GenerateNames` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), one line in `WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)), and one block in each of the two template-filling `MakeFile` overloads ([OutputWriter.cs](../UI/Components/OutputWriter.cs)).
 
 **Evidence.** Read.
 

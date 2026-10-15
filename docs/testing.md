@@ -109,7 +109,7 @@ static class Program
         comp.WaitForFileWrites();
     }
 
-    // Set both clocks. Game time is exact; real time is accurate to a few milliseconds.
+    // Set both clocks. Game time is exact; real time is only close.
     static void At(double s)
     {
         state.AdjustedStartTime = TimeStamp.Now - TimeSpan.FromSeconds(s);
@@ -124,7 +124,7 @@ Build it with `dotnet build`, then run `bin\Debug\net48\Harness.exe <output fold
 
 Things to know:
 
-- **Check `GameTime` outputs.** Game time is exact, while real time drifts by a few milliseconds.
+- **Check `GameTime` outputs.** Game time is exact, while real time drifts. Usually that is a few milliseconds, but two runs of the same build through a long multi-scenario harness differed by up to 0.3 s in `RealTime` deltas (seen 2026-10-15). When comparing two builds, compare `RealTime` files only by which ones exist.
 - **Call `Tick()` after every event.** Several bugs only appear on the frame after the event, when `Update()` reacts to the phase change.
 - **Files are written in the background.** `Split()` and `Update()` only queue them, so call `comp.WaitForFileWrites()` before reading files; the sample's `Tick()` does. A failed write shows up in `comp.Settings.WriteError` on the next `Update()` after it fails. When timing, a stopwatch around `Split()` measures only the UI thread's part; time `WaitForFileWrites()` separately for the writes.
 - **Advance the clock in steps of a second or less** when testing timer files. `HasTimerChanged` only compares the seconds component, so a jump of exactly a minute looks like no change.

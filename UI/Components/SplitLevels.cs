@@ -21,6 +21,15 @@ namespace LiveSplit.UI.Components {
 		public SplitLevel this[int lvl] => _levels[lvl];
 
 		public void GenerateSubsplitLevels(IRun run, bool outputSubsplits, TimingMethod method) {
+			int numberOfLevels = CalculateDepths(run, outputSubsplits);
+			GenerateLevels(run, numberOfLevels);
+			GenerateNames(run);
+		}
+
+		/// <summary>
+		/// Set each split's depth. Returns the number of levels.
+		/// </summary>
+		int CalculateDepths(IRun run, bool outputSubsplits) {
 			// Count how many levels of subsplits there are (including the main top level). Default subsplits component only supports 2 levels (Main + subsplits)
 			Depths = new int[run.Count];
 			for (int i = 0; i < run.Count; i++) {
@@ -49,7 +58,13 @@ namespace LiveSplit.UI.Components {
 				}
 			}
 			Depths[Depths.Length - 1] = 0; // Last split is always top level
+			return numberOfLevels;
+		}
 
+		/// <summary>
+		/// Make the levels: level lvl contains the splits with depth ≤ lvl.
+		/// </summary>
+		void GenerateLevels(IRun run, int numberOfLevels) {
 			var splitLevelIndices = new List<List<int>>();
 
 			// Mark which splits belong to which level. Level 0 contains only top level splits, and then working down
@@ -71,7 +86,9 @@ namespace LiveSplit.UI.Components {
 			for (int i = 0; i < numberOfLevels; i++) {
 				_levels[i] = new SplitLevel(splitLevelIndices[i]);
 			}
+		}
 
+		void GenerateNames(IRun run) {
 			// Make a list of all the split names by level, taking into consideration removing dashes and {} parts
 			Names = new List<List<string>>();
 			for (int split = 0; split < run.Count; split++) {

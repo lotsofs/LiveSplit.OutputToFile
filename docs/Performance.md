@@ -2,7 +2,7 @@
 
 The index is [TODO.md](TODO.md).
 
-GEN edits `GenerateSubsplitLevels`, as do several items in [Defects.md](Defects.md).
+GEN changes `GenerateSubsplitLevels`. DUP and DSH in [Defects.md](Defects.md) edit the methods it calls.
 
 ## GEN — GenerateSubsplitLevels runs twice
 

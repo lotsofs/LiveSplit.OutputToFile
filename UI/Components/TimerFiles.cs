@@ -27,57 +27,50 @@ namespace LiveSplit.UI.Components {
 			if (!HasTimerChanged(method)) { return; }
 
 			TimeSpan? currentTime = (method == TimingMethod.RealTime ? State.CurrentTime.RealTime : State.CurrentTime.GameTime);
-			if (!currentTime.HasValue) {
-				// There is no current timer. Probably the game timer if it isn't in use.
-				MakeFile(FILE_TIMER_RUN, "-", method);
-				for (int lvl = 0; lvl < Levels.Count; lvl++) {
-					MakeFile(FILE_TIMER_SPLIT, "-", method, lvl);
-				}
-				return;
-			}
 
-			TimeSpan runTimer = currentTime.Value;
-			string timeString = TimeFormatter.DurationString(runTimer);
-
-			if (State.CurrentPhase == TimerPhase.NotRunning) {
-				// Timer isn't running. This does not mean the time is at 0:00, due to the "Start timer at" split setting.
-				MakeFile(FILE_TIMER_RUN, timeString, method);
-				for (int lvl = 0; lvl < Levels.Count; lvl++) {
-					MakeFile(FILE_TIMER_SPLIT, timeString, method, lvl);
-				}
-				return;
-			}
-
-			// Run Timer
-			MakeFile(FILE_TIMER_RUN, timeString, method);
+			// Run Timer. "-" when there is none.
+			MakeFile(FILE_TIMER_RUN, TimeFormatter.DurationString(currentTime), method);
 
 			// Split Timer
 			for (int lvl = 0; lvl < Levels.Count; lvl++) {
 				//SplitLevel level = _splitLevels[lvl];
-				// The timer for the current split is the current full run timer, minus the finish time of the previous split
-				// However, due to subsplits, it is not immediately obvious what 'the previous split' is. So we must figure that out.
-				int previousSplitIndex = GetPreviousSubsplitIndex(lvl);
-
-				if (previousSplitIndex == -1) {
-					// We are on the first split. The split timer equals the run timer.
-					MakeFile(FILE_TIMER_SPLIT, timeString, method, lvl);
-					continue;
-				}
-
-				// We know now what the previous split we need to compare against is. Get its time.
-				TimeSpan? previousSplitFinishTime = LiveRunTime(method, lvl, previousSplitIndex);
-
-				if (!previousSplitFinishTime.HasValue) {
-					// We skipped the previous split. No timer can be calculated.
-					MakeFile(FILE_TIMER_SPLIT, "-", method, lvl);
-					continue;
-				}
-
-				// Do the necessary subtraction and output.
-				TimeSpan splitTimer = runTimer - previousSplitFinishTime.Value;
-				timeString = TimeFormatter.DurationString(splitTimer);
-				MakeFile(FILE_TIMER_SPLIT, timeString, method, lvl);
+				MakeFile(FILE_TIMER_SPLIT, SegmentTimer(method, lvl, currentTime), method, lvl);
 			}
+		}
+
+		string SegmentTimer(TimingMethod method, int lvl, TimeSpan? currentTime) {
+			if (!currentTime.HasValue) {
+				// There is no current timer. Probably the game timer if it isn't in use.
+				return "-";
+			}
+
+			TimeSpan runTimer = currentTime.Value;
+
+			if (State.CurrentPhase == TimerPhase.NotRunning) {
+				// Timer isn't running. This does not mean the time is at 0:00, due to the "Start timer at" split setting.
+				return TimeFormatter.DurationString(runTimer);
+			}
+
+			// The timer for the current split is the current full run timer, minus the finish time of the previous split
+			// However, due to subsplits, it is not immediately obvious what 'the previous split' is. So we must figure that out.
+			int previousSplitIndex = GetPreviousSubsplitIndex(lvl);
+
+			if (previousSplitIndex == -1) {
+				// We are on the first split. The split timer equals the run timer.
+				return TimeFormatter.DurationString(runTimer);
+			}
+
+			// We know now what the previous split we need to compare against is. Get its time.
+			TimeSpan? previousSplitFinishTime = LiveRunTime(method, lvl, previousSplitIndex);
+
+			if (!previousSplitFinishTime.HasValue) {
+				// We skipped the previous split. No timer can be calculated.
+				return "-";
+			}
+
+			// Do the necessary subtraction.
+			TimeSpan splitTimer = runTimer - previousSplitFinishTime.Value;
+			return TimeFormatter.DurationString(splitTimer);
 		}
 	}
 }

@@ -41,149 +41,156 @@ namespace LiveSplit.UI.Components {
 			if (!Settings.OutputSubsplits) startingLevel = Levels.Count - 1;
 
 			for (int lvl = startingLevel; lvl < Levels.Count; lvl++) {
-				List<int> subsplitIndices = Levels[lvl].Indices;
-				int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
-
 				if (Settings.OutputSplitList) {
-					// We must first determine the range of the splits we need to write
-					int range = 1 + Settings.SplitsBefore + Settings.SplitsAfter;
-					int first;
-					int last;
-					if (range > subsplitIndices.Count) {
-						range = subsplitIndices.Count;
-						first = 0;
-						last = subsplitIndices.Count - 1;
-					}
-					else if (State.CurrentPhase == TimerPhase.NotRunning || currentSubsplitIndex < Settings.SplitsBefore) {
-						first = 0;
-						last = range - 1;
-					}
-					else if (State.CurrentPhase == TimerPhase.Ended || currentSubsplitIndex > subsplitIndices.Count - 1 - Settings.SplitsAfter) {
-						first = subsplitIndices.Count - range;
-						last = subsplitIndices.Count - 1;
-					}
-					else {
-						first = currentSubsplitIndex - Settings.SplitsBefore;
-						last = currentSubsplitIndex + Settings.SplitsAfter;
-					}
+					var (first, last) = SplitListRange(lvl);
 					WriteSplitListLevel(FOLDER_SPLITLIST, method, lvl, first, last);
 				}
 
 				// Every split before the current one
 				if (Settings.OutputCompletedSplits) {
-					WriteSplitListLevel(FOLDER_COMPLETEDSPLITS, method, lvl, 0, currentSubsplitIndex - 1);
+					WriteSplitListLevel(FOLDER_COMPLETEDSPLITS, method, lvl, 0, GetCurrentSubsplitIndex(lvl) - 1);
 				}
 			}
 		}
 
+		// The SplitList window at one level, as local indices: the current split with SplitsBefore splits before it
+		// and SplitsAfter after it, shifted to stay within the level
+		(int First, int Last) SplitListRange(int lvl) {
+			int count = Levels[lvl].Indices.Count;
+			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
+			int range = 1 + Settings.SplitsBefore + Settings.SplitsAfter;
+			if (range > count) {
+				return (0, count - 1);
+			}
+			if (State.CurrentPhase == TimerPhase.NotRunning || currentSubsplitIndex < Settings.SplitsBefore) {
+				return (0, range - 1);
+			}
+			if (State.CurrentPhase == TimerPhase.Ended || currentSubsplitIndex > count - 1 - Settings.SplitsAfter) {
+				return (count - range, count - 1);
+			}
+			return (currentSubsplitIndex - Settings.SplitsBefore, currentSubsplitIndex + Settings.SplitsAfter);
+		}
+
 		// Writes the files of one split list (folder) at one level, for the splits with local indices first to last.
 		void WriteSplitListLevel(string folder, TimingMethod method, int lvl, int first, int last) {
-			SplitLevel level = Levels[lvl];
-			List<int> subsplitIndices = level.Indices;
 			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
+			var lines = new ListLines(lvl == Levels.Count - 1, lvl + 1);
 
-			// StringBuilders, not +=: CompletedSplits rebuilds every completed line on every split
-			var splitNames = new StringBuilder();
-			var splitNamesRaw = new StringBuilder();
-			var finishTimeLive = new StringBuilder();
-			var finishTimeUpcoming = new StringBuilder();
-			var runDelta = new StringBuilder();
-			var goldDelta = new StringBuilder();
-			var goldTimeUpcoming = new StringBuilder();
-			var segmentTimeUpcoming = new StringBuilder();
-			var segmentDelta = new StringBuilder();
-			var currentSplitHighlight = new StringBuilder();
-			var goldHighlights = new StringBuilder();
-			var aheadGainedHighlights = new StringBuilder();
-			var aheadLostHighlights = new StringBuilder();
-			var behindGainedHighlights = new StringBuilder();
-			var behindLostHighlights = new StringBuilder();
-
-			// Build the strings
 			for (int spl = first; spl <= last; spl++) {
-				int allSplitsIndex = subsplitIndices[spl];
-				var split = State.Run[allSplitsIndex];
-
-				splitNamesRaw.Append(split.Name);
-				splitNames.Append(Levels.Names[allSplitsIndex][lvl]);
-
-				if (spl == currentSubsplitIndex) currentSplitHighlight.Append(HIGHLIGHT_FILL);
-
+				AppendNames(lines, lvl, spl);
+				if (spl == currentSubsplitIndex) lines.CurrentSplitHighlight.Append(HIGHLIGHT_FILL);
 				if (spl < currentSubsplitIndex) {
-					TimeSpan? lineRunDelta = RunDelta(method, lvl, spl);
-					TimeSpan? lineSegmentDelta = SegmentDelta(method, lvl, spl);
-					finishTimeLive.Append(TimeFormatter.DurationString(split.SplitTime[method]));
-					runDelta.Append(TimeFormatter.DeltaString(lineRunDelta));
-					goldDelta.Append(lvl == Levels.Count - 1 ? TimeFormatter.DeltaString(GoldDelta(method, lvl, spl)) : "");
-					segmentDelta.Append(TimeFormatter.DeltaString(lineSegmentDelta));
-					// highlight fills
-					if (IsGold(method, lvl, spl))
-						goldHighlights.Append(HIGHLIGHT_FILL);
-					else if (lineRunDelta < TimeSpan.Zero && lineSegmentDelta < TimeSpan.Zero)
-						aheadGainedHighlights.Append(HIGHLIGHT_FILL);
-					else if (lineRunDelta < TimeSpan.Zero)
-						aheadLostHighlights.Append(HIGHLIGHT_FILL);
-					else if (lineSegmentDelta < TimeSpan.Zero)
-						behindGainedHighlights.Append(HIGHLIGHT_FILL);
-					else if (split.PersonalBestSplitTime[method] != null)
-						behindLostHighlights.Append(HIGHLIGHT_FILL);
+					AppendCompletedLine(lines, method, lvl, spl);
 				}
 				else {
-					finishTimeUpcoming.Append(TimeFormatter.DurationString(split.PersonalBestSplitTime[method]));
-					goldTimeUpcoming.Append(lvl == Levels.Count - 1 ? TimeFormatter.DurationString(split.BestSegmentTime[method]) : "");
-					segmentTimeUpcoming.Append(TimeFormatter.DurationString(level.PbSegmentTimes[method][spl]));
+					AppendUpcomingLine(lines, method, lvl, spl);
 				}
+				lines.EndLine();
+			}
 
+			foreach (var file in lines.Files) {
+				MakeFile(folder + file.Template, file.Lines.ToString(), method, lvl);
+			}
+		}
+
+		// Names_Indent_{depth}.txt, with {1} left in for MakeFile
+		static string IndentFile(int depth) => string.Format(FILE_LIST_WHITESPACE, "", "{1}", depth);
+
+		void AppendNames(ListLines lines, int lvl, int spl) {
+			int allSplitsIndex = Levels[lvl].Indices[spl];
+			string name = Levels.Names[allSplitsIndex][lvl];
+			lines.NamesRaw.Append(State.Run[allSplitsIndex].Name);
+			lines.Names.Append(name);
+			// Write different levels of subsplits to different files, allowing the user to indent them in their OBS etc.
+			lines.Indents[Levels.Depths[allSplitsIndex]].Append(name);
+		}
+
+		// A completed split: this attempt's time and deltas, and its highlight
+		void AppendCompletedLine(ListLines lines, TimingMethod method, int lvl, int spl) {
+			var split = State.Run[Levels[lvl].Indices[spl]];
+			TimeSpan? runDelta = RunDelta(method, lvl, spl);
+			TimeSpan? segmentDelta = SegmentDelta(method, lvl, spl);
+			lines.RunTimeCurrent.Append(TimeFormatter.DurationString(split.SplitTime[method]));
+			lines.RunDelta.Append(TimeFormatter.DeltaString(runDelta));
+			if (lvl == Levels.Count - 1) lines.GoldDelta.Append(TimeFormatter.DeltaString(GoldDelta(method, lvl, spl)));
+			lines.SegmentDelta.Append(TimeFormatter.DeltaString(segmentDelta));
+			HighlightFile(lines, method, lvl, spl, runDelta, segmentDelta)?.Append(HIGHLIGHT_FILL);
+		}
+
+		// The current split and those after it: their PB times
+		void AppendUpcomingLine(ListLines lines, TimingMethod method, int lvl, int spl) {
+			var split = State.Run[Levels[lvl].Indices[spl]];
+			lines.RunTimeUpcoming.Append(TimeFormatter.DurationString(split.PersonalBestSplitTime[method]));
+			if (lvl == Levels.Count - 1) lines.GoldTimeUpcoming.Append(TimeFormatter.DurationString(split.BestSegmentTime[method]));
+			lines.SegmentTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].PbSegmentTimes[method][spl]));
+		}
+
+		// The highlight file that a completed split is filled in, or null for none. The first that applies wins.
+		StringBuilder HighlightFile(ListLines lines, TimingMethod method, int lvl, int spl, TimeSpan? runDelta, TimeSpan? segmentDelta) {
+			if (IsGold(method, lvl, spl)) return lines.GoldHighlight;
+			if (runDelta < TimeSpan.Zero && segmentDelta < TimeSpan.Zero) return lines.AheadGainedHighlight;
+			if (runDelta < TimeSpan.Zero) return lines.AheadLostHighlight;
+			if (segmentDelta < TimeSpan.Zero) return lines.BehindGainedHighlight;
+			if (State.Run[Levels[lvl].Indices[spl]].PersonalBestSplitTime[method] != null) return lines.BehindLostHighlight;
+			return null;
+		}
+
+		/// <summary>
+		/// The files of one split list, built a line at a time: every file gets a line per split, left blank where it has nothing for that split.
+		/// One StringBuilder per file, appended to directly. StringBuilders, not +=: CompletedSplits rebuilds every completed line on every split.
+		/// </summary>
+		class ListLines {
+
+			public readonly StringBuilder Names, NamesRaw;
+			public readonly StringBuilder RunTimeCurrent, RunTimeUpcoming, RunDelta;
+			public readonly StringBuilder SegmentTimeUpcoming, SegmentDelta;
+			public readonly StringBuilder CurrentSplitHighlight;
+			public readonly StringBuilder AheadGainedHighlight, AheadLostHighlight, BehindGainedHighlight, BehindLostHighlight;
+			// Golds are only supported at the last level. Null at the other levels.
+			public readonly StringBuilder GoldDelta, GoldTimeUpcoming, GoldHighlight;
+			// Names_Indent_{depth}, one per depth up to the level's
+			public readonly StringBuilder[] Indents;
+
+			// Every file above with its FILE_LIST_* template
+			readonly List<(string Template, StringBuilder Lines)> _files = new List<(string, StringBuilder)>();
+
+			public ListLines(bool golds, int depths) {
+				Names = Add(FILE_LIST_NAMES);
+				NamesRaw = Add(FILE_LIST_NAMES_RAW);
+				RunTimeCurrent = Add(FILE_LIST_FINISH_TIME_LIVE);
+				RunTimeUpcoming = Add(FILE_LIST_FINISH_TIME_UPCOMING);
+				RunDelta = Add(FILE_LIST_RUN_DELTA);
+				SegmentTimeUpcoming = Add(FILE_LIST_SEGMENT_TIME_UPCOMING);
+				SegmentDelta = Add(FILE_LIST_SEGMENT_DELTA);
+				CurrentSplitHighlight = Add(FILE_LIST_CURRENT_SPLIT_HIGHLIGHT);
+				AheadGainedHighlight = Add(FILE_LIST_AHEAD_GAINED_HIGHLIGHT);
+				AheadLostHighlight = Add(FILE_LIST_AHEAD_LOST_HIGHLIGHT);
+				BehindGainedHighlight = Add(FILE_LIST_BEHIND_GAINED_HIGHLIGHT);
+				BehindLostHighlight = Add(FILE_LIST_BEHIND_LOST_HIGHLIGHT);
+				if (golds) {
+					GoldDelta = Add(FILE_LIST_GOLD_DELTA);
+					GoldTimeUpcoming = Add(FILE_LIST_GOLD_TIME_UPCOMING);
+					GoldHighlight = Add(FILE_LIST_GOLD_HIGHLIGHT);
+				}
+				Indents = new StringBuilder[depths];
+				for (int depth = 0; depth < depths; depth++) {
+					Indents[depth] = Add(IndentFile(depth));
+				}
+			}
+
+			StringBuilder Add(string template) {
+				var lines = new StringBuilder();
+				_files.Add((template, lines));
+				return lines;
+			}
+
+			public IEnumerable<(string Template, StringBuilder Lines)> Files => _files;
+
+			public void EndLine() {
 				// '\n', not AppendLine, which would write "\r\n"
-				splitNames.Append('\n');
-				splitNamesRaw.Append('\n');
-				finishTimeLive.Append('\n');
-				finishTimeUpcoming.Append('\n');
-				runDelta.Append('\n');
-				goldDelta.Append('\n');
-				goldTimeUpcoming.Append('\n');
-				segmentTimeUpcoming.Append('\n');
-				segmentDelta.Append('\n');
-				currentSplitHighlight.Append('\n');
-				goldHighlights.Append('\n');
-				aheadGainedHighlights.Append('\n');
-				behindGainedHighlights.Append('\n');
-				aheadLostHighlights.Append('\n');
-				behindLostHighlights.Append('\n');
-			}
-
-			// Output
-			MakeFile(folder + FILE_LIST_NAMES, splitNames.ToString(), null, lvl);
-			MakeFile(folder + FILE_LIST_NAMES_RAW, splitNamesRaw.ToString(), null, lvl);
-			MakeFile(folder + FILE_LIST_FINISH_TIME_LIVE, finishTimeLive.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_FINISH_TIME_UPCOMING, finishTimeUpcoming.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_RUN_DELTA, runDelta.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_SEGMENT_TIME_UPCOMING, segmentTimeUpcoming.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_SEGMENT_DELTA, segmentDelta.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_CURRENT_SPLIT_HIGHLIGHT, currentSplitHighlight.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_AHEAD_GAINED_HIGHLIGHT, aheadGainedHighlights.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_AHEAD_LOST_HIGHLIGHT, aheadLostHighlights.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_BEHIND_GAINED_HIGHLIGHT, behindGainedHighlights.ToString(), method, lvl);
-			MakeFile(folder + FILE_LIST_BEHIND_LOST_HIGHLIGHT, behindLostHighlights.ToString(), method, lvl);
-			if (lvl == Levels.Count - 1) MakeFile(folder + FILE_LIST_GOLD_DELTA, goldDelta.ToString(), method, lvl);
-			if (lvl == Levels.Count - 1) MakeFile(folder + FILE_LIST_GOLD_TIME_UPCOMING, goldTimeUpcoming.ToString(), method, lvl);
-			if (lvl == Levels.Count - 1) MakeFile(folder + FILE_LIST_GOLD_HIGHLIGHT, goldHighlights.ToString(), method, lvl);
-
-			// Write differnet levels of subsplits to different files, allowing the user to indent them in their OBS etc.
-			// One file per depth 0..lvl
-			StringBuilder[] whitespacedSplitListNames = new StringBuilder[lvl + 1];
-			for (int i = 0; i < whitespacedSplitListNames.Length; i++) {
-				whitespacedSplitListNames[i] = new StringBuilder();
-			}
-			for (int split = first; split <= last; split++) {
-				int globalIndex = Levels[lvl].Indices[split];
-				for (int list = 0; list <= lvl; list++) {
-					if (list == Levels.Depths[globalIndex]) whitespacedSplitListNames[list].Append(Levels.Names[globalIndex][lvl]);
-					whitespacedSplitListNames[list].Append('\n');
+				foreach (var file in _files) {
+					file.Lines.Append('\n');
 				}
-			}
-			for (int list = 0; list <= lvl; list++) {
-				MakeFile(folder + string.Format(FILE_LIST_WHITESPACE, "", "{1}", list), whitespacedSplitListNames[list].ToString(), method, lvl);
 			}
 		}
 	}

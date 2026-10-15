@@ -54,7 +54,7 @@ LiveSplit fires every event *after* it has updated the timer state. A handler th
 
 1. `SplitFiles.WriteSplitInformation()`: names and indexes.
 2. `SplitFiles.WriteSplitTimes(RealTime)`, `WriteSplitTimes(GameTime)`: the CurrentSplit and PreviousSplit time files.
-3. `SplitListFiles.WriteSplitLists(RealTime)`, `WriteSplitLists(GameTime)`: for each level, the `SplitList\` window and the `CompletedSplits\` list. `WriteSplitLists` works out each list's range of splits, and `WriteSplitListLevel` writes the files for that range.
+3. `SplitListFiles.WriteSplitLists(RealTime)`, `WriteSplitLists(GameTime)`: for each level, the `SplitList\` window and the `CompletedSplits\` list. `WriteSplitLists` works out each list's range of splits (`SplitListRange` for the window), and `WriteSplitListLevel` writes the files for that range.
 
 The steps don't depend on each other: each computes what it needs from the run.
 
@@ -64,7 +64,7 @@ This is the central idea. Every output except the root info files and the run ti
 
 ### Depth
 
-A split's depth is its number of leading `-` characters (`SplitLevels.Depths`). When the Subsplits setting is off, every depth is 0. `SplitLevels.GenerateSubsplitLevels` then does the following:
+A split's depth is its number of leading `-` characters (`SplitLevels.Depths`). When the Subsplits setting is off, every depth is 0. `SplitLevels.GenerateSubsplitLevels` sets the depths, the levels and the display names, each in its own method. The first, `CalculateDepths`, does the following:
 
 1. Counts levels: start at 1, and add a level for each consecutive depth 1, 2, … that some split actually has.
 2. Clamps any depth ≥ the level count to `levels - 1`, so a split deeper than any level goes into the deepest one.
@@ -75,7 +75,7 @@ A split's depth is its number of leading `-` characters (`SplitLevels.Depths`). 
 Level `lvl` contains every split whose depth is ≤ `lvl`, in order. `Levels[lvl].Indices` lists their **global** indices, meaning indices into `State.Run`. Position within that list is the **local** index.
 
 - Level 0 contains top-level splits only.
-- The last level (`Levels.Count - 1`) contains every split. Local index equals global index there. The current gold time (`State.CurrentSplit.BestSegmentTime` in `WriteSplitTimes`) relies on this.
+- The last level (`Levels.Count - 1`) contains every split. Local index equals global index there. The current gold time (`State.CurrentSplit.BestSegmentTime` in `WriteCurrentSplitTimes`) relies on this.
 
 Folder names come from `MakeFile` in `OutputWriter`:
 
@@ -91,7 +91,7 @@ With a single level (no subsplits, or the setting off), level 0 *is* the last le
 
 ### Display names
 
-`SplitLevels.Names[global][lvl]` holds a split's name as displayed at each level. Building it walks the levels from 0 upwards:
+`SplitLevels.Names[global][lvl]` holds a split's name as displayed at each level. Building it (`GenerateNames`) walks the levels from 0 upwards:
 
 - If the name starts with `{Header}` (the convention from LiveSplit's own Subsplits component), the level shows `Header`, and the `{Header}` prefix is removed for the deeper levels.
 - Otherwise the level shows the current name, and one leading `-` is removed for the deeper levels.
@@ -153,7 +153,7 @@ Most write functions start from these two helpers, which return **local** indexe
 | Running / Paused, otherwise | local index of the first member whose global index ≥ `CurrentSplitIndex` | that − 1 |
 | Ended | `Count` | `Count − 1` |
 
-The functions branch on the phase separately and inconsistently. For example, `WriteSplitTimes` uses `!= -1`, which lets NotRunning (−2) through to a code path that happens to write `-`. Check every phase when changing one of these functions.
+The functions branch on the phase separately and inconsistently. For example, `WritePreviousSplitTimes` only treats −1 as "no previous split", which lets NotRunning (−2) through to a code path that happens to write `-`. Check every phase when changing one of these functions.
 
 ## How the values are calculated
 
@@ -163,8 +163,8 @@ The functions branch on the phase separately and inconsistently. For example, `W
 - **Segment delta:** live segment minus PB segment, at this level.
 - **Gold delta:** live segment minus `BestSegmentTime`, at the last level only. Best segments and PB times don't change during a run; LiveSplit updates them on reset. Comparisons made during the run therefore use the values from before the run.
 - **Gold** (`OutputWriter.IsGold`): at the last level only, the live segment exists and either the split has no best segment yet or the live segment beats it. A skipped split, and the split after it, have no live segment, so they aren't golds. `Sign.txt` and the highlights both use this rule.
-- **`Sign.txt`** (in `SplitFiles.WriteSplitTimes`): a decision chain over gold, run delta and segment delta. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values).
-- **Highlights** (in `SplitListFiles.WriteSplitListLevel`): each completed line gets exactly one highlight, checked in this order:
+- **`Sign.txt`** (`SplitFiles.PreviousSign`): a decision chain over gold, run delta and segment delta. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values).
+- **Highlights** (`SplitListFiles.HighlightFile`): each completed line gets exactly one highlight, checked in this order:
   1. Gold: the segment is a gold, last level only.
   2. AheadGained: run delta < 0 and segment delta < 0.
   3. AheadLost: run delta < 0.
@@ -173,7 +173,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
 
   `HIGHLIGHT_FILL` is 43 × `█`.
 - **Index / ReverseIndex:** the local index of the current member, i.e. the number of members completed at this level, and `Count − Index − 1`. When the timer isn't running these are −1 / `Count`; after the finish they are `Count` / −1.
-- **Run timer:** `State.CurrentTime[method]`. **Segment timer:** the run timer minus the `SplitTime` of the level's previous member. It equals the run timer on the first member and when the timer isn't running.
+- **Run timer:** `State.CurrentTime[method]`. **Segment timer** (`TimerFiles.SegmentTimer`): the run timer minus the `SplitTime` of the level's previous member. It equals the run timer on the first member and when the timer isn't running.
 - **FinishedRunsCount:** the number of attempts in history with a real time, plus 1 while the timer is `Ended`, because the current attempt joins the history only on reset.
 
 ## Writing files
@@ -181,8 +181,9 @@ The functions branch on the phase separately and inconsistently. For example, `W
 - Every path is a `const string FILE_*` template, declared in the writer for its folder, with these placeholders:
   - `{0}` the timing method (`RealTime` / `GameTime`);
   - `{1}` the level tag;
-  - `{2}` the indent index, `Names_Indent_*` only. Those files are pre-formatted with `{2}` filled in and `{1}` re-inserted as a literal (in `WriteSplitListLevel`).
+  - `{2}` the indent index, `Names_Indent_*` only. Those files are pre-formatted with `{2}` filled in and `{1}` re-inserted as a literal (`IndentFile` in `SplitListFiles`).
 - The split list templates (`FILE_LIST_*`) are relative to the list folder. `WriteSplitListLevel` prefixes them with `FOLDER_SPLITLIST` (`SplitList\`) or `FOLDER_COMPLETEDSPLITS` (`CompletedSplits\`), so both lists write the same files.
+- `WriteSplitListLevel` builds a list in a new `ListLines`: one `StringBuilder` field per file, which the helpers append to directly, and a list of each field with its template, for ending lines and writing. The gold fields exist only at the last level and are null elsewhere; `Indents` has one per depth up to the level. `EndLine` ends a line in every file at once, so each file gets one line per split, blank where nothing was appended.
 - There are three `MakeFile` overloads, in `OutputWriter`:
   - `(template, contents, method?, level)` fills `{0}` and `{1}`;
   - `(template, contents, method)` fills `{0}`;

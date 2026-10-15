@@ -6,12 +6,12 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## Dependencies between plans
 
-- DUP and DSH both edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
+- DUP edits `CalculateDepths` and DSH edits `GenerateNames`. [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) changes `GenerateSubsplitLevels`, which calls both.
 - SEC and LAG both change `HasTimerChanged`.
 
 ## SKP — Skipped splits are highlighted as BehindLost
 
-The highlight chain in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) falls through to BehindLost whenever a PB time exists, even for a split with no time.
+The highlight chain in `HighlightFile` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) falls through to BehindLost whenever a PB time exists, even for a split with no time.
 
 **Evidence.** Reproduced 2026-10-14.
 
@@ -59,7 +59,7 @@ Timer files are only rewritten when the *run* timer's seconds change (`HasTimerC
 
 ## DUP — An extra duplicate level when only the last split has dashes
 
-In `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), levels are counted before the last split is forced to depth 0. Splits `A`, `B`, `-C` therefore produce a `SansSubsplits` folder identical to `AllSplits`.
+In `CalculateDepths` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), levels are counted before the last split is forced to depth 0. Splits `A`, `B`, `-C` therefore produce a `SansSubsplits` folder identical to `AllSplits`.
 
 **Evidence.** Read.
 
@@ -71,7 +71,7 @@ In `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)),
 
 ## DSH — Moved splits keep leftover dashes in their names
 
-Building the display names in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) removes one leading `-` per subsplit level. A split's depth normally equals its number of dashes, so they are all gone by the levels it appears at. Two kinds of split end up at a shallower level than their dashes, and keep the dashes that weren't removed:
+Building the display names in `GenerateNames` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) removes one leading `-` per subsplit level. A split's depth normally equals its number of dashes, so they are all gone by the levels it appears at. Two kinds of split end up at a shallower level than their dashes, and keep the dashes that weren't removed:
 
 - a split deeper than the deepest level, which is moved into that level;
 - the last split, which is always top level.
