@@ -146,8 +146,6 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | NUL | After A3 (Area A: 28 vs 30) | `PreviousSplit\SansSubsplits\GameTime\Sign.txt` | `GoldAhead` | `GainedAhead` |
 | IDX | Timer at 33.2 s | `Timers\GameTime\SegmentTimer_SansSubsplits.txt` | `0:23` | `0:05` |
 | PAU | Pause after A3, then `Tick()` | `SplitList\AllSplits\GameTime\Delta_Run.txt` | `- \| - \| -2.00 \| \| \|` | `-0.5 \| +1.0 \| -2.0 \| \| \|` |
-| RET | After the finish | `PreviousSplit\AllSplits\Name.txt` | `B1` | `B2` |
-| RET | Finish, reset, `Tick()` | `CurrentSplit\AllSplits\Index.txt`, `Name.txt` | `4`, `B2` | `-1`, `-` |
 | NUL | Splits `A`, `B`, `C`: skip A, split B at 19 | `PreviousSplit\AllSplits\GameTime\Sign.txt` | `GoldAhead` | `Ahead` |
 | NEG | `DeltaString(-5.234 s)` | (call it directly) | `-5.23` | `-5.2` |
 | EMP | Splits named `""` or `-` | constructor | throws | no exception |

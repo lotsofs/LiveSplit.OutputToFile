@@ -40,18 +40,6 @@ Only "no best segment exists yet" should count as a gold. The highlight chain in
 
 **Docs.** CLAUDE.md "Must-know before editing" (the stored-deltas bullet). architecture.md "Lifecycle" and "Per-level data". output-files.md "SplitList" (⚠ under the highlight table). testing.md PAU row.
 
-## RET — AllSplits current and previous files stop updating at finish and reset
-
-`WriteSplitInformation` uses `return` instead of `continue` in its NotRunning and Ended branches ([SplitFiles.cs](../UI/Components/SplitFiles.cs)). Only level 0 (`SansSubsplits`) gets written, so with subsplits the other levels stay stale. The same branches never write `CurrentSplit\*\Name_Raw.txt`, so it keeps the last split's raw name after a finish or reset, even at level 0.
-
-**Evidence.** Reproduced 2026-10-14: after a finish and a reset, `CurrentSplit\AllSplits\Index.txt` was still `4`, `Name.txt` was still the last split, and `PreviousSplit\AllSplits\Name.txt` was still the second-to-last split.
-
-**Plan.** `continue` instead of `return`, and write `-` to `Name_Raw.txt` in both branches.
-
-**Verify.** The RET regression checks in testing.md give the correct values. `Name_Raw.txt` shows `-` after a finish and after a reset.
-
-**Docs.** output-files.md "CurrentSplit" and "PreviousSplit" (⚠ marks). testing.md RET rows.
-
 ## IDX — SansSubsplits segment timer measures from the wrong split
 
 `WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)) uses a level-local index as a global one (`State.Run[previousSplitIndex]`). The `indices` list it fetches for the level is never used.

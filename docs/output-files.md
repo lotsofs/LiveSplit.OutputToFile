@@ -39,14 +39,12 @@ Written from `Update()`, but only when the run timer's seconds component changes
 | File | Not running | Running / paused | Finished |
 |---|---|---|---|
 | `Name.txt` | `-` | Current member's display name | `-` |
-| `Name_Raw.txt` | ⚠ RET: not rewritten | Current member's raw name | ⚠ RET: not rewritten |
+| `Name_Raw.txt` | `-` | Current member's raw name | `-` |
 | `Index.txt` | `-1` | Number of members completed (0-based index of the current one) | `Count` |
 | `ReverseIndex.txt` | `Count` | `Count − Index − 1` | `-1` |
 | `{method}\SegmentTime.txt` | `-` | PB segment time of the current member | `-` |
 | `{method}\RunTime.txt` | `-` | PB split time of the current member | `-` |
 | `{method}\GoldTime.txt` (gold) | `-` | Best segment of the current split | `-` |
-
-⚠ RET: When there are subsplits, the not-running and finished values are only written for `SansSubsplits`; the other levels keep their last running values.
 
 ## `PreviousSplit\{level}\`
 
@@ -54,7 +52,7 @@ Written from `Update()`, but only when the run timer's seconds component changes
 
 | File | Running, nothing completed at this level yet | Running / paused | Finished |
 |---|---|---|---|
-| `Name.txt`, `Name_Raw.txt` | `-` | Previous member's name | Last split's name ⚠ RET (see CurrentSplit note) |
+| `Name.txt`, `Name_Raw.txt` | `-` | Previous member's name | Last split's name |
 | `{method}\SegmentTime.txt` | `-` | This attempt's segment time for that member | The last member's segment time |
 | `{method}\RunTime.txt` | `-` | This attempt's split time | Final time |
 | `{method}\SegmentDifference.txt` | `-` | Segment time − PB segment | Last segment − PB segment |

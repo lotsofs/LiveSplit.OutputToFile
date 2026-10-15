@@ -40,19 +40,21 @@ namespace LiveSplit.UI.Components {
 
 				if (State.CurrentPhase == TimerPhase.NotRunning) {
 					MakeFile(FILE_CURRENT_NAME, "-", null, lvl);
+					MakeFile(FILE_CURRENT_NAME_RAW, "-", null, lvl);
 					MakeFile(FILE_CURRENT_INDEX, "-1", null, lvl);
 					MakeFile(FILE_CURRENT_REVERSEINDEX, Levels[lvl].Indices.Count.ToString(), null, lvl);
 					MakeFile(FILE_PREVIOUS_NAME, "-", null, lvl);
 					MakeFile(FILE_PREVIOUS_NAME_RAW, "-", null, lvl);
-					return;
+					continue;
 				}
 				if (State.CurrentPhase == TimerPhase.Ended) {
 					MakeFile(FILE_CURRENT_NAME, "-", null, lvl);
+					MakeFile(FILE_CURRENT_NAME_RAW, "-", null, lvl);
 					MakeFile(FILE_CURRENT_INDEX, Levels[lvl].Indices.Count.ToString(), null, lvl);
 					MakeFile(FILE_CURRENT_REVERSEINDEX, "-1", null, lvl);
 					MakeFile(FILE_PREVIOUS_NAME_RAW, run[run.Count - 1].Name, null, lvl);
 					MakeFile(FILE_PREVIOUS_NAME, Levels.Names[run.Count - 1][lvl], null, lvl);
-					return;
+					continue;
 				}
 
 				int prevSplitIndex = GetPreviousSubsplitIndex(lvl);
