@@ -14,7 +14,7 @@ namespace LiveSplit.UI.Components {
 		const string FILE_INFO_ATTEMPTCOUNT = @"AttemptCount.txt";
 		const string FILE_INFO_FINISHEDRUNSCOUNT = @"FinishedRunsCount.txt";
 
-		public RunInfoFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels) : base(state, settings, levels) { }
+		public RunInfoFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) : base(state, settings, levels, files) { }
 
 		public void Write() {
 			MakeFile(FILE_INFO_GAMENAME, State.Run.GameName);

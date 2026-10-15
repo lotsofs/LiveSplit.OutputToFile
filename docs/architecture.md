@@ -10,9 +10,10 @@ Code is referred to by member name. The table below says which file each class i
 |---|---|
 | `Properties/AssemblyInfo.cs` | `[assembly: ComponentFactory(typeof(OutputToFileFactory))]`. This attribute is how LiveSplit finds the component in the DLL. |
 | `UI/Components/OutputToFileFactory.cs` | Name, description and category (Other) shown in the Layout Editor. `Create(state)` builds the component. |
-| `UI/Components/OutputToFileComponent.cs` | The LiveSplit side: event handling, change detection in `Update()`, and when each writer runs. Owns the one `SplitLevels` instance and the four writers. |
+| `UI/Components/OutputToFileComponent.cs` | The LiveSplit side: event handling, change detection in `Update()`, and when each writer runs. Owns the one `SplitLevels` instance, the one `FileQueue` and the four writers. |
 | `UI/Components/SplitLevels.cs` | `SplitLevels` (depths, display names, the levels) and `SplitLevel` (one level's members and arrays). Builds the levels and the PB segment times. |
-| `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings and levels they share, the `MakeFile` overloads, and `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`. |
+| `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, and `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`. |
+| `UI/Components/FileQueue.cs` | Writes the files on a background thread: skips unchanged contents, keeps the latest contents per file, and records the latest write error. |
 | `UI/Components/RunInfoFiles.cs` | Writer for the root files. |
 | `UI/Components/TimerFiles.cs` | Writer for `Timers\`, with its own `GraphicsCache`. |
 | `UI/Components/SplitFiles.cs` | Writer for `CurrentSplit\` and `PreviousSplit\`. Calculates the previous split's live segment and deltas, stores them in the level arrays, and picks `Sign.txt`. |
@@ -23,11 +24,11 @@ Code is referred to by member name. The table below says which file each class i
 
 ## Lifecycle
 
-1. LiveSplit loads the layout and calls `OutputToFileFactory.Create(state)`. The component's constructor creates the settings control with default values, subscribes to the timer events, creates the shared `SplitLevels` and the four writers, and runs `CalculateSegments()`.
+1. LiveSplit loads the layout and calls `OutputToFileFactory.Create(state)`. The component's constructor creates the settings control with default values, subscribes to the timer events, creates the shared `SplitLevels`, the `FileQueue` and the four writers, and runs `CalculateSegments()`.
 2. LiveSplit then calls `SetSettings(xml)` with the saved settings. This does **not** trigger a recalculation by itself. In practice the first `Update()` does it, because every cache key is new at that point.
 3. `Update()` is called repeatedly for as long as the layout is open. The component has zero size, and `DrawVertical`/`DrawHorizontal` are empty.
 4. `GetSettings()` runs when the layout is saved. `GetSettingsHashCode()` is called on every refresh, but LiveSplit only uses it to decide whether to redraw, not to detect unsaved changes ([livesplit-notes.md](livesplit-notes.md#layout-save-prompt-and-the-settings-hash-read-in-source)).
-5. `Dispose()` unsubscribes from the events.
+5. `Dispose()` unsubscribes from the events, then waits up to 2 seconds for queued files to be written.
 
 ## When files get written
 
@@ -35,8 +36,8 @@ Code is referred to by member name. The table below says which file each class i
 |---|---|
 | `OnStart` | `CalculateSegments()`, then `WriteSplits()` |
 | `OnSplit`, `OnSkipSplit`, `OnUndoSplit` | `WriteSplits()` |
-| `OnReset` | `ForgetWrittenFiles()` on each writer, `WriteSplits()`, then `CalculateSegments()` |
-| `Update()` (every frame) | 1. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless that method's whole-second value changed. <br>2. If any cache key changed: `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. |
+| `OnReset` | `FileQueue.ForgetWrittenFiles()`, `WriteSplits()`, then `CalculateSegments()` |
+| `Update()` (every frame) | 0. If the latest write error changed, show it in the settings (`ShowWriteError`). <br>1. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless that method's whole-second value changed. <br>2. If any cache key changed: `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. |
 
 The cache keys in `Update()` are attempt count, game name, category name, platform name, `FolderPath`, `SplitsBefore`, `SplitsAfter` and `CurrentPhase`.
 
@@ -170,11 +171,16 @@ The functions branch on the phase separately and inconsistently. For example, `W
 - There are three `MakeFile` overloads, in `OutputWriter`:
   - `(template, contents, method?, level)` fills `{0}` and `{1}`;
   - `(template, contents, method)` fills `{0}`;
-  - `(path, contents)` writes the file.
-- The final overload does nothing when `FolderPath` is empty. Otherwise it calls `File.WriteAllText`, which writes UTF-8 without a BOM. If that throws `DirectoryNotFoundException`, it creates the directory and writes again.
-- I/O errors are caught per file in that overload (`IOException`, `UnauthorizedAccessException`, `ArgumentException`, `NotSupportedException`, `SecurityException`). That covers a locked or read-only file, invalid characters in the folder setting, a missing drive and no permission. A failed file doesn't stop the other files, and nothing reaches LiveSplit. The failed path is dropped from `_written` (below), so the next write retries it even with the same contents. `OutputToFileSettings.ShowWriteError` shows the latest failure in the settings panel, and `ClearWriteError` hides it once that file (by its path relative to the folder) is written successfully.
-- Each writer remembers the contents it last wrote to each full path (`_written` in `OutputWriter`), and `MakeFile` skips a write when the contents are the same. On a split, only the files that changed are written. A file with no `{0}` in its path but written once per timing method, such as `Names.txt`, is skipped the second time. The four writers write separate folders, so no path has two records.
-- `OnReset` clears every writer's record (`ForgetWrittenFiles()`), so each attempt ends with every file written in full. A file deleted or edited outside LiveSplit comes back when its contents next change, or at the next reset.
+  - `(path, contents)` queues the file.
+- The final overload does nothing when `FolderPath` is empty. It builds the full path (an `ArgumentException` from invalid characters in the folder setting goes to `FileQueue.ReportError`) and calls `FileQueue.Write`. Nothing is written on the calling thread.
+- `FileQueue` (one per component, shared by the writers, every field under one lock):
+  - `Write` skips the file when its contents equal what is already queued for that path, or, with nothing queued, what was last handed to the disk (`_written`). On a split, only the files that changed are queued. A file with no `{0}` in its path but written once per timing method, such as `Names.txt`, is skipped the second time.
+  - Otherwise it queues the contents in `_pending`, replacing any older contents for that path, and starts a drain task on the thread pool if none is running.
+  - `Drain` takes all pending files at once, records them in `_written`, and writes them outside the lock with `File.WriteAllText` (UTF-8 without a BOM). On `DirectoryNotFoundException` it creates the directory and writes again. It repeats until nothing is pending.
+  - Every exception from a write is caught, per file. A failed file doesn't stop the others, and nothing reaches LiveSplit or ends the drain. The file is dropped from `_written`, so the next `Write` retries it even with the same contents. That covers a locked or read-only file, a missing drive and no permission.
+  - The latest failure is kept as text with the file and time, and is cleared once that file (by its path relative to the folder) is written successfully. `Update()` picks up each change with `TakeErrorChange` and shows it with `OutputToFileSettings.ShowWriteError`, so the settings control is only touched on the UI thread.
+  - `OnReset` calls `ForgetWrittenFiles()`, so each attempt ends with every file written in full. A file deleted or edited outside LiveSplit comes back when its contents next change, or at the next reset.
+  - `WaitForWrites(timeout)` blocks until the drain task is done. `Dispose()` uses it with 2 seconds; tests use `OutputToFileComponent.WaitForFileWrites()`.
 - Multi-line files use `\n` and end with a trailing `\n`. Every list file has the same number of lines, so separate OBS text sources line up.
 - Which outputs each setting controls:
 
@@ -186,7 +192,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
   | `OutputSubsplits` | Whether there is more than one level |
 
   Everything else is always written. Turning an output off doesn't delete its old files.
-- Nothing is written in the background: every write happens synchronously inside the LiveSplit event or `Update()` call. See [WRT](Performance.md#wrt--changed-files-are-written-on-the-ui-thread).
+- The file *contents* are still built synchronously inside the LiveSplit event or `Update()` call; only the writing is in the background. On a split that is under a millisecond on the calling thread, with the writes taking about 35 ms on the drain task (40 splits, every output on).
 
 ## Settings
 
@@ -207,5 +213,5 @@ Each one is bound to its control with `DataBindings.Add(..., DataSourceUpdateMod
 - Binding is the only thing that updates these properties from the UI. Most of the `*_Changed` handlers in the .cs file aren't connected to any control. The two connected handlers are `checkBoxOutputSplitList_CheckedChanged`, which also enables or disables the split-list group, and `buttonFolderPath_Click`.
 - The class doesn't implement `INotifyPropertyChanged`, so setting a property in code won't update its control. `buttonFolderPath_Click` updates the textbox itself for this reason.
 - XML keys: `Version` (`0.1`), `FolderPath`, `SplitsBefore`, `SplitsAfter`, `OutputTimer`, `OutputSplitList`, `OutputSubsplits`, `OutputCompletedSplits`.
-- `WriteError` isn't a setting: it holds the latest failed file write, shown in red in `labelWriteError` under the split-list group, and is neither saved nor hashed. `MakeFile` sets and clears it through `ShowWriteError`/`ClearWriteError` (see "Writing files").
+- `WriteError` isn't a setting: it holds the latest failed file write, shown in red in `labelWriteError` under the split-list group, and is neither saved nor hashed. `Update()` sets and clears it through `ShowWriteError` (see "Writing files").
 - `GetSettingsHashCode()` reuses `CreateSettingsNode(null, null)`, which XORs the hashes of the saved values, so two changes can cancel out. That's harmless here: LiveSplit only uses the hash to decide whether to redraw, and this component draws nothing.

@@ -45,6 +45,7 @@ The code is in `UI/Components/`:
 | `OutputToFileComponent.cs` | The LiveSplit side: timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
 | `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members, PB segment times and the stored deltas |
 | `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex` |
+| `FileQueue.cs` | Writes the files on a background thread, skipping unchanged contents; keeps the latest write error |
 | `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …) |
 | `TimerFiles.cs` | Writes `Timers\` |
 | `SplitFiles.cs` | Writes `CurrentSplit\` and `PreviousSplit\`, including the delta calculations and `Sign.txt` |
@@ -61,8 +62,8 @@ The code is in `UI/Components/`:
 - **Stored deltas.** Deltas are stored at split time by `WriteSplitTimes` and read later by the split lists, so the call order in `WriteSplits()` matters. `CalculateSegments()` regenerates the shared `SplitLevels` in place, rebuilding every array and discarding those stored deltas, and it runs on every cache-key change, including timer phase changes.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own cache, keyed on whole seconds.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
-  - `MakeFile` skips a file when its writer last wrote the same contents there, and `OnReset` clears that record. The record is per writer, so a path must belong to one writer only.
-  - `MakeFile` catches I/O errors per file and shows the latest in the settings panel (`ShowWriteError`). Don't add file access that bypasses it: an exception would escape into LiveSplit's `Split()`/`Update()`.
+  - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. `OnReset` clears that record. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
+  - The drain catches every exception per file, and `Update()` shows the latest in the settings panel (`ShowWriteError`). Only touch the settings control from the UI thread. Don't add file access that bypasses `FileQueue`: on the UI thread an exception would escape into LiveSplit's `Split()`/`Update()`.
 - **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`.
 
 ## Making changes
@@ -74,7 +75,7 @@ The code is in `UI/Components/`:
 4. Write it once per timing method only if its path contains `{0}`.
 5. Document it in `docs/output-files.md` and `README.md`.
 
-A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels`, and call it from `WriteSplits()` or `Update()`.
+A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels` and `_files`, and call it from `WriteSplits()` or `Update()`.
 
 **Adding a setting** (`OutputToFileSettings`, a WinForms `UserControl` with its layout in `.Designer.cs`/`.resx`):
 1. Add the property, plus its default and `DataBindings.Add` call in the constructor. Binding is what updates the property from the control.

@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UI\Components\FileQueue.cs" />
     <Compile Include="UI\Components\OutputToFileComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Components\OutputToFileFactory.cs" />

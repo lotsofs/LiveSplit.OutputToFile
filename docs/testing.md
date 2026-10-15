@@ -102,8 +102,12 @@ static class Program
 
     static Time T(double s) => new Time(TimeSpan.FromSeconds(s), TimeSpan.FromSeconds(s));
 
-    // One LiveSplit frame. Call it after every event: phase changes are only acted on in Update().
-    static void Tick() => comp.Update(null, state, 0, 0, LayoutMode.Vertical);
+    // One LiveSplit frame, then wait for the files it queued. Call it after every event: phase changes are only acted on in Update().
+    static void Tick()
+    {
+        comp.Update(null, state, 0, 0, LayoutMode.Vertical);
+        comp.WaitForFileWrites();
+    }
 
     // Set both clocks. Game time is exact; real time is accurate to a few milliseconds.
     static void At(double s)
@@ -122,10 +126,11 @@ Things to know:
 
 - **Check `GameTime` outputs.** Game time is exact, while real time drifts by a few milliseconds.
 - **Call `Tick()` after every event.** Several bugs only appear on the frame after the event, when `Update()` reacts to the phase change.
+- **Files are written in the background.** `Split()` and `Update()` only queue them, so call `comp.WaitForFileWrites()` before reading files; the sample's `Tick()` does. A failed write shows up in `comp.Settings.WriteError` on the next `Update()` after it fails. When timing, a stopwatch around `Split()` measures only the UI thread's part; time `WaitForFileWrites()` separately for the writes.
 - **Advance the clock in steps of a second or less** when testing timer files. `HasTimerChanged` only compares the seconds component, so a jump of exactly a minute looks like no change.
 - **Real time.** Setting `AdjustedStartTime` only affects real time while the timer is `Running`; while paused, real time stays frozen. `model.Pause()` toggles between pause and resume.
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
-- **Don't delete output files mid-run.** `MakeFile` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
+- **Don't delete output files mid-run.** `FileQueue` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
 - **Rebuild the component first.** The harness references `bin\Debug`, so it tests whatever was last built.
 - **Don't run it from the repo.** LiveSplit.Core saves speedrun.com's game list (about 2 MB) as `speedruncom_game_names.json` in the current directory once a run has a game name. Seen 2026-10-15.
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.OutputToFile.UI.Components.OutputToFile.TimeFormatter")`.

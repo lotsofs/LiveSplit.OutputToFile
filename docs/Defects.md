@@ -198,11 +198,11 @@ In `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)),
 
 ## THR — Timer events may arrive off the UI thread
 
-Some callers may call `TimerModel` from a thread other than the UI thread; some auto splitters or the LiveSplit Server component might. If so, `WriteSplits()` could run at the same time as `Update()`, and the shared arrays have no locking.
+Some callers may call `TimerModel` from a thread other than the UI thread; some auto splitters or the LiveSplit Server component might. If so, `WriteSplits()` could run at the same time as `Update()`, and the shared arrays have no locking. The file writes themselves are safe: `FileQueue` locks all of its state.
 
 **Evidence.** Not checked.
 
-**Plan.** Find out which thread raises `OnSplit` and the other timer events when the Server component or an auto splitter drives the timer. If any isn't the UI thread, lock around the writes or marshal them to the UI thread.
+**Plan.** Find out which thread raises `OnSplit` and the other timer events when the Server component or an auto splitter drives the timer. If any isn't the UI thread, lock around the `SplitLevels` work or marshal the handlers to the UI thread. Either way, only `Update()` may touch the settings control.
 
 **Verify.** Drive splits through the Server component while logging the thread ID in the event handlers and in `Update()`.
 

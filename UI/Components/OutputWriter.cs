@@ -2,26 +2,24 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security;
 
 namespace LiveSplit.UI.Components {
 	/// <summary>
 	/// Base for the classes that each write one group of output files.
-	/// Holds what they share: the timer state, the settings, the subsplit levels and file writing.
+	/// Holds what they share: the timer state, the settings, the subsplit levels and the file queue.
 	/// </summary>
 	abstract class OutputWriter {
 
 		protected LiveSplitState State { get; }
 		protected OutputToFileSettings Settings { get; }
 		protected SplitLevels Levels { get; }
+		protected FileQueue Files { get; }
 
-		// Full path → the contents this writer last wrote there. Files whose contents haven't changed are skipped.
-		readonly Dictionary<string, string> _written = new Dictionary<string, string>();
-
-		protected OutputWriter(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels) {
+		protected OutputWriter(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) {
 			State = state;
 			Settings = settings;
 			Levels = levels;
+			Files = files;
 		}
 
 		#region subsplit indices
@@ -99,35 +97,16 @@ namespace LiveSplit.UI.Components {
 		protected void MakeFile(string fileName, string contents) {
 			string settingsPath = Settings.FolderPath;
 			if (string.IsNullOrEmpty(settingsPath)) return;
-			string path = null;
+			string path;
 			try {
 				path = Path.Combine(settingsPath, fileName);
-				if (_written.TryGetValue(path, out string written) && written == contents) return;
-				try {
-					File.WriteAllText(path, contents);
-				}
-				catch (DirectoryNotFoundException) {
-					Directory.CreateDirectory(Path.GetDirectoryName(path));
-					File.WriteAllText(path, contents);
-				}
 			}
-			catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException || ex is NotSupportedException || ex is SecurityException) {
-				// Locked file, bad folder path, no permission, ... Report it and carry on with the other files.
-				// Forgetting the file makes the next write retry it, even with the same contents.
-				if (path != null) _written.Remove(path);
-				Settings.ShowWriteError(fileName, ex);
+			catch (ArgumentException ex) {
+				// Invalid characters in the folder setting
+				Files.ReportError(fileName, ex);
 				return;
 			}
-			_written[path] = contents;
-			Settings.ClearWriteError(fileName);
-		}
-
-		/// <summary>
-		/// Makes the next write of every file go to disk, even if its contents haven't changed.
-		/// Brings back files deleted or edited outside LiveSplit.
-		/// </summary>
-		public void ForgetWrittenFiles() {
-			_written.Clear();
+			Files.Write(path, fileName, contents);
 		}
 
 		#endregion

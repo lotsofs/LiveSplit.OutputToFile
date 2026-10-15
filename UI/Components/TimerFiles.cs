@@ -14,7 +14,7 @@ namespace LiveSplit.UI.Components {
 
 		GraphicsCache Cache { get; } = new GraphicsCache();
 
-		public TimerFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels) : base(state, settings, levels) { }
+		public TimerFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) : base(state, settings, levels, files) { }
 
 		bool HasTimerChanged(TimingMethod method) {
 			Cache.Restart();

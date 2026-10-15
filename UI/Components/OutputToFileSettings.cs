@@ -19,7 +19,6 @@ namespace LiveSplit.UI.Components
 
 		// The latest failed file write, as shown in the settings, or null. Not a setting: it isn't saved.
 		public string WriteError { get; private set; }
-		string _writeErrorFile;
 
 		public OutputToFileSettings()
 		{
@@ -86,28 +85,14 @@ namespace LiveSplit.UI.Components
 		}
 
 		/// <summary>
-		/// Show a failed file write. It stays until that file is written successfully, or another write fails.
+		/// Show the latest failed file write, or hide it. Call on the UI thread only.
 		/// </summary>
-		/// <param name="fileName">Path relative to the folder</param>
-		public void ShowWriteError(string fileName, Exception ex)
+		/// <param name="error">The text to show, or null to hide it</param>
+		public void ShowWriteError(string error)
 		{
-			_writeErrorFile = fileName;
-			WriteError = $"Couldn't write {fileName} ({DateTime.Now:T}): {ex.Message}";
-			labelWriteError.Text = WriteError;
-			labelWriteError.Visible = true;
-		}
-
-		/// <summary>
-		/// A file was written successfully. Hide the error if it was about that file.
-		/// </summary>
-		/// <param name="fileName">Path relative to the folder</param>
-		public void ClearWriteError(string fileName)
-		{
-			if (fileName != _writeErrorFile) return;
-			_writeErrorFile = null;
-			WriteError = null;
-			labelWriteError.Text = string.Empty;
-			labelWriteError.Visible = false;
+			WriteError = error;
+			labelWriteError.Text = error ?? string.Empty;
+			labelWriteError.Visible = error != null;
 		}
 
 		private void buttonFolderPath_Click(object sender, EventArgs e)

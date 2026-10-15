@@ -43,6 +43,8 @@ namespace LiveSplit.UI.Components {
 
 		// One instance, shared by the writers. CalculateSegments() regenerates it in place.
 		SplitLevels _levels;
+		// Writes the files on a background thread. Shared by the writers.
+		FileQueue _files;
 
 		RunInfoFiles _runInfoFiles;
 		TimerFiles _timerFiles;
@@ -63,10 +65,11 @@ namespace LiveSplit.UI.Components {
 
 			State = state;
 			_levels = new SplitLevels();
-			_runInfoFiles = new RunInfoFiles(State, Settings, _levels);
-			_timerFiles = new TimerFiles(State, Settings, _levels);
-			_splitFiles = new SplitFiles(State, Settings, _levels);
-			_splitListFiles = new SplitListFiles(State, Settings, _levels);
+			_files = new FileQueue();
+			_runInfoFiles = new RunInfoFiles(State, Settings, _levels, _files);
+			_timerFiles = new TimerFiles(State, Settings, _levels, _files);
+			_splitFiles = new SplitFiles(State, Settings, _levels, _files);
+			_splitListFiles = new SplitListFiles(State, Settings, _levels, _files);
 			CalculateSegments();
 		}
 
@@ -99,10 +102,7 @@ namespace LiveSplit.UI.Components {
 
 		void state_OnReset(object sender, TimerPhase e) {
 			// Write every file in full once per attempt
-			_runInfoFiles.ForgetWrittenFiles();
-			_timerFiles.ForgetWrittenFiles();
-			_splitFiles.ForgetWrittenFiles();
-			_splitListFiles.ForgetWrittenFiles();
+			_files.ForgetWrittenFiles();
 			WriteSplits();
 			CalculateSegments();
 		}
@@ -128,6 +128,10 @@ namespace LiveSplit.UI.Components {
 		// and tell the internal component to display it. This function is called hundreds to
 		// thousands of times per second.
 		public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode) {
+			// Write errors happen on the background thread; the settings control may only be touched here, on the UI thread
+			if (_files.TakeErrorChange(out string writeError)) {
+				Settings.ShowWriteError(writeError);
+			}
 			if (Settings.OutputTimer) {
 				_timerFiles.WriteTimer(TimingMethod.RealTime);
 				_timerFiles.WriteTimer(TimingMethod.GameTime);
@@ -157,6 +161,15 @@ namespace LiveSplit.UI.Components {
 			State.OnSkipSplit -= state_OnSplitChange;
 			State.OnUndoSplit -= state_OnSplitChange;
 			State.OnReset -= state_OnReset;
+			// Let queued files finish, but don't hang LiveSplit on a stuck drive
+			_files.WaitForWrites(2000);
+		}
+
+		/// <summary>
+		/// Blocks until every file queued so far is written. For tests: files are written on a background thread.
+		/// </summary>
+		public void WaitForFileWrites() {
+			_files.WaitForWrites(System.Threading.Timeout.Infinite);
 		}
 
 		// I do not know what this is for.

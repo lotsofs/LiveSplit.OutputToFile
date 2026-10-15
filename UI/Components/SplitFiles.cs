@@ -27,7 +27,7 @@ namespace LiveSplit.UI.Components {
 		const string FILE_PREVIOUS_NAME = @"PreviousSplit\{1}\Name.txt";
 		const string FILE_PREVIOUS_NAME_RAW = @"PreviousSplit\{1}\Name_Raw.txt";
 
-		public SplitFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels) : base(state, settings, levels) { }
+		public SplitFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) : base(state, settings, levels, files) { }
 
 		/// <summary>
 		/// Write non-timing related information about a split

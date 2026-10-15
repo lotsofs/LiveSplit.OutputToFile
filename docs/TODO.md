@@ -31,7 +31,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 |---|---|---|---|
 | [LSG](Performance.md#lsg--calculatelivesegment-runs-once-per-level) | Split times | `WriteSplitTimes` calls `CalculateLiveSegment`, which already loops over every level, once per level | Low |
 | [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) | Subsplits | `CalculateSegments` runs `GenerateSubsplitLevels` twice; its `method` parameter is unused | Low |
-| [WRT](Performance.md#wrt--changed-files-are-written-on-the-ui-thread) | File writing | Changed files are still written on the UI thread (about 66 files, 38 ms per split with 40 splits); move writing to a background thread | Low |
 | [ATM](Performance.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic, so OBS could read a half-written file; check whether it flickers before fixing | Low |
 
 ## Cleanup — [Cleanup.md](Cleanup.md)
