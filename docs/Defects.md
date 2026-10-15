@@ -6,7 +6,7 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## Dependencies between plans
 
-- CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
+- CLM and DUP both edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - EDT and CHK both change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
 
@@ -33,18 +33,6 @@ The depth clamp loop in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Compone
 **Verify.** The CLM regression check in testing.md lists all three names.
 
 **Docs.** architecture.md "Depth" (the note that the loop skips split 0). testing.md CLM row.
-
-## EMP — An empty or dash-only split name crashes the component
-
-`name[0]` in `GenerateSubsplitLevels` and in `GetSectionHeader` (both in [SplitLevels.cs](../UI/Components/SplitLevels.cs)) assumes a non-empty string. A split named `""` crashes the constructor. A split named `-` crashes once its dash is stripped, if there are 2+ levels.
-
-**Evidence.** Reproduced 2026-10-14: `IndexOutOfRangeException` in `String.get_Chars`.
-
-**Plan.** Check the length before reading `name[0]` in both places. An all-dash name can show as an empty line at the levels where its dashes are stripped.
-
-**Verify.** The EMP regression check in testing.md doesn't throw, and a run with those names finishes and writes its files.
-
-**Docs.** architecture.md "Display names", if it mentions the empty-name case. testing.md EMP row.
 
 ## EDT — Editing splits isn't picked up until the next run starts
 

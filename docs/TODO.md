@@ -10,7 +10,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 |---|---|---|---|
 | [IDX](Defects.md#idx--sanssubsplits-segment-timer-measures-from-the-wrong-split) | Timers | `SegmentTimer_SansSubsplits*` indexes the run with a level-local index, so it measures from the wrong split | Medium |
 | [CLM](Defects.md#clm--a-first-split-with-two-or-more-dashes-is-dropped) | Subsplits | The depth clamp skips split 0: a first split with 2+ dashes (and no 1-dash split) vanishes from every output, and the next split's segment absorbs its time | Medium |
-| [EMP](Defects.md#emp--an-empty-or-dash-only-split-name-crashes-the-component) | Subsplits | A split named `""` or `-` crashes on `name[0]` | Medium |
 | [EDT](Defects.md#edt--editing-splits-isnt-picked-up-until-the-next-run-starts) | Change detection | Split count, names and PB times aren't cache keys, so edited splits stay stale in the files until the next run starts | Medium |
 | [NEG](Defects.md#neg--negative-deltas-get-a-different-precision-from-positive-ones) | Time format | Negative deltas choose precision from the negative value, so `-5.23` but `+5.2` | Low |
 | [UND](Defects.md#und--undo-to-the-first-split-leaves-golddifference-stale) | PreviousSplit | Undoing to the first split resets every `PreviousSplit` file except `GoldDifference.txt` | Low |
@@ -26,7 +25,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 | Code | Area | Summary | Severity |
 |---|---|---|---|
 | [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) | Subsplits | `CalculateSegments` runs `GenerateSubsplitLevels` twice; its `method` parameter is unused | Low |
-| [ATM](Performance.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic, so OBS could read a half-written file; check whether it flickers before fixing | Low |
+| [ATM](Performance.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic. Measured: an OBS text source on a timer file goes blank for 1–2 s about once every 4 h of running timer. Not worth fixing unless blanks are seen | Parked |
 
 ## Cleanup — [Cleanup.md](Cleanup.md)
 

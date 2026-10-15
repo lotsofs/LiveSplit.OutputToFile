@@ -85,7 +85,7 @@ namespace LiveSplit.UI.Components {
 						continue;
 					}
 					Names[split].Add(name);
-					if (name[0] == '-') {
+					if (name.Length > 0 && name[0] == '-') {
 						name = name.Substring(1);
 					}
 				}
@@ -96,7 +96,7 @@ namespace LiveSplit.UI.Components {
 		}
 
 		string GetSectionHeader(string name) {
-			if (name[0] != '{') return null;
+			if (name.Length == 0 || name[0] != '{') return null;
 			int closing = name.IndexOf('}');
 			if (closing == -1) return null;
 			return name.Substring(1, closing - 1);

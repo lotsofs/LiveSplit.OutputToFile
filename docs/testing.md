@@ -136,6 +136,51 @@ Things to know:
 - **The settings control.** To test the settings UI, add `comp.Settings` to a `Form` you `Show()`, reach its private controls by reflection, type with `PostMessage(textBox.Handle, WM_CHAR, c, 0)`, and pump with `Application.DoEvents()`. Bindings only see focus changes and keys that go through the message loop. Remove the control before closing the form, which would dispose it. These forms appear on screen and take focus from whatever else is open, so warn whoever is at the machine first.
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.OutputToFile.UI.Components.OutputToFile.TimeFormatter")`.
 
+### Reading files as OBS does
+
+OBS 32's text source reads a file with `_wfopen(path, "rb")` and then sizes and reads it with the CRT (`os_quick_read_utf8_file` and `os_fread_utf8` in libobs). Calling the same CRT functions from `ucrtbase.dll` gives the same sharing mode and the same view of a half-written file:
+
+```csharp
+[DllImport("ucrtbase.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+static extern IntPtr _wfopen(string path, string mode);
+[DllImport("ucrtbase.dll", CallingConvention = CallingConvention.Cdecl)]
+static extern int fseek(IntPtr f, int offset, int origin);
+[DllImport("ucrtbase.dll", CallingConvention = CallingConvention.Cdecl)]
+static extern long _ftelli64(IntPtr f);
+[DllImport("ucrtbase.dll", CallingConvention = CallingConvention.Cdecl)]
+static extern UIntPtr fread(byte[] buf, UIntPtr size, UIntPtr count, IntPtr f);
+[DllImport("ucrtbase.dll", CallingConvention = CallingConvention.Cdecl)]
+static extern int fclose(IntPtr f);
+
+// Null where OBS would show nothing: the open failed, the file was empty, or it was truncated between the size and the read.
+// Leaves out os_fread_utf8's BOM check; the component writes no BOM.
+static string ReadLikeObs(string path)
+{
+    IntPtr f = _wfopen(path, "rb");
+    if (f == IntPtr.Zero) return null;
+    try
+    {
+        fseek(f, 0, 2); // SEEK_END
+        long size = _ftelli64(f);
+        if (size <= 0) return null;
+        var buf = new byte[size];
+        fseek(f, 0, 0); // SEEK_SET
+        if ((long)fread(buf, (UIntPtr)1, (UIntPtr)size, f).ToUInt64() < size) return null;
+        return Encoding.UTF8.GetString(buf);
+    }
+    finally { fclose(f); }
+}
+```
+
+To measure torn reads:
+- Call it in a loop on a second thread while the main thread writes one file through `FileQueue` with new contents each time.
+- Count the reads that return null or contents that were never written.
+- `FileQueue` is internal: create it with `Activator.CreateInstance(type, true)` and call `Write` and `WaitForWrites` by reflection.
+- Record each value before writing it, so a read never sees a value it doesn't know.
+- Spin a random 0–400 µs between reads so they start at random moments. Back-to-back reads understate the share, because a read that hits a write takes several times longer than one that doesn't.
+
+The share of bad reads is then the chance that an OBS read lands on a write. Divided by the writes per second, it gives how long each write leaves the file unreadable.
+
 ## Regression checks
 
 These checks reproduce bugs tracked in [TODO.md](TODO.md); the Code column names the item. Each one shows today's output and the correct output, so a fix can be confirmed.
@@ -146,6 +191,6 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 |---|---|---|---|---|
 | IDX | Timer at 33.2 s | `Timers\GameTime\SegmentTimer_SansSubsplits.txt` | `0:23` | `0:05` |
 | NEG | `DeltaString(-5.234 s)` | (call it directly) | `-5.23` | `-5.2` |
-| EMP | Splits named `""` or `-` | constructor | throws | no exception |
 | CLM | Splits `--Intro`, `A`, `B` | `SplitList\AllSplits\Names.txt` | `A \| B` | three names |
 | SEC | Tick every 0.5 s to 60.5 s, then reset | `Timers\GameTime\RunTimer.txt` | `1:00` | `0:00` |
+| ATM | `FileQueue` rewrites a timer-sized file 10 times a second for 180 s while [OBS-style reads](#reading-files-as-obs-does) with random gaps run | that file | 491 of 726,347 reads empty or short | none |

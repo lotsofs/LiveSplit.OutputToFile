@@ -93,7 +93,9 @@ With a single level (no subsplits, or the setting off), level 0 *is* the last le
 - If the name starts with `{Header}` (the convention from LiveSplit's own Subsplits component), the level shows `Header`, and the `{Header}` prefix is removed for the deeper levels.
 - Otherwise the level shows the current name, and one leading `-` is removed for the deeper levels.
 
-A split only appears at levels ≥ its depth, and by then all its dashes have been removed. The raw `Segment.Name` goes to the `*_Raw.txt` files.
+A split only appears at levels ≥ its depth, and usually all its dashes have been removed by then. A split whose depth was lowered, by the clamp or because it is the last split, keeps the dashes that are left. With depths 0 and 1 present, for example, `---C` shows as `--C` at `AllSplits`.
+
+A name that is empty, or becomes empty once its `{Header}` or dashes are removed (`""`, `-`, `{}`), shows as an empty line. The raw `Segment.Name` goes to the `*_Raw.txt` files.
 
 ### Worked example
 
