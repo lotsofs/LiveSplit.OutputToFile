@@ -24,7 +24,7 @@ Code is referred to by member name. The table below says which file each class i
 
 ## Lifecycle
 
-1. LiveSplit loads the layout and calls `OutputToFileFactory.Create(state)`. The component's constructor creates the settings control with default values, subscribes to the timer events, creates the shared `SplitLevels`, the `FileQueue` and the four writers, and runs `CalculateSegments()`.
+1. LiveSplit loads the layout and calls `OutputToFileFactory.Create(state)`. The component's constructor creates the settings control with default values, subscribes to the timer events and `RunManuallyModified`, creates the shared `SplitLevels`, the `FileQueue` and the four writers, and runs `CalculateSegments()`.
 2. LiveSplit then calls `SetSettings(xml)` with the saved settings. This does **not** trigger a recalculation by itself. In practice the first `Update()` does it, because every cache key is new at that point.
 3. `Update()` is called repeatedly for as long as the layout is open. The component has zero size, and `DrawVertical`/`DrawHorizontal` are empty.
 4. `GetSettings()` runs when the layout is saved. `GetSettingsHashCode()` is called on every refresh, but LiveSplit only uses it to decide whether to redraw, not to detect unsaved changes ([livesplit-notes.md](livesplit-notes.md#layout-save-prompt-and-the-settings-hash-read-in-source)).
@@ -37,13 +37,16 @@ Code is referred to by member name. The table below says which file each class i
 | `OnStart` | `CalculateSegments()`, then `WriteSplits()` |
 | `OnSplit`, `OnSkipSplit`, `OnUndoSplit` | `WriteSplits()` |
 | `OnReset` | `FileQueue.ForgetWrittenFiles()`, `WriteSplits()`, then `CalculateSegments()` |
+| `RunManuallyModified` | Counts the edit (`_runEdits`), a cache key, so the next `Update()` rewrites everything. Several edits in one frame cost one rewrite. |
 | `Update()` (every frame) | 0. If the latest write error changed, show it in the settings (`ShowWriteError`). <br>1. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless that method's whole-second value changed. <br>2. If any cache key changed: `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. |
 
-The cache keys in `Update()` are attempt count, game name, category name, platform name, `FolderPath`, `SplitsBefore`, `SplitsAfter` and `CurrentPhase`.
+The cache keys in `Update()` are attempt count, game name, category name, platform name, the `RunManuallyModified` count, the `Run` object (by reference), `FolderPath`, `SplitsBefore`, `SplitsAfter` and `CurrentPhase`.
+
+Split edits are seen through `RunManuallyModified`: LiveSplit raises it after each change in Edit Splits, which edits the run in place, and after opening splits. Close Splits replaces the run without raising it, which the `Run` key catches. See [livesplit-notes.md](livesplit-notes.md#editing-and-opening-splits-read-in-source).
 
 Because the phase is a cache key, every start, pause, resume, finish and reset goes through row 2 of `Update()` one frame after the event handler has run, and so rebuilds the levels. That is harmless because the levels hold nothing about the current attempt (see [Per-level data](#per-level-data-splitlevel)).
 
-Not cache keys: the `Output*` checkboxes, split names, split count and PB times. Changing any of those does nothing until something else triggers a rewrite.
+Not cache keys: the `Output*` checkboxes. Changing one does nothing until something else triggers a rewrite ([CHK](Defects.md#chk--output-checkboxes-dont-take-effect-at-once)).
 
 LiveSplit fires every event *after* it has updated the timer state. A handler therefore sees the new state: on `OnSplit` the index has already moved on, and on the last split the phase is already `Ended`. Details are in [livesplit-notes.md](livesplit-notes.md).
 

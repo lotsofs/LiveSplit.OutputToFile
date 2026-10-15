@@ -14,7 +14,7 @@ Entries marked ⚠ have a known bug. The code after the ⚠ is its item in [TODO
 
 ## Root
 
-Rewritten whenever one of `Update()`'s cache keys changes (run loaded, run started or ended, settings changed, …).
+Rewritten whenever one of `Update()`'s cache keys changes (run loaded or edited, run started or ended, settings changed, …).
 
 | File | Contents |
 |---|---|

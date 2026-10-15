@@ -7,20 +7,7 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 ## Dependencies between plans
 
 - DUP and DSH both edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
-- EDT and CHK both change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
-
-## EDT — Editing splits isn't picked up until the next run starts
-
-The cache keys in `Update()` don't cover split count, names or PB times.
-
-**Evidence.** Reproduced 2026-10-14: after adding a split and renaming one, `TotalSplits_AllSplits.txt` and `Names.txt` still showed the old splits.
-
-**Plan.** Add `Run.Count` plus a hash of the names and times to the cache keys, or handle `state.RunManuallyModified`. Keep it cheap: `Update()` runs every frame.
-
-**Verify.** With the timer stopped, add a split and rename one: `TotalSplits_*.txt` and `Names.txt` update without starting a run.
-
-**Docs.** architecture.md "When files get written" (the cache keys).
 
 ## NEG — Negative deltas get a different precision from positive ones
 
@@ -72,13 +59,13 @@ The highlight chain in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Componen
 
 ## CHK — Output checkboxes don't take effect at once
 
-`OutputTimer`, `OutputSplitList`, `OutputSubsplits` and `OutputCompletedSplits` aren't cache keys, so changing one does nothing until something else triggers a rewrite. Changing `OutputSubsplits` only changes the level structure at the next `CalculateSegments()`. Turning an output off leaves its old files on disk with stale values.
+`OutputTimer`, `OutputSplitList`, `OutputSubsplits` and `OutputCompletedSplits` aren't cache keys, so changing one does nothing until something else triggers a rewrite. Changing `OutputSubsplits` only changes the level structure at the next `CalculateSegments()`. Turning an output off leaves its old files on disk with stale values. So does a subsplit level that goes away because the splits were edited or another splits file was opened: its folders keep their last contents.
 
-**Evidence.** Read.
+**Evidence.** The checkboxes: read. The level that goes away: reproduced 2026-10-15. After every dash was removed from the base run's names, `SplitList\SansSubsplits\Names.txt` still showed `Area A | Area B`.
 
-**Plan.** Add these settings to the cache keys. For an output turned off, decide between blanking its files once and deleting them; deleting must touch only files this component writes.
+**Plan.** Add these settings to the cache keys. For an output turned off, or a level that is gone, decide between blanking its files once and deleting them; deleting must touch only files this component writes.
 
-**Verify.** With the timer stopped, toggle each checkbox: its files appear, or are cleared, straight away.
+**Verify.** With the timer stopped, toggle each checkbox: its files appear, or are cleared, straight away. Remove every dash from the splits: the `SansSubsplits` files are cleared.
 
 **Docs.** architecture.md "When files get written" (the cache keys). output-files.md, on what turning an output off does. README.
 

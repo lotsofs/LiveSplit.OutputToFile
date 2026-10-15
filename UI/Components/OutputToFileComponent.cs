@@ -45,6 +45,8 @@ namespace LiveSplit.UI.Components {
 		SplitLevels _levels;
 		// Writes the files on a background thread. Shared by the writers.
 		FileQueue _files;
+		// Counts RunManuallyModified, which LiveSplit raises after each edit in Edit Splits and when splits are opened. A cache key in Update().
+		int _runEdits;
 
 		RunInfoFiles _runInfoFiles;
 		TimerFiles _timerFiles;
@@ -62,6 +64,7 @@ namespace LiveSplit.UI.Components {
 			state.OnSkipSplit += state_OnSplitChange;
 			state.OnUndoSplit += state_OnSplitChange;
 			state.OnReset += state_OnReset;
+			state.RunManuallyModified += state_RunManuallyModified;
 
 			State = state;
 			_levels = new SplitLevels();
@@ -107,6 +110,11 @@ namespace LiveSplit.UI.Components {
 			CalculateSegments();
 		}
 
+		void state_RunManuallyModified(object sender, EventArgs e) {
+			// The run was edited in place, or replaced. Update() rewrites everything on the next frame.
+			_runEdits++;
+		}
+
 		#endregion
 
 		void CalculateSegments() {
@@ -142,6 +150,9 @@ namespace LiveSplit.UI.Components {
 			Cache["GameName"] = state.Run.GameName;
 			Cache["CategoryName"] = state.Run.CategoryName;
 			Cache["PlatformName"] = state.Run.Metadata.PlatformName;
+			Cache["RunEdits"] = _runEdits;
+			// Compared by reference. Close Splits replaces the run without raising RunManuallyModified.
+			Cache["Run"] = state.Run;
 			Cache["FolderPath"] = Settings.FolderPath;
 			Cache["SplitsBefore"] = Settings.SplitsBefore;
 			Cache["SplitsAfter"] = Settings.SplitsAfter;
@@ -161,6 +172,7 @@ namespace LiveSplit.UI.Components {
 			State.OnSkipSplit -= state_OnSplitChange;
 			State.OnUndoSplit -= state_OnSplitChange;
 			State.OnReset -= state_OnReset;
+			State.RunManuallyModified -= state_RunManuallyModified;
 			// Let queued files finish, but don't hang LiveSplit on a stuck drive
 			_files.WaitForWrites(2000);
 		}

@@ -71,6 +71,18 @@ Read in the LiveSplit source at the installed commit `e16f72c` on 2026-10-15, an
 - OK only closes. It is the dialog's AcceptButton, so Enter in a textbox clicks it ([LayoutSettingsDialog.Designer.cs:92](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/LayoutSettingsDialog.Designer.cs#L92)).
 - There is no CancelButton and no closing handler, so closing with X restores nothing and Escape doesn't cancel.
 
+## Editing and opening splits (read in source)
+
+Read in the LiveSplit source at the installed commit `e16f72c` on 2026-10-15 ([TimerForm.cs](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/TimerForm.cs), [RunEditorDialog.cs](https://github.com/LiveSplit/LiveSplit/blob/e16f72c3fbae37a722674346cde12995453696ee/src/LiveSplit.View/View/RunEditorDialog.cs)). Not checked by running LiveSplit. Two facts were checked by reflection on the installed `LiveSplit.Core.dll`: `LiveSplitState` has the `RunManuallyModified` event and `CallRunManuallyModified()`, and `Run` doesn't override `Equals`.
+
+- Edit Splits (`RunEditorDialog`) edits `CurrentState.Run` in place. After each change it raises `RunEdited`, and `TimerForm` responds with `CallRunManuallyModified()`. A change is any edit to a name, a time, a best segment, the game, the category, the attempt count, the metadata, an icon or a comparison, and any added, removed or moved split.
+- Splits can only be added or removed while the timer is `NotRunning`. Other edits are allowed during a run.
+- OK only closes the editor. Cancel puts back a copy of the run taken when the editor opened (`SetRun`), then calls `CallRunManuallyModified()`.
+- The offset and the auto splitter settings change the run without raising the event.
+- Opening splits from a file, a URL or speedrun.com calls `SetRun`, then `CallRunManuallyModified()`.
+- Close Splits calls `SetRun` with a blank run and doesn't raise the event. `LiveSplitState.Run` is a plain property, so replacing the run raises nothing by itself.
+- Not known: whether LiveSplit keeps calling `Update()` while the Edit Splits dialog is open. If it doesn't, the files catch up when the dialog closes.
+
 ## Not verified
 
 These come from LiveSplit conventions and from this component working in practice:
