@@ -118,6 +118,7 @@ namespace LiveSplit.UI.Components {
 					MakeFile(FILE_PREVIOUS_RUN_TIME, "-", method, lvl);
 					MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, "-", method, lvl);
 					MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, "-", method, lvl);
+					if (lvl == Levels.Count - 1) MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, "-", method, lvl);
 					MakeFile(FILE_PREVIOUS_SIGN, Signs.NotApplicable.ToString(), method, lvl);
 				}
 

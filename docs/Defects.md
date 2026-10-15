@@ -9,18 +9,6 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 - DUP and DSH both edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - SEC and LAG both change `HasTimerChanged`.
 
-## UND — Undo to the first split leaves GoldDifference stale
-
-The "no previous split" branch of `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) resets every other `PreviousSplit` file, but not `PreviousSplit\AllSplits\*\GoldDifference.txt`.
-
-**Evidence.** Reproduced 2026-10-14.
-
-**Plan.** Write `-` to it in that branch, keeping the `AllSplits`-only guard.
-
-**Verify.** Split once, then undo: `GoldDifference.txt` shows `-`.
-
-**Docs.** output-files.md "PreviousSplit" (⚠ mark on `GoldDifference.txt`).
-
 ## SKP — Skipped splits are highlighted as BehindLost
 
 The highlight chain in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) falls through to BehindLost whenever a PB time exists, even for a split with no time.

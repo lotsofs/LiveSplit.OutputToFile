@@ -57,7 +57,7 @@ Written from `Update()`, but only when the run timer's seconds component changes
 | `{method}\RunTime.txt` | `-` | This attempt's split time | Final time |
 | `{method}\SegmentDifference.txt` | `-` | Segment time − PB segment | Last segment − PB segment |
 | `{method}\RunDifference.txt` | `-` | Split time − PB split time | Final time − PB |
-| `{method}\GoldDifference.txt` (gold) | ⚠ UND: not rewritten | Segment time − best segment | Last segment − best segment |
+| `{method}\GoldDifference.txt` (gold) | `-` | Segment time − best segment | Last segment − best segment |
 | `{method}\Sign.txt` | `NotApplicable` | See below | See below |
 
 When the timer isn't running, every file shows `-`, and `Sign.txt` shows `NotApplicable`.
