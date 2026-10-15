@@ -126,7 +126,9 @@ namespace LiveSplit.UI.Components {
 		}
 
 		// The highlight file that a completed split is filled in, or null for none. The first that applies wins.
+		// A skipped split has no time, and no highlight.
 		StringBuilder HighlightFile(ListLines lines, TimingMethod method, int lvl, int spl, TimeSpan? runDelta, TimeSpan? segmentDelta) {
+			if (LiveRunTime(method, lvl, spl) == null) return null;
 			if (IsGold(method, lvl, spl)) return lines.GoldHighlight;
 			if (runDelta < TimeSpan.Zero && segmentDelta < TimeSpan.Zero) return lines.AheadGainedHighlight;
 			if (runDelta < TimeSpan.Zero) return lines.AheadLostHighlight;

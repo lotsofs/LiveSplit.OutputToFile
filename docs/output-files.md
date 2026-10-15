@@ -104,9 +104,9 @@ Every file has the same number of lines, so separate text sources line up. "Comp
 | `{method}\Highlight_AheadGained.txt` | Fill: run delta < 0 and segment delta < 0 |
 | `{method}\Highlight_AheadLost.txt` | Fill: run delta < 0, segment not gained |
 | `{method}\Highlight_BehindGained.txt` | Fill: segment delta < 0, run delta not < 0 |
-| `{method}\Highlight_BehindLost.txt` | Fill: every other completed line that has a PB time ⚠ SKP: includes skipped splits |
+| `{method}\Highlight_BehindLost.txt` | Fill: every other completed line that has a PB time |
 
-Each completed line has a fill in exactly one highlight file, checked in the table's order from top to bottom. The fill is 43 × `█`.
+Each completed line has a fill in at most one highlight file, checked in the table's order from top to bottom. A skipped split's line is blank in all of them, and so is the line of a split that has no PB time and isn't a gold. The fill is 43 × `█`.
 
 ## `CompletedSplits\{level}\` (Completed splits setting)
 

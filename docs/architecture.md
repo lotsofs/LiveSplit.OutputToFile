@@ -164,14 +164,14 @@ The functions branch on the phase separately and inconsistently. For example, `W
 - **Gold delta:** live segment minus `BestSegmentTime`, at the last level only. Best segments and PB times don't change during a run; LiveSplit updates them on reset. Comparisons made during the run therefore use the values from before the run.
 - **Gold** (`OutputWriter.IsGold`): at the last level only, the live segment exists and either the split has no best segment yet or the live segment beats it. A skipped split, and the split after it, have no live segment, so they aren't golds. `Sign.txt` and the highlights both use this rule.
 - **`Sign.txt`** (`SplitFiles.PreviousSign`): a decision chain over gold, run delta and segment delta. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values).
-- **Highlights** (`SplitListFiles.HighlightFile`): each completed line gets exactly one highlight, checked in this order:
+- **Highlights** (`SplitListFiles.HighlightFile`): each completed line gets at most one highlight. A skipped split, which has no live split time, gets none. Otherwise the first that applies, in this order:
   1. Gold: the segment is a gold, last level only.
   2. AheadGained: run delta < 0 and segment delta < 0.
   3. AheadLost: run delta < 0.
   4. BehindGained: segment delta < 0.
   5. BehindLost: the split has a PB time.
 
-  `HIGHLIGHT_FILL` is 43 × `█`.
+  A split that matches none of these gets no highlight. `HIGHLIGHT_FILL` is 43 × `█`.
 - **Index / ReverseIndex:** the local index of the current member, i.e. the number of members completed at this level, and `Count − Index − 1`. When the timer isn't running these are −1 / `Count`; after the finish they are `Count` / −1.
 - **Run timer:** `State.CurrentTime[method]`. **Segment timer** (`TimerFiles.SegmentTimer`): the run timer minus the `SplitTime` of the level's previous member. It equals the run timer on the first member and when the timer isn't running.
 - **FinishedRunsCount:** the number of attempts in history with a real time, plus 1 while the timer is `Ended`, because the current attempt joins the history only on reset.

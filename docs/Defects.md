@@ -9,18 +9,6 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 - DUP edits `CalculateDepths` and DSH edits `GenerateNames`. [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) changes `GenerateSubsplitLevels`, which calls both.
 - SEC and LAG both change `HasTimerChanged`.
 
-## SKP — Skipped splits are highlighted as BehindLost
-
-The highlight chain in `HighlightFile` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) falls through to BehindLost whenever a PB time exists, even for a split with no time.
-
-**Evidence.** Reproduced 2026-10-14.
-
-**Plan.** Give a split with no `SplitTime` no highlight.
-
-**Verify.** Skip a split: its line is blank in every `Highlight_*.txt`.
-
-**Docs.** output-files.md "SplitList" (⚠ mark on `Highlight_BehindLost.txt`).
-
 ## SEC — Run timer file can get stuck after a reset
 
 `HasTimerChanged` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)) compares `time.Seconds`, the 0–59 seconds component, rather than total seconds. After resetting at 1:00.5, the seconds component is 0 both before and after, so `Timers\*\RunTimer.txt` stays at `1:00` until the next start.
