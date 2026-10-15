@@ -61,6 +61,7 @@ The code is in `UI/Components/`:
 - **Stored deltas.** Deltas are stored at split time by `WriteSplitTimes` and read later by the split lists, so the call order in `WriteSplits()` matters. `CalculateSegments()` regenerates the shared `SplitLevels` in place, rebuilding every array and discarding those stored deltas, and it runs on every cache-key change, including timer phase changes.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own cache, keyed on whole seconds.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
+  - `MakeFile` skips a file when its writer last wrote the same contents there, and `OnReset` clears that record. The record is per writer, so a path must belong to one writer only.
 - **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`.
 
 ## Making changes

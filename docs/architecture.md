@@ -35,7 +35,7 @@ Code is referred to by member name. The table below says which file each class i
 |---|---|
 | `OnStart` | `CalculateSegments()`, then `WriteSplits()` |
 | `OnSplit`, `OnSkipSplit`, `OnUndoSplit` | `WriteSplits()` |
-| `OnReset` | `WriteSplits()`, then `CalculateSegments()` |
+| `OnReset` | `ForgetWrittenFiles()` on each writer, `WriteSplits()`, then `CalculateSegments()` |
 | `Update()` (every frame) | 1. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless that method's whole-second value changed. <br>2. If any cache key changed: `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. |
 
 The cache keys in `Update()` are attempt count, game name, category name, platform name, `FolderPath`, `SplitsBefore`, `SplitsAfter` and `CurrentPhase`.
@@ -171,7 +171,9 @@ The functions branch on the phase separately and inconsistently. For example, `W
   - `(template, contents, method?, level)` fills `{0}` and `{1}`;
   - `(template, contents, method)` fills `{0}`;
   - `(path, contents)` writes the file.
-- The final overload does nothing when `FolderPath` is empty, creates missing directories, and calls `File.WriteAllText`, which writes UTF-8 without a BOM. There is no error handling, so exceptions escape into LiveSplit.
+- The final overload does nothing when `FolderPath` is empty. Otherwise it calls `File.WriteAllText`, which writes UTF-8 without a BOM. If that throws `DirectoryNotFoundException`, it creates the directory and writes again. There is no other error handling, so exceptions escape into LiveSplit.
+- Each writer remembers the contents it last wrote to each full path (`_written` in `OutputWriter`), and `MakeFile` skips a write when the contents are the same. On a split, only the files that changed are written. A file with no `{0}` in its path but written once per timing method, such as `Names.txt`, is skipped the second time. The four writers write separate folders, so no path has two records.
+- `OnReset` clears every writer's record (`ForgetWrittenFiles()`), so each attempt ends with every file written in full. A file deleted or edited outside LiveSplit comes back when its contents next change, or at the next reset.
 - Multi-line files use `\n` and end with a trailing `\n`. Every list file has the same number of lines, so separate OBS text sources line up.
 - Which outputs each setting controls:
 
@@ -183,7 +185,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
   | `OutputSubsplits` | Whether there is more than one level |
 
   Everything else is always written. Turning an output off doesn't delete its old files.
-- Nothing is written in the background: every write happens synchronously inside the LiveSplit event or `Update()` call.
+- Nothing is written in the background: every write happens synchronously inside the LiveSplit event or `Update()` call. See [WRT](Performance.md#wrt--changed-files-are-written-on-the-ui-thread).
 
 ## Settings
 

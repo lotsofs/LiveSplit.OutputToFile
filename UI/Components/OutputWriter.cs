@@ -13,6 +13,9 @@ namespace LiveSplit.UI.Components {
 		protected OutputToFileSettings Settings { get; }
 		protected SplitLevels Levels { get; }
 
+		// Full path → the contents this writer last wrote there. Files whose contents haven't changed are skipped.
+		readonly Dictionary<string, string> _written = new Dictionary<string, string>();
+
 		protected OutputWriter(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels) {
 			State = state;
 			Settings = settings;
@@ -95,10 +98,23 @@ namespace LiveSplit.UI.Components {
 			string settingsPath = Settings.FolderPath;
 			if (string.IsNullOrEmpty(settingsPath)) return;
 			string path = Path.Combine(settingsPath, fileName);
-			if (!Directory.Exists(Path.GetDirectoryName(path))) {
-				Directory.CreateDirectory(Path.GetDirectoryName(path));
+			if (_written.TryGetValue(path, out string written) && written == contents) return;
+			try {
+				File.WriteAllText(path, contents);
 			}
-			File.WriteAllText(path, contents);
+			catch (DirectoryNotFoundException) {
+				Directory.CreateDirectory(Path.GetDirectoryName(path));
+				File.WriteAllText(path, contents);
+			}
+			_written[path] = contents;
+		}
+
+		/// <summary>
+		/// Makes the next write of every file go to disk, even if its contents haven't changed.
+		/// Brings back files deleted or edited outside LiveSplit.
+		/// </summary>
+		public void ForgetWrittenFiles() {
+			_written.Clear();
 		}
 
 		#endregion

@@ -2,24 +2,7 @@
 
 The index is [TODO.md](TODO.md).
 
-WRT and [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit) both change `MakeFile`. GEN edits `GenerateSubsplitLevels`, as do several items in [Defects.md](Defects.md).
-
-## WRT — Every split rewrites about 160 files
-
-All of them are written synchronously, and in LiveSplit that happens on the UI thread, on every split. Each write also calls `Directory.Exists`.
-
-**Evidence.** Measured 2026-10-14 with the headless harness in [testing.md](testing.md): in a 40-split test with one subsplit level and every output turned on, each `Split()` took about 125 ms on this machine.
-
-**Plan.** Ideas, biggest payoff first:
-
-- Remember the last content written to each path and skip unchanged files. Most files don't change on any given split.
-- Write each per-method duplicate once. `Names.txt`, `Names_Raw.txt`, `Names_Indent_*.txt` and `Highlight_CurrentSplit.txt` are written for both RealTime and GameTime, by `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)).
-- Create directories once per recalculation, not per write.
-- Move file I/O to a background writer that keeps only the latest content per path. See [THR](Defects.md#thr--timer-events-may-arrive-off-the-ui-thread) and ATM.
-
-**Verify.** Repeat the 40-split measurement. Diff the output folder against a run from before the change: identical.
-
-**Docs.** architecture.md "Writing files", and the writing-files bullet in CLAUDE.md "Must-know before editing", if `MakeFile` gains a cache or a background writer.
+WRT's background writer needs [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit)'s error handling first, and could take in ATM. GEN edits `GenerateSubsplitLevels`, as do several items in [Defects.md](Defects.md).
 
 ## LSG — CalculateLiveSegment runs once per level
 
@@ -44,6 +27,23 @@ All of them are written synchronously, and in LiveSplit that happens on the UI t
 **Verify.** Output unchanged for a full run with subsplits.
 
 **Docs.** architecture.md "Per-level data", which notes the double build.
+
+## WRT — Changed files are written on the UI thread
+
+Every write happens synchronously inside the LiveSplit event, which runs on the UI thread. `MakeFile` already skips files whose contents haven't changed. But on a split, many files do change: the `SplitList\` window slides and the `CompletedSplits\` list grows, at every level and for both timing methods.
+
+**Evidence.** Measured 2026-10-15 with the headless harness in [testing.md](testing.md): 40 splits, every fourth a section end (two levels), every output on, a 2/2 list window. Each `Split()` took about 38 ms and wrote about 66 of the 159 files.
+
+**Plan.** Move file I/O to a background writer. `MakeFile` keeps its content check, then queues the write, and the worker writes only the latest content for each path. Before starting:
+
+- Do [WER](Defects.md#wer--file-write-errors-are-thrown-into-livesplit) first. An unhandled exception on a background thread ends LiveSplit, so the worker must catch every write error.
+- `Dispose` has to flush pending writes.
+- The headless harness needs a way to wait until the queue is empty before it reads files.
+- See [THR](Defects.md#thr--timer-events-may-arrive-off-the-ui-thread). The worker could also make writes atomic ([ATM](#atm--file-writes-arent-atomic)).
+
+**Verify.** Repeat the 40-split measurement: `Split()` time no longer grows with the number of files written. Snapshots after every step, taken after the queue drains, match a run from before the change.
+
+**Docs.** architecture.md "Writing files" (the last bullet says nothing is written in the background). The writing-files bullet in CLAUDE.md "Must-know before editing". testing.md, on waiting for writes.
 
 ## ATM — File writes aren't atomic
 

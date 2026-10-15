@@ -98,6 +98,11 @@ namespace LiveSplit.UI.Components {
 		}
 
 		void state_OnReset(object sender, TimerPhase e) {
+			// Write every file in full once per attempt
+			_runInfoFiles.ForgetWrittenFiles();
+			_timerFiles.ForgetWrittenFiles();
+			_splitFiles.ForgetWrittenFiles();
+			_splitListFiles.ForgetWrittenFiles();
 			WriteSplits();
 			CalculateSegments();
 		}

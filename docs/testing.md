@@ -125,6 +125,7 @@ Things to know:
 - **Advance the clock in steps of a second or less** when testing timer files. `HasTimerChanged` only compares the seconds component, so a jump of exactly a minute looks like no change.
 - **Real time.** Setting `AdjustedStartTime` only affects real time while the timer is `Running`; while paused, real time stays frozen. `model.Pause()` toggles between pause and resume.
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
+- **Don't delete output files mid-run.** `MakeFile` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
 - **Rebuild the component first.** The harness references `bin\Debug`, so it tests whatever was last built.
 - **Don't run it from the repo.** LiveSplit.Core saves speedrun.com's game list (about 2 MB) as `speedruncom_game_names.json` in the current directory once a run has a game name. Seen 2026-10-15.
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.OutputToFile.UI.Components.OutputToFile.TimeFormatter")`.
