@@ -1,10 +1,10 @@
 # Project and README
 
-Build setup and end-user documentation. The index is [TODO.md](TODO.md). Line numbers are as of commit `30d30fa`. [output-files.md](output-files.md) is the accurate reference to bring the README in line with.
+Build setup and end-user documentation. The index is [TODO.md](TODO.md). [output-files.md](output-files.md) is the accurate reference to bring the README in line with.
 
 ## LVL — README level folder names don't match the code
 
-The README says two dashes make `SansSubsplits_Level2`, and its tree shows `_Level2` and `_Level3` folders. The code names a middle level by its level number ([OutputToFileComponent.cs:952](../UI/Components/OutputToFileComponent.cs#L952)).
+The README says two dashes make `SansSubsplits_Level2`, and its tree shows `_Level2` and `_Level3` folders. The code names a middle level by its level number (`MakeFile` in [OutputWriter.cs](../UI/Components/OutputWriter.cs)).
 
 **Evidence.** Reproduced 2026-10-14: with splits at depths 0, 1 and 2, the code produced `SansSubsplits`, `SansSubsplits_Level1` and `AllSplits`.
 
@@ -48,7 +48,7 @@ Under `Timers\GameTime`, the tree lists only `SegmentTimer_AllSplits.txt`, but t
 
 ## HNT — LiveSplit references only resolve on this machine
 
-The LiveSplit references use a HintPath into `D:\Programs\Streaming\LiveSplit` ([csproj:35](../LiveSplit.OutputToFile.csproj#L35), [:48](../LiveSplit.OutputToFile.csproj#L48)), so the project won't build elsewhere.
+The LiveSplit references use a HintPath into `D:\Programs\Streaming\LiveSplit` (the `LiveSplit.Core` and `UpdateManager` references in [LiveSplit.OutputToFile.csproj](../LiveSplit.OutputToFile.csproj)), so the project won't build elsewhere.
 
 **Evidence.** Read.
 
@@ -72,7 +72,7 @@ The references aren't marked `<Private>false</Private>`, so `LiveSplit.Core.dll`
 
 ## VER — Version stuck at 1.0.0 with no update URL
 
-The version is 1.0.0 in [OutputToFileFactory.cs:30](../UI/Components/OutputToFileFactory.cs#L30) and in [AssemblyInfo.cs:36-37](../Properties/AssemblyInfo.cs#L36-L37), and `UpdateURL` is empty ([OutputToFileFactory.cs:23](../UI/Components/OutputToFileFactory.cs#L23)).
+The version is 1.0.0 in the factory's `Version` ([OutputToFileFactory.cs](../UI/Components/OutputToFileFactory.cs)) and in `AssemblyVersion`/`AssemblyFileVersion` ([AssemblyInfo.cs](../Properties/AssemblyInfo.cs)), and the factory's `UpdateURL` is empty.
 
 **Evidence.** Read.
 
@@ -84,7 +84,7 @@ The version is 1.0.0 in [OutputToFileFactory.cs:30](../UI/Components/OutputToFil
 
 ## RCC — Unused Release Candidate configuration
 
-The solution has a "Release Candidate" configuration that just maps to Release ([sln:11](../LiveSplit.OutputToFile.sln#L11)).
+The solution has a "Release Candidate" configuration that just maps to Release ([LiveSplit.OutputToFile.sln](../LiveSplit.OutputToFile.sln)).
 
 **Evidence.** Read.
 

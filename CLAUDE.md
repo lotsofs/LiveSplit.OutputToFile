@@ -21,7 +21,7 @@ Read the doc that matches the task before editing:
 | [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
 | [docs/DONE.md](docs/DONE.md) | Log of finished TODO items: what was done and when, newest first |
 
-Line numbers in the docs are as of commit `30d30fa`. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section, and add a row to docs/DONE.md. When you find a defect you aren't fixing now, add both.
+The docs refer to code by member name and file, not by line number. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section, and add a row to docs/DONE.md. When you find a defect you aren't fixing now, add both.
 
 ## Build / deploy
 
@@ -31,32 +31,48 @@ cp bin/Debug/LiveSplit.OutputToFile.dll "D:/Programs/Streaming/LiveSplit/Compone
 ```
 
 - This is an old-style (non-SDK) csproj. `dotnet build` works without Visual Studio as long as the .NET Framework 4.8 targeting pack is installed. The one expected build warning is CS0219 (`currentSplitIndex`).
+- Old-style also means the csproj lists every source file. A new `.cs` file needs its own `<Compile Include>` line, or it isn't built.
 - `LiveSplit.Core.dll` and `UpdateManager.dll` are referenced by HintPath `..\..\Programs\Streaming\LiveSplit\`, which is `D:\Programs\Streaming\LiveSplit`. The build fails if LiveSplit isn't installed there.
 - Deploying overwrites the DLL that LiveSplit actually loads. LiveSplit must be closed first, because it locks that DLL. `LiveSplitComponents.lnk` in the repo root is a gitignored shortcut to the `Components` folder. That folder also holds the user's `.backup` copies of older builds; leave them alone.
 - There are no tests and no linter. Verify changes headless (see docs/testing.md), or in LiveSplit.
 
 ## Must-know before editing
 
-All logic is in `UI/Components/OutputToFileComponent.cs`.
+The code is in `UI/Components/`:
+
+| File | Holds |
+|---|---|
+| `OutputToFileComponent.cs` | The LiveSplit side: timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
+| `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members, PB segment times and the stored deltas |
+| `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex` |
+| `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …) |
+| `TimerFiles.cs` | Writes `Timers\` |
+| `SplitFiles.cs` | Writes `CurrentSplit\` and `PreviousSplit\`, including the delta calculations and `Sign.txt` |
+| `SplitListFiles.cs` | Writes `SplitList\` and `CompletedSplits\` |
+| `Signs.cs` | The `Sign.txt` values |
+| `TimeFormatter.cs` | Time and delta strings |
+| `OutputToFileSettings.cs` | The settings control and its XML save/load |
 
 - **Levels.** A split's depth is its number of leading `-`. Level `lvl` contains the splits with depth ≤ `lvl`.
   - The **last** level holds every split and is tagged `AllSplits`. Level 0 is `SansSubsplits`; levels in between are `SansSubsplits_Level{n}`. With a single level, level 0 is `AllSplits`.
-  - `_splitLevelIndices[lvl]` maps **local** index → **global** index, i.e. into `State.Run`. Mixing the two up is a recurring bug source. Only at the last level are they the same.
-  - Golds exist only at the last level. Keep the `lvl == _splitLevels.Length - 1` guard on any gold output.
+  - `Levels[lvl].Indices` maps **local** index → **global** index, i.e. into `State.Run`. Mixing the two up is a recurring bug source. Only at the last level are they the same.
+  - Golds exist only at the last level. Keep the `lvl == Levels.Count - 1` guard on any gold output.
 - **Timer phases.** `GetCurrentSubsplitIndex` and `GetPreviousSubsplitIndex` return sentinel values depending on the phase (−1/−2 when not running, `Count`/`Count−1` when finished). Every write path needs correct output for NotRunning, Running/Paused and Ended. Otherwise files keep stale values.
-- **Stored deltas.** Deltas are stored at split time by `WriteSplitTimes` and read later by the split lists, so the call order in `WriteSplits()` matters. `CalculateSegments()` rebuilds every array and discards those stored deltas, and it runs on every cache-key change, including timer phase changes.
-- **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite.
-- **Writing files.** Always write through the `MakeFile` overloads and the `FILE_*` path templates (`{0}` timing method, `{1}` level tag). Paths use backslashes, so this is Windows-only.
-- **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`.
+- **Stored deltas.** Deltas are stored at split time by `WriteSplitTimes` and read later by the split lists, so the call order in `WriteSplits()` matters. `CalculateSegments()` regenerates the shared `SplitLevels` in place, rebuilding every array and discarding those stored deltas, and it runs on every cache-key change, including timer phase changes.
+- **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own cache, keyed on whole seconds.
+- **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
+- **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`.
 
 ## Making changes
 
 **Adding an output file:**
-1. Add a `FILE_*` template.
-2. Write it from the right `Write*` function, in every phase branch.
+1. Add a `FILE_*` template to the writer for its folder (see the file table above). Root files go in `RunInfoFiles`.
+2. Write it from that writer's `Write*` function, in every phase branch.
 3. If it's a list column, make it a `FILE_LIST_*` template and write it in `WriteSplitListLevel`. Both lists then get it.
 4. Write it once per timing method only if its path contains `{0}`.
 5. Document it in `docs/output-files.md` and `README.md`.
+
+A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels`, and call it from `WriteSplits()` or `Update()`.
 
 **Adding a setting** (`OutputToFileSettings`, a WinForms `UserControl` with its layout in `.Designer.cs`/`.resx`):
 1. Add the property, plus its default and `DataBindings.Add` call in the constructor. Binding is what updates the property from the control.

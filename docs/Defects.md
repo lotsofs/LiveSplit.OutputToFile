@@ -2,7 +2,7 @@
 
 Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.md).
 
-Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 by driving the built DLL headless against the real `LiveSplit.Core.dll` (see [testing.md](testing.md)) and reading back the files it wrote. "Read" means found by reading the code only. Where [testing.md](testing.md#regression-checks) has a regression check for an item, its row is marked with the item's code; update that row when the item is fixed.
+"Reproduced" means seen on 2026-10-14 by driving the built DLL headless against the real `LiveSplit.Core.dll` (see [testing.md](testing.md)) and reading back the files it wrote. "Read" means found by reading the code only. Where [testing.md](testing.md#regression-checks) has a regression check for an item, its row is marked with the item's code; update that row when the item is fixed.
 
 ## Dependencies between plans
 
@@ -14,7 +14,7 @@ Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 b
 
 ## WER — File write errors are thrown into LiveSplit
 
-`MakeFile` ([OutputToFileComponent.cs:976-984](../UI/Components/OutputToFileComponent.cs#L976-L984)) has no try/catch, so any I/O error escapes into whichever LiveSplit call triggered the write. LiveSplit then skips any event handlers registered after this component's (see [livesplit-notes.md](livesplit-notes.md#exceptions-verified)).
+`MakeFile` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) has no try/catch, so any I/O error escapes into whichever LiveSplit call triggered the write. LiveSplit then skips any event handlers registered after this component's (see [livesplit-notes.md](livesplit-notes.md#exceptions-verified)).
 
 **Evidence.** Reproduced 2026-10-14: with one output file locked by another process, `TimerModel.Split()` threw `IOException` to its caller. The split itself still registered. Other triggers, read only: characters that are invalid in a path in the folder setting (on .NET Framework `Path.Combine` throws, and would do so on every `Update()`), a missing drive, or no write permission.
 
@@ -26,12 +26,12 @@ Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 b
 
 ## NUL — Sign reports a gold whenever the gold delta is null
 
-[:855](../UI/Components/OutputToFileComponent.cs#L855) and [:861](../UI/Components/OutputToFileComponent.cs#L861) treat `goldDelta == null` as a gold. It is null in cases that are not golds:
+Both `Sign.txt` chains in `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)), mid-run and at the finish, treat `goldDelta == null` as a gold. It is null in cases that are not golds:
 
-- At every subsplit level, because `CalculatePreviousGoldDelta` returns null there ([:385](../UI/Components/OutputToFileComponent.cs#L385)). So `PreviousSplit\SansSubsplits*\*\Sign.txt` always says `GoldAhead`/`GoldBehind`, or `PBGold`/`NoPBGold` at the finish.
+- At every subsplit level, because `CalculatePreviousGoldDelta` returns null there. So `PreviousSplit\SansSubsplits*\*\Sign.txt` always says `GoldAhead`/`GoldBehind`, or `PBGold`/`NoPBGold` at the finish.
 - On the split after a skipped split.
 
-Only "no best segment exists yet" should count as a gold. The highlight code ([:587](../UI/Components/OutputToFileComponent.cs#L587), [:721](../UI/Components/OutputToFileComponent.cs#L721)) treats null as "not a gold", so `Sign.txt` and `Highlight_Gold.txt` also disagree.
+Only "no best segment exists yet" should count as a gold. The highlight chain in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) treats null as "not a gold", so `Sign.txt` and `Highlight_Gold.txt` also disagree.
 
 **Evidence.** Reproduced 2026-10-14.
 
@@ -43,7 +43,7 @@ Only "no best segment exists yet" should count as a gold. The highlight code ([:
 
 ## PAU — Pausing or finishing wipes stored deltas
 
-`TimerPhase` is one of the cache keys in `Update()` ([:525](../UI/Components/OutputToFileComponent.cs#L525)). Any phase change (Running→Paused, Paused→Running, Running→Ended) therefore runs `CalculateSegments()` ([:527](../UI/Components/OutputToFileComponent.cs#L527)). That recreates every `SplitLevel` array ([:256-259](../UI/Components/OutputToFileComponent.cs#L256-L259), [:300-304](../UI/Components/OutputToFileComponent.cs#L300-L304)), and with them the deltas `WriteSplitTimes` stored at each split. Changing Splits before/after or the folder mid-run does the same.
+`TimerPhase` is one of the cache keys in `Update()`. Any phase change (Running→Paused, Paused→Running, Running→Ended) therefore runs `CalculateSegments()`. That recreates every `SplitLevel` array (in `GenerateSubsplitLevels` and `CalculatePBSegments`, [SplitLevels.cs](../UI/Components/SplitLevels.cs)), and with them the deltas `WriteSplitTimes` stored at each split. Changing Splits before/after or the folder mid-run does the same.
 
 **Evidence.** Reproduced 2026-10-14: after one pause, every completed split except the latest showed `-` in `Delta_*.txt` and moved to `Highlight_BehindLost.txt`. After finishing, every split except the last was BehindLost.
 
@@ -55,7 +55,7 @@ Only "no best segment exists yet" should count as a gold. The highlight code ([:
 
 ## RET — AllSplits current and previous files stop updating at finish and reset
 
-`WriteSplitInformation` uses `return` instead of `continue` in its NotRunning and Ended branches ([:911](../UI/Components/OutputToFileComponent.cs#L911), [:919](../UI/Components/OutputToFileComponent.cs#L919)). Only level 0 (`SansSubsplits`) gets written, so with subsplits the other levels stay stale. The same branches never write `CurrentSplit\*\Name_Raw.txt`, so it keeps the last split's raw name after a finish or reset, even at level 0.
+`WriteSplitInformation` uses `return` instead of `continue` in its NotRunning and Ended branches ([SplitFiles.cs](../UI/Components/SplitFiles.cs)). Only level 0 (`SansSubsplits`) gets written, so with subsplits the other levels stay stale. The same branches never write `CurrentSplit\*\Name_Raw.txt`, so it keeps the last split's raw name after a finish or reset, even at level 0.
 
 **Evidence.** Reproduced 2026-10-14: after a finish and a reset, `CurrentSplit\AllSplits\Index.txt` was still `4`, `Name.txt` was still the last split, and `PreviousSplit\AllSplits\Name.txt` was still the second-to-last split.
 
@@ -67,7 +67,7 @@ Only "no best segment exists yet" should count as a gold. The highlight code ([:
 
 ## IDX — SansSubsplits segment timer measures from the wrong split
 
-[:481](../UI/Components/OutputToFileComponent.cs#L481) uses a level-local index as a global one (`State.Run[previousSplitIndex]`). The `indices` list fetched at [:469](../UI/Components/OutputToFileComponent.cs#L469) is never used.
+`WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)) uses a level-local index as a global one (`State.Run[previousSplitIndex]`). The `indices` list it fetches for the level is never used.
 
 **Evidence.** Reproduced 2026-10-14: top-level split at 28 s, first subsplit at 9.5 s, timer at 33 s. `SegmentTimer_SansSubsplits.txt` showed `0:23` instead of `0:05`.
 
@@ -79,9 +79,9 @@ Only "no best segment exists yet" should count as a gold. The highlight code ([:
 
 ## CLM — A first split with two or more dashes is dropped
 
-The depth clamp loop at [:232](../UI/Components/OutputToFileComponent.cs#L232) starts at `i = 1`, so split 0 is never clamped. When no split has exactly one dash, a first split with 2+ dashes keeps a depth that no level includes, and the run crashes at the finish.
+The depth clamp loop in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)) starts at `i = 1`, so split 0 is never clamped. When no split has exactly one dash, a first split with 2+ dashes keeps a depth that no level includes, and the run crashes at the finish.
 
-**Evidence.** Reproduced 2026-10-14: with splits `--Intro`, `A`, `B`, the `AllSplits` output contained only A and B. The final split then threw `IndexOutOfRangeException` in `CalculatePreviousGoldDelta` ([:390](../UI/Components/OutputToFileComponent.cs#L390)).
+**Evidence.** Reproduced 2026-10-14: with splits `--Intro`, `A`, `B`, the `AllSplits` output contained only A and B. The final split then threw `IndexOutOfRangeException` in `CalculatePreviousGoldDelta`.
 
 **Plan.** Start the loop at 0.
 
@@ -91,7 +91,7 @@ The depth clamp loop at [:232](../UI/Components/OutputToFileComponent.cs#L232) s
 
 ## EMP — An empty or dash-only split name crashes the component
 
-`name[0]` at [:274](../UI/Components/OutputToFileComponent.cs#L274) and in `GetSectionHeader` ([:285](../UI/Components/OutputToFileComponent.cs#L285)) assumes a non-empty string. A split named `""` crashes the constructor. A split named `-` crashes once its dash is stripped, if there are 2+ levels.
+`name[0]` in `GenerateSubsplitLevels` and in `GetSectionHeader` (both in [SplitLevels.cs](../UI/Components/SplitLevels.cs)) assumes a non-empty string. A split named `""` crashes the constructor. A split named `-` crashes once its dash is stripped, if there are 2+ levels.
 
 **Evidence.** Reproduced 2026-10-14: `IndexOutOfRangeException` in `String.get_Chars`.
 
@@ -103,7 +103,7 @@ The depth clamp loop at [:232](../UI/Components/OutputToFileComponent.cs#L232) s
 
 ## EDT — Editing splits isn't picked up until the next run starts
 
-The cache keys in `Update()` ([:518-525](../UI/Components/OutputToFileComponent.cs#L518-L525)) don't cover split count, names or PB times.
+The cache keys in `Update()` don't cover split count, names or PB times.
 
 **Evidence.** Reproduced 2026-10-14: after adding a split and renaming one, `TotalSplits_AllSplits.txt` and `Names.txt` still showed the old splits.
 
@@ -115,7 +115,7 @@ The cache keys in `Update()` ([:518-525](../UI/Components/OutputToFileComponent.
 
 ## KEY — Typing a folder path creates a folder per keystroke
 
-The textbox updates `FolderPath` on every change ([OutputToFileSettings.cs:31](../UI/Components/OutputToFileSettings.cs#L31)), and `FolderPath` is a cache key, so each keystroke writes a full set of files to a new path.
+The textbox updates `FolderPath` on every change (its `OnPropertyChanged` binding in the `OutputToFileSettings` constructor, [OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)), and `FolderPath` is a cache key, so each keystroke writes a full set of files to a new path.
 
 **Evidence.** Reproduced 2026-10-14: typing `…\Stream` created `S`, `St`, `Str` and `Stream`, each holding a full set of output files.
 
@@ -127,7 +127,7 @@ The textbox updates `FolderPath` on every change ([OutputToFileSettings.cs:31](.
 
 ## NEG — Negative deltas get a different precision from positive ones
 
-[TimeFormatter.cs:55](../UI/Components/TimeFormatter.cs#L55) passes the negative value to `DetermineTimeFormat`, so every negative delta counts as "under 100 ms" and gets centiseconds.
+`DeltaString` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)) passes the negative value to `DetermineTimeFormat`, so every negative delta counts as "under 100 ms" and gets centiseconds.
 
 **Evidence.** Reproduced 2026-10-14: `+5.2` vs `-5.23`, and `+1:05` vs `-1:05.20`.
 
@@ -139,7 +139,7 @@ The textbox updates `FolderPath` on every change ([OutputToFileSettings.cs:31](.
 
 ## UND — Undo to the first split leaves GoldDifference stale
 
-The "no previous split" branch ([:865-871](../UI/Components/OutputToFileComponent.cs#L865-L871)) resets every other `PreviousSplit` file, but not `PreviousSplit\AllSplits\*\GoldDifference.txt`.
+The "no previous split" branch of `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) resets every other `PreviousSplit` file, but not `PreviousSplit\AllSplits\*\GoldDifference.txt`.
 
 **Evidence.** Reproduced 2026-10-14.
 
@@ -151,7 +151,7 @@ The "no previous split" branch ([:865-871](../UI/Components/OutputToFileComponen
 
 ## SKP — Skipped splits are highlighted as BehindLost
 
-The highlight chain in `WriteSplitListLevel` ([:587-596](../UI/Components/OutputToFileComponent.cs#L587-L596)) falls through to BehindLost whenever a PB time exists, even for a split with no time.
+The highlight chain in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)) falls through to BehindLost whenever a PB time exists, even for a split with no time.
 
 **Evidence.** Reproduced 2026-10-14.
 
@@ -163,7 +163,7 @@ The highlight chain in `WriteSplitListLevel` ([:587-596](../UI/Components/Output
 
 ## SEC — Run timer file can get stuck after a reset
 
-`HasTimerChanged` ([:430-436](../UI/Components/OutputToFileComponent.cs#L430-L436)) compares `time.Seconds`, the 0–59 seconds component, rather than total seconds. After resetting at 1:00.5, the seconds component is 0 both before and after, so `Timers\*\RunTimer.txt` stays at `1:00` until the next start.
+`HasTimerChanged` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)) compares `time.Seconds`, the 0–59 seconds component, rather than total seconds. After resetting at 1:00.5, the seconds component is 0 both before and after, so `Timers\*\RunTimer.txt` stays at `1:00` until the next start.
 
 **Evidence.** Reproduced 2026-10-14.
 
@@ -187,7 +187,7 @@ The highlight chain in `WriteSplitListLevel` ([:587-596](../UI/Components/Output
 
 ## LAG — Segment timer ticks over late
 
-Timer files are only rewritten when the *run* timer's seconds change ([:439](../UI/Components/OutputToFileComponent.cs#L439)). The segment timer's second boundaries are offset by the fraction at which the previous split happened, so it can lag by up to about a second. After the run ends it shows `0:00`; it should probably show the last segment's time or `-`.
+Timer files are only rewritten when the *run* timer's seconds change (`HasTimerChanged` in [TimerFiles.cs](../UI/Components/TimerFiles.cs)). The segment timer's second boundaries are offset by the fraction at which the previous split happened, so it can lag by up to about a second. After the run ends it shows `0:00`; it should probably show the last segment's time or `-`.
 
 **Evidence.** The lag was read. The `0:00` after the finish was reproduced 2026-10-14.
 
@@ -199,7 +199,7 @@ Timer files are only rewritten when the *run* timer's seconds change ([:439](../
 
 ## DUP — An extra duplicate level when only the last split has dashes
 
-Levels are counted ([:224-229](../UI/Components/OutputToFileComponent.cs#L224-L229)) before the last split is forced to depth 0 ([:237](../UI/Components/OutputToFileComponent.cs#L237)). Splits `A`, `B`, `-C` therefore produce a `SansSubsplits` folder identical to `AllSplits`.
+In `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), levels are counted before the last split is forced to depth 0. Splits `A`, `B`, `-C` therefore produce a `SansSubsplits` folder identical to `AllSplits`.
 
 **Evidence.** Read.
 

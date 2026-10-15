@@ -126,6 +126,7 @@ Things to know:
 - **Real time.** Setting `AdjustedStartTime` only affects real time while the timer is `Running`; while paused, real time stays frozen. `model.Pause()` toggles between pause and resume.
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
 - **Rebuild the component first.** The harness references `bin\Debug`, so it tests whatever was last built.
+- **Don't run it from the repo.** LiveSplit.Core saves speedrun.com's game list (about 2 MB) as `speedruncom_game_names.json` in the current directory once a run has a game name. Seen 2026-10-15.
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.OutputToFile.UI.Components.OutputToFile.TimeFormatter")`.
 
 ## Regression checks

@@ -1,14 +1,14 @@
 # Cleanup
 
-Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md). Line numbers are as of commit `30d30fa`.
+Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
 DUR and NSP both edit `TimeFormatter.cs`.
 
 ## DEF — Three different sets of settings defaults
 
-- Designer: 6 before, 4 after, Completed splits checked ([Designer.cs:161](../UI/Components/OutputToFileSettings.Designer.cs#L161), [:231](../UI/Components/OutputToFileSettings.Designer.cs#L231), [:244](../UI/Components/OutputToFileSettings.Designer.cs#L244)).
-- Constructor: 10, 10, unchecked ([OutputToFileSettings.cs:24-29](../UI/Components/OutputToFileSettings.cs#L24-L29)).
-- `SetSettings` fallback: 3, 2 ([:75-76](../UI/Components/OutputToFileSettings.cs#L75-L76)).
+- Designer: 6 before, 4 after, Completed splits checked (`InitializeComponent` in [OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)).
+- Constructor: 10, 10, unchecked (the `OutputToFileSettings` constructor in [OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)).
+- `SetSettings` fallback: 3, 2.
 
 **Evidence.** Read.
 
@@ -20,7 +20,7 @@ DUR and NSP both edit `TimeFormatter.cs`.
 
 ## BRW — Browse opens the parent of the current folder
 
-[OutputToFileSettings.cs:87](../UI/Components/OutputToFileSettings.cs#L87) should use `FolderPath` rather than `Path.GetDirectoryName(FolderPath)`. The `FolderBrowserDialog` is never disposed either.
+`buttonFolderPath_Click` ([OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)) should use `FolderPath` rather than `Path.GetDirectoryName(FolderPath)`. The `FolderBrowserDialog` is never disposed either.
 
 **Evidence.** Read.
 
@@ -32,7 +32,7 @@ DUR and NSP both edit `TimeFormatter.cs`.
 
 ## HND — Dead change handlers in the settings control
 
-These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChanged`, `checkBoxOutputSubsplits_CheckedChanged`, `checkBoxOutputCompletedSplits_CheckedChanged`, `numericUpDownSplitListBefore_ValueChanged` and `numericUpDownSplitListAfter_ValueChanged`. Data binding does their job. The Subsplits one also sets the wrong property ([:115](../UI/Components/OutputToFileSettings.cs#L115)). `OutputToFileSettings_Load` is connected but empty.
+These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChanged`, `checkBoxOutputSubsplits_CheckedChanged`, `checkBoxOutputCompletedSplits_CheckedChanged`, `numericUpDownSplitListBefore_ValueChanged` and `numericUpDownSplitListAfter_ValueChanged`. Data binding does their job. The Subsplits one also sets the wrong property (`OutputSplitList`). `OutputToFileSettings_Load` is connected but empty.
 
 **Evidence.** Read: the Designer only wires up `buttonFolderPath_Click`, `checkBoxOutputSplitList_CheckedChanged` and `Load`.
 
@@ -44,7 +44,7 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 ## SNT — Sentinel indices instead of explicit phase handling
 
-`GetPreviousSubsplitIndex` returns −2 when the timer isn't running. `WriteSplitTimes` ([:829](../UI/Components/OutputToFileComponent.cs#L829)) relies on −2 ≠ −1 to reach the branch that writes `-`. The "shouldn't happen" −3 ([:803](../UI/Components/OutputToFileComponent.cs#L803), [:820](../UI/Components/OutputToFileComponent.cs#L820)) would surface as an index crash.
+`GetPreviousSubsplitIndex` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) returns −2 when the timer isn't running. `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) relies on −2 ≠ −1 to reach the branch that writes `-`. The "shouldn't happen" −3 that both index helpers return would surface as an index crash.
 
 **Evidence.** Read.
 
@@ -68,7 +68,7 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 ## IND — Names_Indent arrays are initialised at the wrong end
 
-In the `Names_Indent` code in `WriteSplitListLevel` ([:639-642](../UI/Components/OutputToFileComponent.cs#L639-L642)), the init loop fills entries `lvl..Length-1`, but the code uses entries `0..lvl`. It only works because `null + string` gives a string in C#.
+In the `Names_Indent` code in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)), the init loop fills entries `lvl..Length-1`, but the code uses entries `0..lvl`. It only works because `null + string` gives a string in C#.
 
 **Evidence.** Read.
 
@@ -80,7 +80,7 @@ In the `Names_Indent` code in `WriteSplitListLevel` ([:639-642](../UI/Components
 
 ## DUR — DurationString and TimerString are identical
 
-`TimeFormatter.TimerString` is the same code as `DurationString` and has no callers. The `HasValue ? … : "-"` check at [OutputToFileComponent.cs:889](../UI/Components/OutputToFileComponent.cs#L889) repeats null handling that `DurationString` already does.
+`TimeFormatter.TimerString` is the same code as `DurationString` and has no callers. The `HasValue ? … : "-"` check for `GoldTime.txt` in `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) repeats null handling that `DurationString` already does.
 
 **Evidence.** Read.
 
@@ -92,11 +92,11 @@ In the `Names_Indent` code in `WriteSplitListLevel` ([:639-642](../UI/Components
 
 ## NSP — TimeFormatter has its own namespace
 
-`TimeFormatter` is in `LiveSplit.OutputToFile.UI.Components.OutputToFile` ([TimeFormatter.cs:8](../UI/Components/TimeFormatter.cs#L8)), while everything else is in `LiveSplit.UI.Components`.
+`TimeFormatter` is in `LiveSplit.OutputToFile.UI.Components.OutputToFile` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)), while everything else is in `LiveSplit.UI.Components`.
 
 **Evidence.** Read.
 
-**Plan.** Move it to `LiveSplit.UI.Components` and drop the matching `using` lines from the component.
+**Plan.** Move it to `LiveSplit.UI.Components` and drop the matching `using` lines from `OutputToFileComponent`, `TimerFiles`, `SplitFiles` and `SplitListFiles`.
 
 **Verify.** Build.
 
@@ -104,7 +104,7 @@ In the `Names_Indent` code in `WriteSplitListLevel` ([:639-642](../UI/Components
 
 ## SVR — Saved settings Version is never used
 
-The saved `Version` (`0.1`) is read into a variable that's never used ([OutputToFileSettings.cs:72](../UI/Components/OutputToFileSettings.cs#L72)).
+The saved `Version` (`0.1`) is read into a variable in `SetSettings` ([OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)) that's never used.
 
 **Evidence.** Read.
 
@@ -116,7 +116,7 @@ The saved `Version` (`0.1`) is read into a variable that's never used ([OutputTo
 
 ## USN — Unused usings
 
-Including an accidental `using static System.Windows.Forms.AxHost` ([:2-13](../UI/Components/OutputToFileComponent.cs#L2-L13)). Most of the usings in `TimeFormatter.cs` are unused too.
+In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs), including an accidental `using static System.Windows.Forms.AxHost`. Most of the usings in `TimeFormatter.cs` are unused too.
 
 **Evidence.** Read.
 
@@ -128,10 +128,10 @@ Including an accidental `using static System.Windows.Forms.AxHost` ([:2-13](../U
 
 ## UNU — Unused members and variables
 
-- `InternalComponent` ([:18](../UI/Components/OutputToFileComponent.cs#L18)).
-- `currentSplitIndex` ([:814](../UI/Components/OutputToFileComponent.cs#L814)), which gave the build's only warning on 2026-10-14.
-- `level` in `WriteSplitInformation` ([:902](../UI/Components/OutputToFileComponent.cs#L902)).
-- `Settings.Mode`, which is set ([:172](../UI/Components/OutputToFileComponent.cs#L172)) but never read.
+- `InternalComponent` in `OutputToFileComponent`.
+- `currentSplitIndex` in `GetCurrentSubsplitIndex` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)), which gives the build's only warning, CS0219.
+- `level` in `WriteSplitInformation` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)).
+- `Settings.Mode`, which `GetSettingsControl` sets but nothing reads.
 
 **Evidence.** Read.
 
@@ -143,7 +143,7 @@ Including an accidental `using static System.Windows.Forms.AxHost` ([:2-13](../U
 
 ## SGN — Some Signs values are never written
 
-`Undetermined`, `Gained`, `Lost` and `Gold` ([:38-60](../UI/Components/OutputToFileComponent.cs#L38-L60)).
+`Undetermined`, `Gained`, `Lost` and `Gold`, in [Signs.cs](../UI/Components/Signs.cs).
 
 **Evidence.** Read.
 
@@ -155,7 +155,7 @@ Including an accidental `using static System.Windows.Forms.AxHost` ([:2-13](../U
 
 ## CMT — Commented-out code
 
-At [:250-253](../UI/Components/OutputToFileComponent.cs#L250-L253), [:278-280](../UI/Components/OutputToFileComponent.cs#L278-L280), [:468](../UI/Components/OutputToFileComponent.cs#L468), [:956-958](../UI/Components/OutputToFileComponent.cs#L956-L958) and [:970-972](../UI/Components/OutputToFileComponent.cs#L970-L972).
+Two blocks in `GenerateSubsplitLevels` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), one line in `WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)), and one block in each of the two template-filling `MakeFile` overloads ([OutputWriter.cs](../UI/Components/OutputWriter.cs)).
 
 **Evidence.** Read.
 
@@ -167,10 +167,12 @@ At [:250-253](../UI/Components/OutputToFileComponent.cs#L250-L253), [:278-280](.
 
 ## TPL — Wrong or misleading template comments
 
-- `DrawVertical` says "two rows" ([:168](../UI/Components/OutputToFileComponent.cs#L168)).
-- `Update` says "tell the internal component to display it" ([:508-510](../UI/Components/OutputToFileComponent.cs#L508-L510)).
-- `GetSettingsHashCode` says "I do not know what this is for" ([:998](../UI/Components/OutputToFileComponent.cs#L998)). LiveSplit uses that hash only to decide whether to redraw the layout.
-- The factory's "Fill in this empty string" comments ([OutputToFileFactory.cs:25-27](../UI/Components/OutputToFileFactory.cs#L25-L27)).
+In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs) unless another file is named:
+
+- `DrawVertical` says "two rows".
+- `Update` says "tell the internal component to display it".
+- `GetSettingsHashCode` says "I do not know what this is for". LiveSplit uses that hash only to decide whether to redraw the layout.
+- The factory's "Fill in this empty string" comments on `UpdateURL` and `XMLURL` ([OutputToFileFactory.cs](../UI/Components/OutputToFileFactory.cs)).
 
 **Evidence.** Read.
 
@@ -182,7 +184,7 @@ At [:250-253](../UI/Components/OutputToFileComponent.cs#L250-L253), [:278-280](.
 
 ## LAY — Settings layout leftovers
 
-`tableLayoutPanelTop` has 5 rows for 3 controls ([Designer.cs:67-72](../UI/Components/OutputToFileSettings.Designer.cs#L67-L72)), and tab order goes Folder → Split list → Output.
+`tableLayoutPanelTop` has 5 rows for 3 controls ([OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)), and tab order goes Folder → Split list → Output.
 
 **Evidence.** Read.
 

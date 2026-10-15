@@ -58,7 +58,14 @@
     <Compile Include="UI\Components\OutputToFileSettings.Designer.cs">
       <DependentUpon>OutputToFileSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Components\OutputWriter.cs" />
+    <Compile Include="UI\Components\RunInfoFiles.cs" />
+    <Compile Include="UI\Components\Signs.cs" />
+    <Compile Include="UI\Components\SplitFiles.cs" />
+    <Compile Include="UI\Components\SplitLevels.cs" />
+    <Compile Include="UI\Components\SplitListFiles.cs" />
     <Compile Include="UI\Components\TimeFormatter.cs" />
+    <Compile Include="UI\Components\TimerFiles.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="UI\Components\OutputToFileSettings.resx">

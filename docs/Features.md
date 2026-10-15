@@ -1,6 +1,6 @@
 # Features and limitations
 
-Things the component doesn't do yet. The index is [TODO.md](TODO.md). Line numbers are as of commit `30d30fa`.
+Things the component doesn't do yet. The index is [TODO.md](TODO.md).
 
 TST makes the Verify steps in the other detail docs repeatable, so it pays to do it early. Its test project will need [HNT](Project.md#hnt--livesplit-references-only-resolve-on-this-machine) to build anywhere but this machine.
 
@@ -32,7 +32,7 @@ Deltas always compare against Personal Best. The comparison selected in LiveSpli
 
 ## FMT — Time format is fixed
 
-`TimeFormatter.DetermineTimeFormat` ([TimeFormatter.cs:35](../UI/Components/TimeFormatter.cs#L35)) picks the precision from hard-coded thresholds, and durations always use `MSS`. There's no setting. A `// TODO` comment above it ([:34](../UI/Components/TimeFormatter.cs#L34)) says the same; this item replaces it.
+`TimeFormatter.DetermineTimeFormat` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)) picks the precision from hard-coded thresholds, and durations always use `MSS`. There's no setting. A `// TODO` comment above it says the same; this item replaces it.
 
 **Evidence.** Read.
 
@@ -44,7 +44,7 @@ Deltas always compare against Personal Best. The comparison selected in LiveSpli
 
 ## GLD — Golds only exist at the AllSplits level
 
-`CalculatePreviousGoldDelta` returns null for every other level ([OutputToFileComponent.cs:385](../UI/Components/OutputToFileComponent.cs#L385)), and gold files are only written for `AllSplits`. LiveSplit only keeps a best segment (`BestSegmentTime`) for each individual split, so a section that spans several splits has no gold of its own.
+`CalculatePreviousGoldDelta` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) returns null for every other level, and gold files are only written for `AllSplits`. LiveSplit only keeps a best segment (`BestSegmentTime`) for each individual split, so a section that spans several splits has no gold of its own.
 
 A section's gold is the fastest time the whole section took **within a single attempt**. It is not the sum of its splits' golds. What happens in one split can affect a later one, so the sum of golds is a lower bound, not a time anyone actually ran.
 
@@ -60,7 +60,7 @@ A section's gold is the fastest time the whole section took **within a single at
 **Plan.**
 
 - Add `BestSegmentTimes` to `SplitLevel`, per method and by local index, next to `PbSegmentTimes`.
-- Fill it in a new `CalculateBestSegments(state, method)`, called from `CalculateSegments()` after `CalculatePBSegments`.
+- Fill it in a new `SplitLevels.CalculateBestSegments(run, method)`, called from `CalculateSegments()` after `CalculatePBSegments`.
   - **When:** history only changes on reset, so once per recalculation is enough, never per split or per `Update()`. The cost is one pass over attempts × splits, which is tens of thousands of lookups for the largest history above.
   - **Range:** a member covers global splits `prev+1 .. global`. `prev` is the previous member's global index, or −1 for local index 0, as in `CalculatePBSegments`.
   - **Single-split member:** `BestSegmentTime`. This keeps `AllSplits` output unchanged. It also respects golds edited by hand or kept after history was cleared.
@@ -68,7 +68,7 @@ A section's gold is the fastest time the whole section took **within a single at
   - **Which attempts:** iterate `run[0].SegmentHistory.Keys`. Every attempt that recorded anything has a key on split 0, and the imported-gold keys don't. For each attempt, fill one reused `TimeSpan?[run.Count]` with its split times, stopping at the first split without a key. Then update every level's best in place.
   - **No qualifying attempt:** null, meaning no gold yet. That is the same as a split with no best segment.
 - `CalculatePreviousGoldDelta` takes `prevLocalIndex`, like `CalculatePreviousSegmentDelta` does. It drops the level guard and returns `LiveSegmentTimes − BestSegmentTimes` at that index.
-- Drop the `lvl == _splitLevels.Length - 1` guards on gold output in `WriteSplitTimes` and `WriteSplitListLevel`. `GoldTime.txt` and `Time_Gold_Upcoming.txt` read `BestSegmentTimes`. They currently use `State.CurrentSplit.BestSegmentTime`, which is the wrong split above `AllSplits`.
+- Drop the `lvl == Levels.Count - 1` guards on gold output in `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) and `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)). `GoldTime.txt` and `Time_Gold_Upcoming.txt` read `BestSegmentTimes`. They currently use `State.CurrentSplit.BestSegmentTime`, which is the wrong split above `AllSplits`.
 - Related items:
   - Fix [UND](Defects.md#und--undo-to-the-first-split-leaves-golddifference-stale) in the same change, because it then affects every level.
   - [NUL](Defects.md#nul--sign-reports-a-gold-whenever-the-gold-delta-is-null)'s plan limits "is a gold" to `AllSplits`. Extend it to every level.
