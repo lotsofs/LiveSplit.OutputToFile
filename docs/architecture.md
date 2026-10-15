@@ -43,10 +43,9 @@ LiveSplit fires every event *after* it has updated the timer state. A handler th
 
 1. `WriteSplitInformation()`: names and indexes.
 2. `WriteSplitTimes(RealTime)`, `WriteSplitTimes(GameTime)`: the CurrentSplit and PreviousSplit time files. These also **store** the run, segment and gold deltas of the previous split.
-3. `WriteSplitList(RealTime)`, `WriteSplitList(GameTime)`.
-4. `WriteCompletedSplitList(RealTime)`, `WriteCompletedSplitList(GameTime)`.
+3. `WriteSplitLists(RealTime)`, `WriteSplitLists(GameTime)`: for each level, the `SplitList\` window and the `CompletedSplits\` list. `WriteSplitLists` works out each list's range of splits, and `WriteSplitListLevel` writes the files for that range.
 
-Steps 3 and 4 read the deltas stored in step 2, so the order matters.
+Step 3 reads the deltas stored in step 2, so the order matters.
 
 ## Subsplit levels
 
@@ -160,6 +159,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
   - `{0}` the timing method (`RealTime` / `GameTime`);
   - `{1}` the level tag;
   - `{2}` the indent index, `Names_Indent_*` only. Those files are pre-formatted with `{2}` filled in and `{1}` re-inserted as a literal ([:651](../UI/Components/OutputToFileComponent.cs#L651)).
+- The split list templates (`FILE_LIST_*`) are relative to the list folder. `WriteSplitListLevel` prefixes them with `FOLDER_SPLITLIST` (`SplitList\`) or `FOLDER_COMPLETEDSPLITS` (`CompletedSplits\`), so both lists write the same files.
 - There are three `MakeFile` overloads ([:943-984](../UI/Components/OutputToFileComponent.cs#L943-L984)):
   - `(template, contents, method?, level)` fills `{0}` and `{1}`;
   - `(template, contents, method)` fills `{0}`;

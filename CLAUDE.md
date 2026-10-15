@@ -47,14 +47,14 @@ All logic is in `UI/Components/OutputToFileComponent.cs`.
 - **Stored deltas.** Deltas are stored at split time by `WriteSplitTimes` and read later by the split lists, so the call order in `WriteSplits()` matters. `CalculateSegments()` rebuilds every array and discards those stored deltas, and it runs on every cache-key change, including timer phase changes.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite.
 - **Writing files.** Always write through the `MakeFile` overloads and the `FILE_*` path templates (`{0}` timing method, `{1}` level tag). Paths use backslashes, so this is Windows-only.
-- **Two list writers.** `WriteSplitList` and `WriteCompletedSplitList` are near-duplicates. Mirror changes in both.
+- **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`.
 
 ## Making changes
 
 **Adding an output file:**
 1. Add a `FILE_*` template.
 2. Write it from the right `Write*` function, in every phase branch.
-3. If it's a list column, add it to both list writers.
+3. If it's a list column, make it a `FILE_LIST_*` template and write it in `WriteSplitListLevel`. Both lists then get it.
 4. Write it once per timing method only if its path contains `{0}`.
 5. Document it in `docs/output-files.md` and `README.md`.
 

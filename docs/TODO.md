@@ -39,7 +39,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [DRY](Cleanup.md#dry--split-list-writers-are-near-duplicates) | Split list | `WriteSplitList` and `WriteCompletedSplitList` are about 110 near-identical lines each; extract one method | Medium |
 | [DEF](Cleanup.md#def--three-different-sets-of-settings-defaults) | Settings | The Designer, the constructor and the `SetSettings` fallbacks each have different defaults (6/4, 10/10, 3/2; Completed splits on or off) | Low |
 | [BRW](Cleanup.md#brw--browse-opens-the-parent-of-the-current-folder) | Settings | Browse opens the parent of the current folder, and the dialog is never disposed | Low |
 | [HND](Cleanup.md#hnd--dead-change-handlers-in-the-settings-control) | Settings | Unconnected `CheckedChanged`/`ValueChanged` handlers (one sets the wrong property) and an empty `Load` handler | Low |

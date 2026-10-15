@@ -2,19 +2,7 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md). Line numbers are as of commit `30d30fa`.
 
-Do DRY before [SKP](Defects.md#skp--skipped-splits-are-highlighted-as-behindlost) and before any other change to the split list output, so that each change is made once. DUR and NSP both edit `TimeFormatter.cs`.
-
-## DRY — Split list writers are near-duplicates
-
-`WriteSplitList` and `WriteCompletedSplitList` are about 110 nearly identical lines each ([:541-654](../UI/Components/OutputToFileComponent.cs#L541-L654), [:656-788](../UI/Components/OutputToFileComponent.cs#L656-L788)). Only the `first`/`last` range and the file names differ, so every fix to one has to be mirrored in the other.
-
-**Evidence.** Read.
-
-**Plan.** Extract one method that takes the range and the output folder (`SplitList` or `CompletedSplits`; the file names under each are the same). Keep the `FILE_*` templates as the single place paths are defined.
-
-**Verify.** For a full run with subsplits and both outputs on, the output folder is identical before and after.
-
-**Docs.** CLAUDE.md "Must-know before editing" (the two-list-writers bullet) and "Making changes" (step 3 of adding an output file). architecture.md "Writing files".
+DUR and NSP both edit `TimeFormatter.cs`.
 
 ## DEF — Three different sets of settings defaults
 
@@ -72,7 +60,7 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 **Evidence.** Reproduced 2026-10-14.
 
-**Plan.** Stop writing them (simplest after DRY), or document that they're blank.
+**Plan.** Stop writing them: skip them in `WriteSplitListLevel` when the folder is `FOLDER_COMPLETEDSPLITS`. Or document that they're blank.
 
 **Verify.** A fresh output folder after a run with Completed splits on doesn't contain them.
 
@@ -80,7 +68,7 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 ## IND — Names_Indent arrays are initialised at the wrong end
 
-In the `Names_Indent` code ([:639-642](../UI/Components/OutputToFileComponent.cs#L639-L642), [:773-776](../UI/Components/OutputToFileComponent.cs#L773-L776)), the init loop fills entries `lvl..Length-1`, but the code uses entries `0..lvl`. It only works because `null + string` gives a string in C#.
+In the `Names_Indent` code in `WriteSplitListLevel` ([:639-642](../UI/Components/OutputToFileComponent.cs#L639-L642)), the init loop fills entries `lvl..Length-1`, but the code uses entries `0..lvl`. It only works because `null + string` gives a string in C#.
 
 **Evidence.** Read.
 

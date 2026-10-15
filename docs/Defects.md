@@ -7,7 +7,6 @@ Line numbers are as of commit `30d30fa`. "Reproduced" means seen on 2026-10-14 b
 ## Dependencies between plans
 
 - NUL, UND and SKP touch the stored deltas, or the `Sign.txt` and highlight chains that use them. PAU's preferred plan (compute deltas when writing instead of storing them at split time) rewrites that code. Recheck them after PAU.
-- SKP edits a highlight chain that exists twice, in `WriteSplitList` and `WriteCompletedSplitList`. Doing [DRY](Cleanup.md#dry--split-list-writers-are-near-duplicates) first halves that edit.
 - CLM, EMP and DUP all edit `GenerateSubsplitLevels`, as does [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice).
 - PAU's minimal plan, EDT, KEY and CHK all change the cache keys in `Update()`.
 - SEC and LAG both change `HasTimerChanged`.
@@ -152,11 +151,11 @@ The "no previous split" branch ([:865-871](../UI/Components/OutputToFileComponen
 
 ## SKP — Skipped splits are highlighted as BehindLost
 
-The highlight chains ([:587-596](../UI/Components/OutputToFileComponent.cs#L587-L596), [:721-730](../UI/Components/OutputToFileComponent.cs#L721-L730)) fall through to BehindLost whenever a PB time exists, even for a split with no time.
+The highlight chain in `WriteSplitListLevel` ([:587-596](../UI/Components/OutputToFileComponent.cs#L587-L596)) falls through to BehindLost whenever a PB time exists, even for a split with no time.
 
 **Evidence.** Reproduced 2026-10-14.
 
-**Plan.** Give a split with no `SplitTime` no highlight. Easier after DRY.
+**Plan.** Give a split with no `SplitTime` no highlight.
 
 **Verify.** Skip a split: its line is blank in every `Highlight_*.txt`.
 
