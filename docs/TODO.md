@@ -26,7 +26,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [CAT](Performance.md#cat--completedsplits-makes-long-runs-split-slowly) | CompletedSplits | With 1,000 splits each `Split()` takes about 10 ms on the UI thread, almost all of it `CompletedSplits` rebuilding every completed line, probably with quadratic string `+=` | Low |
 | [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) | Subsplits | `CalculateSegments` runs `GenerateSubsplitLevels` twice; its `method` parameter is unused | Low |
 | [ATM](Performance.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic, so OBS could read a half-written file; check whether it flickers before fixing | Low |
 
@@ -39,7 +38,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 | [HND](Cleanup.md#hnd--dead-change-handlers-in-the-settings-control) | Settings | Unconnected `CheckedChanged`/`ValueChanged` handlers (one sets the wrong property) and an empty `Load` handler | Low |
 | [SNT](Cleanup.md#snt--sentinel-indices-instead-of-explicit-phase-handling) | Subsplits | The subsplit index helpers return −2/−3 sentinels that callers rely on implicitly; handle timer phases explicitly | Low |
 | [BLK](Cleanup.md#blk--completedsplits-writes-files-that-are-always-blank) | CompletedSplits | The upcoming-time files and `Highlight_CurrentSplit.txt` under `CompletedSplits\` are always blank | Low |
-| [IND](Cleanup.md#ind--names_indent-arrays-are-initialised-at-the-wrong-end) | Split list | The `Names_Indent` init loop fills `lvl..Length-1` but `0..lvl` is used; it only works because `null + string` is a string | Low |
 | [DUR](Cleanup.md#dur--durationstring-and-timerstring-are-identical) | Time format | `TimerString` duplicates `DurationString` and has no callers; one caller repeats `DurationString`'s null check | Low |
 | [NSP](Cleanup.md#nsp--timeformatter-has-its-own-namespace) | Time format | `TimeFormatter` is in `LiveSplit.OutputToFile.UI.Components.OutputToFile`; everything else is in `LiveSplit.UI.Components` | Low |
 | [SVR](Cleanup.md#svr--saved-settings-version-is-never-used) | Settings | The saved settings `Version` is read but never used; bump it when keys change or drop it | Low |

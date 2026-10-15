@@ -66,18 +66,6 @@ These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChan
 
 **Docs.** output-files.md "CompletedSplits". README, if DOC has documented `CompletedSplits\` by then.
 
-## IND — Names_Indent arrays are initialised at the wrong end
-
-In the `Names_Indent` code in `WriteSplitListLevel` ([SplitListFiles.cs](../UI/Components/SplitListFiles.cs)), the init loop fills entries `lvl..Length-1`, but the code uses entries `0..lvl`. It only works because `null + string` gives a string in C#.
-
-**Evidence.** Read.
-
-**Plan.** Size the array `lvl + 1` and fill all of it.
-
-**Verify.** `Names_Indent_*.txt` unchanged for a run with two subsplit levels.
-
-**Docs.** None.
-
 ## DUR — DurationString and TimerString are identical
 
 `TimeFormatter.TimerString` is the same code as `DurationString` and has no callers. The `HasValue ? … : "-"` check for `GoldTime.txt` in `WriteSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) repeats null handling that `DurationString` already does.
