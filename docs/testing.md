@@ -8,7 +8,7 @@ There is no test project. A change can be checked in two ways: in LiveSplit by h
 dotnet build LiveSplit.OutputToFile.sln -c Debug
 ```
 
-The build has one known warning, CS0219 (`currentSplitIndex`). Any other warning is new.
+The build has one known warning, CS0219 (`currentSplitIndex`). Any other warning is new. It needs the .NET Framework 4.8.1 targeting pack (see CLAUDE.md).
 
 ## In LiveSplit
 
@@ -34,7 +34,7 @@ The build has one known warning, CS0219 (`currentSplitIndex`). Any other warning
 
 ## Headless
 
-A .NET Framework 4.8 console app that references `LiveSplit.Core.dll` and the built component. It builds a `Run`, drives it through `TimerModel`, calls `Update()` to stand in for LiveSplit's frames, and reads the files back. Keep it outside the repo, for example in a scratch folder.
+A .NET Framework 4.8.1 console app that references `LiveSplit.Core.dll` and the built component. It builds a `Run`, drives it through `TimerModel`, calls `Update()` to stand in for LiveSplit's frames, and reads the files back. Keep it outside the repo, for example in a scratch folder.
 
 `Harness.csproj`:
 
@@ -42,7 +42,7 @@ A .NET Framework 4.8 console app that references `LiveSplit.Core.dll` and the bu
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net481</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -120,7 +120,7 @@ static class Program
 }
 ```
 
-Build it with `dotnet build`, then run `bin\Debug\net48\Harness.exe <output folder>`.
+Build it with `dotnet build`, then run `bin\Debug\net481\Harness.exe <output folder>`. As an SDK-style project, it gets the 4.8.1 reference assemblies from NuGet, so it builds even without the targeting pack.
 
 Things to know:
 
@@ -135,6 +135,16 @@ Things to know:
 - **Reusing a folder.** The first `Update()` of a new component empties every file in the component's folders (and every root `TotalSplits*.txt`) that it doesn't write now, such as another level's from an earlier run. Other files in the output folder are left alone.
 - **Rebuild the component first.** The harness references `bin\Debug`, so it tests whatever was last built.
 - **Don't run it from the repo.** LiveSplit.Core saves speedrun.com's game list (about 2 MB) as `speedruncom_game_names.json` in the current directory once a run has a game name. Seen 2026-10-15.
+- **Timer events from another thread.** LiveSplit's server raises the timer events off the UI thread. So did an Auto Splitting Runtime script activated in Edit Splits, before LiveSplit 1.8.36 ([livesplit-notes.md](livesplit-notes.md#which-thread-raises-the-timer-events-mostly-read-in-source)).
+  - To do the same, call `TimerModel` from a second thread, such as a `System.Timers.Timer` like ASR's. Meanwhile the main thread calls `Update()` at LiveSplit's pace: sleep `1000 / RefreshRate` ms (25 at 40), then update.
+  - To go through the real server, call `new LiveSplit.Server.CommandServer(state).StartNamedPipe()`. Then write lines such as `starttimer`, `split` and `reset` to a `NamedPipeClientStream(".", "LiveSplit")`, and call `StopAll()` at the end.
+  - Close LiveSplit first. Its own server has a pipe of the same name, so the client could connect to it and drive the real timer.
+  - To find wrong files:
+    - After an action, let two frames pass and call `WaitForFileWrites()`.
+    - Have a fresh component on the same state write to a second folder: one `Update()`, `WaitForFileWrites()`, then `Dispose()`.
+    - Compare the non-empty files in the two folders, leaving out `RealTime` ones, since real time moves between the two writes.
+    - With every action on the main thread, the folders match.
+    - Damage needs the handler and an `Update()` to overlap, so a long run can compare only after actions that overlapped one, plus a sample of the rest.
 - **The settings control.** To test the settings UI, add `comp.Settings` to a `Form` you `Show()`, reach its private controls by reflection, type with `PostMessage(textBox.Handle, WM_CHAR, c, 0)`, and pump with `Application.DoEvents()`. Bindings only see focus changes and keys that go through the message loop. Remove the control before closing the form, which would dispose it. These forms appear on screen and take focus from whatever else is open, so warn whoever is at the machine first.
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.OutputToFile.UI.Components.OutputToFile.TimeFormatter")`.
 
@@ -192,3 +202,4 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | Code | Check | File | Today | Correct |
 |---|---|---|---|---|
 | ATM | `FileQueue` rewrites a timer-sized file 10 times a second for 180 s while [OBS-style reads](#reading-files-as-obs-does) with random gaps run | that file | 491 of 726,347 reads empty or short | none |
+| THR | 1,000 attempts of the base run's splits, at random game times within 3 s of their PB, each action [on a timer thread](#headless) after a random 0–25 ms, with `Update()` every 25 ms on the main thread; files compared with a fresh component's | all, and exceptions | 3 handler exceptions, 1 in `Update()`, 1 reset with wrong segment timers | no handler exceptions, no wrong files |

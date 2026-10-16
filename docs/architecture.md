@@ -42,7 +42,7 @@ Code is referred to by member name. The table below says which file each class i
 
 The cache keys in `Update()` are attempt count, game name, category name, platform name, the `RunManuallyModified` count, the `Run` object (by reference), `FolderPath`, `SplitsBefore`, `SplitsAfter`, the four `Output*` settings and `CurrentPhase`.
 
-Split edits are seen through `RunManuallyModified`: LiveSplit raises it after each change in Edit Splits, which edits the run in place, and after opening splits. Close Splits replaces the run without raising it, which the `Run` key catches. See [livesplit-notes.md](livesplit-notes.md#editing-and-opening-splits-read-in-source).
+Split edits are seen through `RunManuallyModified`: LiveSplit raises it after each change in Edit Splits, which edits the run in place, and after opening splits. Close Splits replaces the run without raising it, and so does every reset after it while LiveSplit is in timer-only mode. The `Run` key catches both. See [livesplit-notes.md](livesplit-notes.md#editing-and-opening-splits-read-in-source).
 
 Because the phase is a cache key, every start, pause, resume, finish and reset goes through row 2 of `Update()` one frame after the event handler has run, and so rebuilds the levels. That is harmless because the levels hold nothing about the current attempt (see [Per-level data](#per-level-data-splitlevel)).
 

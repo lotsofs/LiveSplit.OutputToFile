@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A LiveSplit layout component (.NET Framework 4.8 class library, WinForms) that draws nothing. Instead it writes split and timer information to `.txt` files in a user-chosen folder, for use as OBS text sources. `README.md` is the end-user documentation of the output folder tree, and `CHANGELOG.md` the end-user changelog.
+A LiveSplit layout component (.NET Framework 4.8.1 class library, WinForms) that draws nothing. Instead it writes split and timer information to `.txt` files in a user-chosen folder, for use as OBS text sources. `README.md` is the end-user documentation of the output folder tree, and `CHANGELOG.md` the end-user changelog.
 
 Remotes: `origin` is this fork (lotsofs); `joshimuz` is a related fork that changes are sometimes merged from.
 
@@ -33,7 +33,9 @@ dotnet build LiveSplit.OutputToFile.sln -c Debug      # or -c Release
 cp bin/Debug/LiveSplit.OutputToFile.dll "D:/Programs/Streaming/LiveSplit/Components/"   # deploy
 ```
 
-- This is an old-style (non-SDK) csproj. `dotnet build` works without Visual Studio as long as the .NET Framework 4.8 targeting pack is installed. The one expected build warning is CS0219 (`currentSplitIndex`).
+- This is an old-style (non-SDK) csproj. `dotnet build` works without Visual Studio as long as the .NET Framework 4.8.1 targeting pack (the 4.8.1 Developer Pack) is installed. The one expected build warning is CS0219 (`currentSplitIndex`).
+- It targets 4.8.1 because LiveSplit does from 1.8.37. With a lower target, MSBuild won't resolve the LiveSplit DLLs (MSB3274), and the build fails with missing `LiveSplit.Model` types.
+- Without the Developer Pack, the build can use the NuGet reference assemblies instead. Any SDK-style net481 build, such as the testing.md harness, puts them in the NuGet cache. Then pass `-p:TargetFrameworkRootPath=<NuGet cache>/microsoft.netframework.referenceassemblies.net481/<version>/build/`.
 - Old-style also means the csproj lists every source file. A new `.cs` file needs its own `<Compile Include>` line, or it isn't built.
 - `LiveSplit.Core.dll` and `UpdateManager.dll` are referenced by HintPath `..\..\Programs\Streaming\LiveSplit\`, which is `D:\Programs\Streaming\LiveSplit`. The build fails if LiveSplit isn't installed there.
 - Deploying overwrites the DLL that LiveSplit actually loads. LiveSplit must be closed first, because it locks that DLL. `LiveSplitComponents.lnk` in the repo root is a gitignored shortcut to the `Components` folder. That folder also holds the user's `.backup` copies of older builds; leave them alone.

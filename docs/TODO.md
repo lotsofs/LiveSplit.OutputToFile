@@ -8,7 +8,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [THR](Defects.md#thr--timer-events-may-arrive-off-the-ui-thread) | Threading | Not checked: timer events raised off the UI thread (Server component, auto splitters) would race `Update()` on unlocked arrays | Low |
+| [THR](Defects.md#thr--timer-events-arrive-off-the-ui-thread) | Threading | LiveSplit's server, and before LiveSplit 1.8.36 WASM auto splitters activated in Edit Splits, raise timer events off the UI thread, and the handlers race `Update()` over the levels. Measured: a handler threw at about 1 finish in 300 and 1 reset in 1,250; through the server that closes LiveSplit | Medium |
 
 ## Performance — [Performance.md](Performance.md)
 
