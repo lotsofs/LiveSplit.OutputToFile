@@ -19,6 +19,8 @@ The files of an output you turn off in the settings, or of a subsplit level your
 ## Subsplits
 In addition to the ``AllSplits`` folder, which takes into consideration every split regardless of whether it is a subsplit or not, if applicable there will also be a ``SansSubsplits`` folder. These will only include splits that do not start with a dash (``-``) (These appear to be referred to in the official subsplits module as 'Section Headers'). Furthermore, the component supports multi-level subsplits, which are subsplits of subsplits, and are created by putting two (2) or more dashes in front of your splitname. Each of these levels gets a folder named after the dashes it leaves out: ``SansSubsplits_Level2`` has every split except those with two or more dashes, ``SansSubsplits_Level3`` every split except those with three or more, and so on. There is no limit to how many levels deep you can go.
 
+Split names in the output leave out the leading dashes and one space after them. To show a name that starts with a dash, put a space before it: a subsplit named ``- -40`` shows as ``-40``.
+
 ```
 |   AttemptCount.txt
 |   CategoryName.txt

@@ -2,8 +2,6 @@
 
 The index is [TODO.md](TODO.md).
 
-GEN changes `GenerateSubsplitLevels`. DSH and SOF in [Defects.md](Defects.md) edit `GenerateNames`, which it calls.
-
 ## GEN — GenerateSubsplitLevels runs twice
 
 `CalculateSegments` ([OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs)) runs `SplitLevels.GenerateSubsplitLevels` once per timing method. Its `method` parameter is unused, and the second call overwrites the first.

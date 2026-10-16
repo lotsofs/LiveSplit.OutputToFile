@@ -23,9 +23,9 @@ What changed in Output to File between releases: the files it writes, what they 
 - **Subsplits.** A split whose name starts with `-` is a subsplit, as in LiveSplit's Subsplits component.
   - Next to `AllSplits`, the component writes a `SansSubsplits` folder with only the top-level splits. Each further level of dashes (`--`, `---`, …) gets a folder of its own, named after the dashes it leaves out: `SansSubsplits_Level2` has every split except those with two or more dashes, `SansSubsplits_Level3` every split except those with three or more, and so on.
   - A name in braces at the start of a split names its section: a split named `{Area A}A3` shows as `Area A` in `SansSubsplits` and as `A3` in `AllSplits`.
-  - The new **Subsplits** setting turns this off.
+  - The new **Subsplits** setting turns this off. Split names in `AllSplits` stay the same as with it on.
   - When a level goes away, because the setting is turned off or the splits no longer have that many dashes, its files are emptied straight away.
-- `Name_Raw.txt` in `CurrentSplit\` and `PreviousSplit\`, and `Names_Raw.txt` in the split list. These give split names exactly as typed in LiveSplit. The other name files leave out the leading dashes and the `{…}` part.
+- `Name_Raw.txt` in `CurrentSplit\` and `PreviousSplit\`, and `Names_Raw.txt` in the split list. These give split names exactly as typed in LiveSplit. The other name files leave out the leading dashes, one space after them, and the `{…}` part. To show a name that starts with a dash, put a space before it: a subsplit named `- -40` shows as `-40`.
 - `Names_Indent_0.txt`, `Names_Indent_1.txt`, … in the split list: one file per subsplit depth, with a split's name only on the line of a split at that depth. Each depth can then be its own OBS text source, indented differently.
 - `PlatformName.txt`: the platform set in the splits' metadata.
 - `CompletedSplits\`: every split completed so far, as a list with the same files as `SplitList\`. Turn it on with the new **Completed splits** setting. Turning it off empties its files.

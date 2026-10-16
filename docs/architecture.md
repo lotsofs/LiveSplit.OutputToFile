@@ -62,11 +62,13 @@ This is the central idea. Every output except the root info files and the run ti
 
 ### Depth
 
-A split's depth is its number of leading `-` characters (`SplitLevels.Depths`). When the Subsplits setting is off, every depth is 0. `SplitLevels.GenerateSubsplitLevels` sets the depths, the levels and the display names, each in its own method. The first, `CalculateDepths`, does the following:
+A split's depth is its number of leading `-` characters (`SplitLevels.Depths`). `SplitLevels.GenerateSubsplitLevels` sets the depths, the display names and the levels, each in its own method. The first, `CalculateDepths`, does the following:
 
 1. Forces the last split to depth 0. The last split is always a top-level split. This comes before the count, so its dashes add no level.
 2. Counts levels: start at 1, and add a level for each consecutive depth 1, 2, … that some split actually has.
 3. Clamps any depth ≥ the level count to `levels - 1`, so a split deeper than any level goes into the deepest one.
+
+The depths are counted even when the Subsplits setting is off, because the display names are built from them. After that, every depth is set to 0 and there is one level.
 
 ### Levels
 
@@ -92,11 +94,18 @@ With a single level (no subsplits, or the setting off), level 0 *is* the last le
 `SplitLevels.Names[global][lvl]` holds a split's name as displayed at each level. Building it (`GenerateNames`) walks the levels from 0 upwards:
 
 - If the name starts with `{Header}` (the convention from LiveSplit's own Subsplits component), the level shows `Header`, and the `{Header}` prefix is removed for the deeper levels.
-- Otherwise the level shows the current name, and one leading `-` is removed for the deeper levels.
+- Otherwise the level shows the current name without its leading dashes and one space after them (`WithoutDashes`), and one leading `-` is removed for the deeper levels.
 
-A split only appears at levels ≥ its depth, and usually all its dashes have been removed by then. A split whose depth was lowered, by the clamp or because it is the last split, keeps the dashes that are left ([DSH](Defects.md#dsh--moved-splits-keep-leftover-dashes-in-their-names)). With depths 0 and 1 present, for example, `---C` shows as `--C` at `AllSplits`. With splits `--Intro`, `A`, `B` there is one level, and the first split shows as `--Intro`. With splits `A`, `B`, `-C` there is one level too, and the last split shows as `-C`.
+A split only appears at levels ≥ its depth. Usually its dashes are all gone by then, but some splits have more dashes than their depth, and showing the name without all of them is what keeps those clean:
+- a split deeper than any level: with only depths 0 and 1, `---C` shows as `C`;
+- the last split: `-Final` shows as `Final`, also in `SansSubsplits`;
+- dashes after a `{Header}` prefix, which the walk removes a level late because the level that removes the header removes no dash: `{Area A}-A3` shows as `A3` at `AllSplits`.
 
-A name that is empty, or becomes empty once its `{Header}` or dashes are removed (`""`, `-`, `{}`), shows as an empty line. The raw `Segment.Name` goes to the `*_Raw.txt` files.
+The space lets a name start with a dash. A subsplit named `- -40` has depth 1 and shows as `-40`, and a top-level split named ` -40` shows as `-40`. Only the first space after the dashes comes off, so `---- Part 2 ----` shows as `Part 2 ----` and `-  x` as ` x`. It comes off even when there are no dashes before it, so `{Area A} A3` shows as `A3`. A `{Header}` after dashes isn't read: `---{Sub}C`, deeper than any level, shows as `{Sub}C`.
+
+With the Subsplits setting off, the names are built for the levels the setting would make, and each split keeps its name at the deepest of them. So `AllSplits` shows the same names with the setting on or off.
+
+A name that is empty, or becomes empty once its `{Header}`, dashes and space are removed (`""`, `-`, `- `, `{}`), shows as an empty line. The raw `Segment.Name` goes to the `*_Raw.txt` files.
 
 ### Worked example
 

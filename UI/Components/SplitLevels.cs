@@ -21,22 +21,24 @@ namespace LiveSplit.UI.Components {
 		public SplitLevel this[int lvl] => _levels[lvl];
 
 		public void GenerateSubsplitLevels(IRun run, bool outputSubsplits, TimingMethod method) {
-			int numberOfLevels = CalculateDepths(run, outputSubsplits);
+			int numberOfLevels = CalculateDepths(run);
+			// Names come from the subsplit levels even with Subsplits off, so AllSplits shows the same names either way
+			GenerateNames(run, numberOfLevels);
+			if (!outputSubsplits) {
+				Depths = new int[run.Count];
+				numberOfLevels = 1;
+				Names = Names.Select(n => new List<string> { n[n.Count - 1] }).ToList();
+			}
 			GenerateLevels(run, numberOfLevels);
-			GenerateNames(run);
 		}
 
 		/// <summary>
 		/// Set each split's depth. Returns the number of levels.
 		/// </summary>
-		int CalculateDepths(IRun run, bool outputSubsplits) {
+		int CalculateDepths(IRun run) {
 			// Count how many levels of subsplits there are (including the main top level). Default subsplits component only supports 2 levels (Main + subsplits)
 			Depths = new int[run.Count];
 			for (int i = 0; i < run.Count; i++) {
-				if (!outputSubsplits) {
-					Depths[i] = 0;
-					continue;
-				}
 				Depths[i] = Array.FindIndex<char>(run[i].Name.ToCharArray(), c => c != '-');
 				if (Depths[i] == -1) {
 					Depths[i] = run[i].Name.Length;
@@ -89,20 +91,20 @@ namespace LiveSplit.UI.Components {
 			}
 		}
 
-		void GenerateNames(IRun run) {
+		void GenerateNames(IRun run, int numberOfLevels) {
 			// Make a list of all the split names by level, taking into consideration removing dashes and {} parts
 			Names = new List<List<string>>();
 			for (int split = 0; split < run.Count; split++) {
 				Names.Add(new List<string>());
 				string name = run[split].Name;
-				for (int lvl = 0; lvl < _levels.Length; lvl++) {
+				for (int lvl = 0; lvl < numberOfLevels; lvl++) {
 					string sectionName = GetSectionHeader(name);
 					if (sectionName != null) {
 						Names[split].Add(sectionName);
 						name = name.Substring(sectionName.Length + 2);
 						continue;
 					}
-					Names[split].Add(name);
+					Names[split].Add(WithoutDashes(name));
 					if (name.Length > 0 && name[0] == '-') {
 						name = name.Substring(1);
 					}
@@ -118,6 +120,12 @@ namespace LiveSplit.UI.Components {
 			int closing = name.IndexOf('}');
 			if (closing == -1) return null;
 			return name.Substring(1, closing - 1);
+		}
+
+		// A name as displayed: without its leading dashes, and without one space after them, so "- -40" shows as "-40"
+		static string WithoutDashes(string name) {
+			string rest = name.TrimStart('-');
+			return rest.StartsWith(" ") ? rest.Substring(1) : rest;
 		}
 
 		/// <summary>
