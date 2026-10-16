@@ -42,6 +42,8 @@ namespace LiveSplit.UI.Components {
 					Depths[i] = run[i].Name.Length;
 				}
 			}
+			// Last split is always top level. Set before counting, so that its dashes don't add a level
+			Depths[Depths.Length - 1] = 0;
 
 			// Count what the highest consecutive present level is
 			int numberOfLevels = 1;
@@ -57,7 +59,6 @@ namespace LiveSplit.UI.Components {
 					Depths[i] = numberOfLevels - 1;
 				}
 			}
-			Depths[Depths.Length - 1] = 0; // Last split is always top level
 			return numberOfLevels;
 		}
 

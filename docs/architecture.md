@@ -64,9 +64,9 @@ This is the central idea. Every output except the root info files and the run ti
 
 A split's depth is its number of leading `-` characters (`SplitLevels.Depths`). When the Subsplits setting is off, every depth is 0. `SplitLevels.GenerateSubsplitLevels` sets the depths, the levels and the display names, each in its own method. The first, `CalculateDepths`, does the following:
 
-1. Counts levels: start at 1, and add a level for each consecutive depth 1, 2, … that some split actually has.
-2. Clamps any depth ≥ the level count to `levels - 1`, so a split deeper than any level goes into the deepest one.
-3. Forces the last split to depth 0. The last split is always a top-level split.
+1. Forces the last split to depth 0. The last split is always a top-level split. This comes before the count, so its dashes add no level.
+2. Counts levels: start at 1, and add a level for each consecutive depth 1, 2, … that some split actually has.
+3. Clamps any depth ≥ the level count to `levels - 1`, so a split deeper than any level goes into the deepest one.
 
 ### Levels
 
@@ -94,7 +94,7 @@ With a single level (no subsplits, or the setting off), level 0 *is* the last le
 - If the name starts with `{Header}` (the convention from LiveSplit's own Subsplits component), the level shows `Header`, and the `{Header}` prefix is removed for the deeper levels.
 - Otherwise the level shows the current name, and one leading `-` is removed for the deeper levels.
 
-A split only appears at levels ≥ its depth, and usually all its dashes have been removed by then. A split whose depth was lowered, by the clamp or because it is the last split, keeps the dashes that are left ([DSH](Defects.md#dsh--moved-splits-keep-leftover-dashes-in-their-names)). With depths 0 and 1 present, for example, `---C` shows as `--C` at `AllSplits`. With splits `--Intro`, `A`, `B` there is one level, and the first split shows as `--Intro`.
+A split only appears at levels ≥ its depth, and usually all its dashes have been removed by then. A split whose depth was lowered, by the clamp or because it is the last split, keeps the dashes that are left ([DSH](Defects.md#dsh--moved-splits-keep-leftover-dashes-in-their-names)). With depths 0 and 1 present, for example, `---C` shows as `--C` at `AllSplits`. With splits `--Intro`, `A`, `B` there is one level, and the first split shows as `--Intro`. With splits `A`, `B`, `-C` there is one level too, and the last split shows as `-C`.
 
 A name that is empty, or becomes empty once its `{Header}` or dashes are removed (`""`, `-`, `{}`), shows as an empty line. The raw `Segment.Name` goes to the `*_Raw.txt` files.
 

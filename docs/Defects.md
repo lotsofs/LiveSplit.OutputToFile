@@ -6,19 +6,7 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## Dependencies between plans
 
-- DUP edits `CalculateDepths`, and DSH and SOF edit `GenerateNames`. [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) changes `GenerateSubsplitLevels`, which calls both.
-
-## DUP — An extra duplicate level when only the last split has dashes
-
-In `CalculateDepths` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), levels are counted before the last split is forced to depth 0. Splits `A`, `B`, `-C` therefore produce a `SansSubsplits` folder identical to `AllSplits`.
-
-**Evidence.** Read.
-
-**Plan.** Force the last split to depth 0 before counting levels.
-
-**Verify.** With splits `A`, `B`, `-C`, only `AllSplits` is written.
-
-**Docs.** architecture.md "Depth" and "Levels".
+- DSH and SOF edit `GenerateNames`. [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) changes `GenerateSubsplitLevels`, which calls it.
 
 ## DSH — Moved splits keep leftover dashes in their names
 
@@ -33,6 +21,11 @@ Whether that is wanted is undecided. The code comment on the move mentions long 
 - `A`, `-B`, `---C`, `D`: `AllSplits` shows `--C`.
 - `--Intro`, `A`, `B`: `AllSplits` shows `--Intro`.
 - `A`, `-B`, `-`: `SansSubsplits` shows `-` for the last split.
+
+Reproduced 2026-10-16:
+- `A`, `B`, `-C`: `AllSplits` shows `-C`.
+- `A`, `-B`, `--C`: `AllSplits` shows `-C`.
+- `A`, `--B`, `-C`: `AllSplits` shows `--B` and `-C`.
 
 **Plan.** Decide whether displayed names should lose every leading dash. If so, remove them all in the `Names` loop at the levels a split appears at. A name made only of dashes then shows as an empty line, as `-` already does where its dash is removed. `*_Raw.txt` keeps the name as typed.
 
