@@ -13,11 +13,7 @@ The build has one known warning, CS0219 (`currentSplitIndex`). Any other warning
 ## In LiveSplit
 
 1. Close LiveSplit. It locks the DLL while it's open.
-2. Copy the DLL into LiveSplit's components folder:
-
-   ```sh
-   cp bin/Debug/LiveSplit.OutputToFile.dll "D:/Programs/Streaming/LiveSplit/Components/"
-   ```
+2. Build and copy the DLL into LiveSplit's components folder with `deploy.cmd` in the repo root (`.\deploy` from PowerShell). It refuses while LiveSplit is running, and copies only after a successful build.
 
    The folder also holds `.backup` copies of older builds; leave them alone.
 3. Open LiveSplit. Add the component if the layout doesn't have it yet: Edit Layout → + → Other → Output to File. Set the folder.

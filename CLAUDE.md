@@ -30,8 +30,12 @@ The docs refer to code by member name and file, not by line number. When a chang
 
 ```sh
 dotnet build LiveSplit.OutputToFile.sln -c Debug      # or -c Release
-cp bin/Debug/LiveSplit.OutputToFile.dll "D:/Programs/Streaming/LiveSplit/Components/"   # deploy
+deploy.cmd                                            # build, then copy into LiveSplit's Components folder; deploy.cmd Release for Release
 ```
+
+- `deploy.cmd` refuses to run while LiveSplit is running, builds, and copies `bin\<config>\LiveSplit.OutputToFile.dll` only if the build succeeded. It finds `Components\` the same way the HintPath finds LiveSplit (below).
+  - It's a batch file because PowerShell scripts are disabled on this machine. It runs from PowerShell (`.\deploy`), cmd or Git Bash (`cmd //c deploy.cmd`).
+  - It calls Windows' `findstr.exe` by full path, because Git's `find` can shadow Windows' and would make the LiveSplit check pass silently.
 
 - This is an old-style (non-SDK) csproj. `dotnet build` works without Visual Studio as long as the .NET Framework 4.8.1 targeting pack (the 4.8.1 Developer Pack) is installed. The one expected build warning is CS0219 (`currentSplitIndex`).
 - It targets 4.8.1 because LiveSplit does from 1.8.37. With a lower target, MSBuild won't resolve the LiveSplit DLLs (MSB3274), and the build fails with missing `LiveSplit.Model` types.
