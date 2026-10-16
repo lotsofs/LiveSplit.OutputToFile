@@ -8,9 +8,9 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [CHK](Defects.md#chk--output-checkboxes-dont-take-effect-at-once) | Change detection | The Output checkboxes aren't cache keys, so toggling one does nothing until another change; outputs turned off, and subsplit levels that a splits edit removes, leave stale files | Low |
 | [DUP](Defects.md#dup--an-extra-duplicate-level-when-only-the-last-split-has-dashes) | Subsplits | When only the last split has dashes, an extra `SansSubsplits` level identical to `AllSplits` is written | Low |
 | [DSH](Defects.md#dsh--moved-splits-keep-leftover-dashes-in-their-names) | Subsplits | Undecided: a split moved to a shallower level (deeper than any level, or the last split) keeps the dashes that weren't removed, so `---C` shows as `--C`; decide whether names should lose all their dashes | Low |
+| [SOF](Defects.md#sof--subsplits-off-shows-section-headers-and-dashes) | Subsplits | Undecided: with the Subsplits setting off, `AllSplits` shows a `{Header}` split as its header and keeps leading dashes (`-A1`, `Area A`), unlike with it on (`A1`, `A3`) | Low |
 | [THR](Defects.md#thr--timer-events-may-arrive-off-the-ui-thread) | Threading | Not checked: timer events raised off the UI thread (Server component, auto splitters) would race `Update()` on unlocked arrays | Low |
 
 ## Performance — [Performance.md](Performance.md)

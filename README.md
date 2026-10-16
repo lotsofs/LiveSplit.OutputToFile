@@ -14,6 +14,8 @@ Reverse Index is the number of splits remaining.
 
 Highlights are a shaded bar to layer behind splits.
 
+The files of an output you turn off in the settings, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits` and `Timers`) as its own, so don't keep other files there.
+
 ## Subsplits
 In addition to the ``AllSplits`` folder, which takes into consideration every split regardless of whether it is a subsplit or not, if applicable there will also be a ``SansSubsplits`` folder. These will only include splits that do not start with a dash (``-``) (These appear to be referred to in the official subsplits module as 'Section Headers'). Furthermore, the component supports multi-level subsplits, which are subsplits of subsplits, and are created by putting two (2) or more dashes in front of your splitname. Each of these levels gets a folder named after the dashes it leaves out: ``SansSubsplits_Level2`` has every split except those with two or more dashes, ``SansSubsplits_Level3`` every split except those with three or more, and so on. There is no limit to how many levels deep you can go.
 

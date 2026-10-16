@@ -13,7 +13,7 @@ Code is referred to by member name. The table below says which file each class i
 | `UI/Components/OutputToFileComponent.cs` | The LiveSplit side: event handling, change detection in `Update()`, and when each writer runs. Owns the one `SplitLevels` instance, the one `FileQueue` and the four writers. |
 | `UI/Components/SplitLevels.cs` | `SplitLevels` (depths, display names, the levels) and `SplitLevel` (one level's members and arrays). Builds the levels and the PB segment times. |
 | `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`, and the live times and deltas (`LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta`, `IsGold`). |
-| `UI/Components/FileQueue.cs` | Writes the files on a background thread: skips unchanged contents, keeps the latest contents per file, and records the latest write error. |
+| `UI/Components/FileQueue.cs` | Writes the files on a background thread: skips unchanged contents, keeps the latest contents per file, records the latest write error, and empties the output files a full rewrite no longer writes. |
 | `UI/Components/RunInfoFiles.cs` | Writer for the root files. |
 | `UI/Components/TimerFiles.cs` | Writer for `Timers\`, with its own change check, `HasTimerChanged`. |
 | `UI/Components/SplitFiles.cs` | Writer for `CurrentSplit\` and `PreviousSplit\`: the previous split's times and deltas, and `Sign.txt`. |
@@ -38,15 +38,13 @@ Code is referred to by member name. The table below says which file each class i
 | `OnSplit`, `OnSkipSplit`, `OnUndoSplit` | `TimerFiles.SegmentStartsChanged()`, then `WriteSplits()` |
 | `OnReset` | `FileQueue.ForgetWrittenFiles()`, `WriteSplits()`, then `CalculateSegments()` |
 | `RunManuallyModified` | Counts the edit (`_runEdits`), a cache key, so the next `Update()` rewrites everything. Several edits in one frame cost one rewrite. |
-| `Update()` (every frame) | 0. If the latest write error changed, show it in the settings (`ShowWriteError`). <br>1. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless what one of that method's files shows changed since its last write: the run timer's or a level's segment timer's whole second (truncated, sign included), or the timer phase. `TimerFiles` keeps each level's segment start, the time its segment timer counts from, and finds them again only after `SegmentStartsChanged()`, which the split events and `CalculateSegments()` call. A frame therefore costs a subtraction per level, not a search. <br>2. If any cache key changed: `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. |
+| `Update()` (every frame) | 0. If the latest write error changed, show it in the settings (`ShowWriteError`). <br>1. If any cache key changed, a full rewrite: `FileQueue.BeginSweep()`, `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. <br>2. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless what one of that method's files shows changed since its last write: the run timer's or a level's segment timer's whole second (truncated, sign included), or the timer phase. `TimerFiles` keeps each level's segment start, the time its segment timer counts from, and finds them again only after `SegmentStartsChanged()`, which the split events and `CalculateSegments()` call. A frame therefore costs a subtraction per level, not a search. After a full rewrite every timer file is written, because finding the segment starts again also forgets what the files show. <br>3. After a full rewrite: `FileQueue.EndSweep()`, which empties the output files the rewrite didn't write (see [Writing files](#writing-files)). |
 
-The cache keys in `Update()` are attempt count, game name, category name, platform name, the `RunManuallyModified` count, the `Run` object (by reference), `FolderPath`, `SplitsBefore`, `SplitsAfter` and `CurrentPhase`.
+The cache keys in `Update()` are attempt count, game name, category name, platform name, the `RunManuallyModified` count, the `Run` object (by reference), `FolderPath`, `SplitsBefore`, `SplitsAfter`, the four `Output*` settings and `CurrentPhase`.
 
 Split edits are seen through `RunManuallyModified`: LiveSplit raises it after each change in Edit Splits, which edits the run in place, and after opening splits. Close Splits replaces the run without raising it, which the `Run` key catches. See [livesplit-notes.md](livesplit-notes.md#editing-and-opening-splits-read-in-source).
 
 Because the phase is a cache key, every start, pause, resume, finish and reset goes through row 2 of `Update()` one frame after the event handler has run, and so rebuilds the levels. That is harmless because the levels hold nothing about the current attempt (see [Per-level data](#per-level-data-splitlevel)).
-
-Not cache keys: the `Output*` checkboxes. Changing one does nothing until something else triggers a rewrite ([CHK](Defects.md#chk--output-checkboxes-dont-take-effect-at-once)).
 
 LiveSplit fires every event *after* it has updated the timer state. A handler therefore sees the new state: on `OnSplit` the index has already moved on, and on the last split the phase is already `Ended`. Details are in [livesplit-notes.md](livesplit-notes.md).
 
@@ -196,7 +194,12 @@ The functions branch on the phase separately and inconsistently. For example, `W
   - Every exception from a write is caught, per file. A failed file doesn't stop the others, and nothing reaches LiveSplit or ends the drain. The file is dropped from `_written`, so the next `Write` retries it even with the same contents. That covers a locked or read-only file, a missing drive and no permission.
   - The latest failure is kept as text with the file and time, and is cleared once that file (by its path relative to the folder) is written successfully. `Update()` picks up each change with `TakeErrorChange` and shows it with `OutputToFileSettings.ShowWriteError`, so the settings control is only touched on the UI thread.
   - `OnReset` calls `ForgetWrittenFiles()`, so each attempt ends with every file written in full. A file deleted or edited outside LiveSplit comes back when its contents next change, or at the next reset.
-  - `WaitForWrites(timeout)` blocks until the drain task is done. `Dispose()` uses it with 2 seconds; tests use `OutputToFileComponent.WaitForFileWrites()`.
+  - `WaitForWrites(timeout)` blocks until the drain task is done, including any search for old files. `Dispose()` uses it with 2 seconds; tests use `OutputToFileComponent.WaitForFileWrites()`.
+- **Emptying old files.** Output files that the component no longer writes, because an output was turned off or a level is gone, are written empty once. They are never deleted.
+  - The component's own files are those in the folders named by `OUTPUT_FOLDERS` in the component (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits`, `Timers`), and the root files that match `OUTPUT_ROOT_FILES` (`TotalSplits*.txt`). The other root files are always written. Anything else in those folders counts as the component's, including release 6's paths.
+  - A full rewrite in `Update()` runs between `FileQueue.BeginSweep()` and `EndSweep()`. In between, `Write` records every path it is given, including those it skips as unchanged. Which files get written depends only on the folder, the settings and the levels, never on the timer phase, so the record is the complete set. **Every write path must therefore write the same files in every phase.** A file written in only some phases would be emptied by a rewrite in another.
+  - `EndSweep` compares the set with the previous rewrite's. Usually they're equal (a phase change) and nothing more happens. When they differ, and on the first rewrite after loading, it drops queued contents and `_written` entries for paths outside the set. Then, once nothing is pending, the drain searches the component's own files and empties every one that isn't in the set and isn't empty already. The set is compared ignoring case.
+  - So the first rewrite after loading also empties leftovers from earlier sessions. Other files in the output folder are never touched, and neither is a folder the setting has moved away from. A file that can't be emptied is reported like a failed write, and tried again at the next search.
 - Multi-line files use `\n` and end with a trailing `\n`. Every list file has the same number of lines, so separate OBS text sources line up.
 - Which outputs each setting controls:
 
@@ -207,7 +210,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
   | `OutputCompletedSplits` | `CompletedSplits\` |
   | `OutputSubsplits` | Whether there is more than one level |
 
-  Everything else is always written. Turning an output off doesn't delete its old files.
+  Everything else is always written. Turning an output off empties its files on the next frame (see "Emptying old files" above).
 - The file *contents* are still built synchronously inside the LiveSplit event or `Update()` call; only the writing is in the background. On a split that is under a millisecond on the calling thread, with the writes taking about 35 ms on the drain task (40 splits, every output on).
 
 ## Settings

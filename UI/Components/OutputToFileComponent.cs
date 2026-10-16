@@ -53,6 +53,12 @@ namespace LiveSplit.UI.Components {
 		SplitFiles _splitFiles;
 		SplitListFiles _splitListFiles;
 
+		// The folders the writers write to, in the output folder. A full rewrite empties every file in them that it doesn't write,
+		// and every file in the output folder itself that matches OUTPUT_ROOT_FILES. The other root files are always written.
+		static readonly string[] OUTPUT_FOLDERS = { "CurrentSplit", "PreviousSplit", "SplitList", "CompletedSplits", "Timers" };
+		// TotalSplits_{level}.txt, and TotalSplits.txt from before subsplits
+		const string OUTPUT_ROOT_FILES = "TotalSplits*.txt";
+
 		#region livesplitoverhead
 
 		public OutputToFileComponent(LiveSplitState state) {
@@ -143,10 +149,6 @@ namespace LiveSplit.UI.Components {
 			if (_files.TakeErrorChange(out string writeError)) {
 				Settings.ShowWriteError(writeError);
 			}
-			if (Settings.OutputTimer) {
-				_timerFiles.WriteTimer(TimingMethod.RealTime);
-				_timerFiles.WriteTimer(TimingMethod.GameTime);
-			}
 			Cache.Restart();
 			// Check for basic 'user loaded or changed splits' etc
 			Cache["AttemptHistoryCount"] = state.Run.AttemptCount;
@@ -159,11 +161,26 @@ namespace LiveSplit.UI.Components {
 			Cache["FolderPath"] = Settings.FolderPath;
 			Cache["SplitsBefore"] = Settings.SplitsBefore;
 			Cache["SplitsAfter"] = Settings.SplitsAfter;
+			Cache["OutputTimer"] = Settings.OutputTimer;
+			Cache["OutputSplitList"] = Settings.OutputSplitList;
+			Cache["OutputSubsplits"] = Settings.OutputSubsplits;
+			Cache["OutputCompletedSplits"] = Settings.OutputCompletedSplits;
 			Cache["TimerPhase"] = state.CurrentPhase;
-			if (Cache.HasChanged) {
+			// A full rewrite queues every file the settings and levels call for. Those it doesn't are emptied.
+			bool rewrite = Cache.HasChanged;
+			if (rewrite) {
+				_files.BeginSweep();
 				CalculateSegments();
 				_runInfoFiles.Write();
 				WriteSplits();
+			}
+			// After a rewrite, this queues every timer file: CalculateSegments() has called SegmentStartsChanged()
+			if (Settings.OutputTimer) {
+				_timerFiles.WriteTimer(TimingMethod.RealTime);
+				_timerFiles.WriteTimer(TimingMethod.GameTime);
+			}
+			if (rewrite) {
+				_files.EndSweep(Settings.FolderPath, OUTPUT_FOLDERS, OUTPUT_ROOT_FILES);
 			}
 		}
 

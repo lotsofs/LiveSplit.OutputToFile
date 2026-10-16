@@ -112,6 +112,14 @@ Each completed line has a fill in at most one highlight file, checked in the tab
 
 The same files as `SplitList`, but the lines cover every completed member: none while the timer isn't running, and all members once the run is finished. `Time_*_Upcoming.txt` and `Highlight_CurrentSplit.txt` are therefore always blank lines.
 
+## Outputs turned off, and levels that are gone
+
+Turning off the Timer, Split list or Completed splits setting empties that output's files straight away. The same happens to:
+- the files of a level that is gone, because Subsplits was turned off or the splits no longer have that many dashes;
+- `Names_Indent_{n}.txt` for a depth no longer present.
+
+The files stay, with no contents, and are filled again when the output or level comes back. Leftovers like these from earlier sessions are emptied when the layout is loaded. Nothing is deleted. Only the component's own files are emptied, and only in the folder currently set. Its own files are everything in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\`, and the `TotalSplits*.txt` files. That includes any other file kept in those folders, and the files release 6 wrote there.
+
 ## Formatting
 
 From `TimeFormatter.cs`. Values are truncated, not rounded.

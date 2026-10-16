@@ -6,19 +6,7 @@ Wrong output, crashes, and output that goes stale. The index is [TODO.md](TODO.m
 
 ## Dependencies between plans
 
-- DUP edits `CalculateDepths` and DSH edits `GenerateNames`. [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) changes `GenerateSubsplitLevels`, which calls both.
-
-## CHK — Output checkboxes don't take effect at once
-
-`OutputTimer`, `OutputSplitList`, `OutputSubsplits` and `OutputCompletedSplits` aren't cache keys, so changing one does nothing until something else triggers a rewrite. Changing `OutputSubsplits` only changes the level structure at the next `CalculateSegments()`. Turning an output off leaves its old files on disk with stale values. So does a subsplit level that goes away because the splits were edited or another splits file was opened: its folders keep their last contents.
-
-**Evidence.** The checkboxes: read. The level that goes away: reproduced 2026-10-15. After every dash was removed from the base run's names, `SplitList\SansSubsplits\Names.txt` still showed `Area A | Area B`.
-
-**Plan.** Add these settings to the cache keys. For an output turned off, or a level that is gone, decide between blanking its files once and deleting them; deleting must touch only files this component writes.
-
-**Verify.** With the timer stopped, toggle each checkbox: its files appear, or are cleared, straight away. Remove every dash from the splits: the `SansSubsplits` files are cleared.
-
-**Docs.** architecture.md "When files get written" (the cache keys). output-files.md, on what turning an output off does. README.
+- DUP edits `CalculateDepths`, and DSH and SOF edit `GenerateNames`. [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice) changes `GenerateSubsplitLevels`, which calls both.
 
 ## DUP — An extra duplicate level when only the last split has dashes
 
@@ -51,6 +39,20 @@ Whether that is wanted is undecided. The code comment on the move mentions long 
 **Verify.** The examples above show `C`, `Intro` and an empty line.
 
 **Docs.** architecture.md "Display names". CHANGELOG.md, if Subsplits has been released by then.
+
+## SOF — Subsplits off shows section headers and dashes
+
+With the Subsplits setting off there is one level, level 0, tagged `AllSplits`. `GenerateNames` gives level 0 the names it gives `SansSubsplits` when the setting is on: a `{Header}` split shows its header, and leading dashes stay. So the names in `AllSplits` change when the setting is turned off. Release 6, which had no subsplits, showed raw names.
+
+Whether that is wanted is undecided.
+
+**Evidence.** Reproduced 2026-10-16, the same in builds from that day and the day before. With the base run and Subsplits off, `SplitList\AllSplits\Names.txt` shows `-A1 | -A2 | Area A | -B1 | Area B`. With Subsplits on it shows `A1 | A2 | A3 | B1 | B2`.
+
+**Plan.** Decide what `AllSplits` should show with the setting off: the same names as with it on, or the raw names. For the same names, build the names from the dashes and headers even when the setting is off, and use the deepest form at the one level.
+
+**Verify.** With Subsplits off, the base run's `Names.txt` shows the chosen names.
+
+**Docs.** architecture.md "Display names". output-files.md. CHANGELOG.md's Subsplits entry, while it is unreleased.
 
 ## THR — Timer events may arrive off the UI thread
 

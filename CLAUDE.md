@@ -66,19 +66,20 @@ The code is in `UI/Components/`:
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own check, `HasTimerChanged`, on what each timer file shows and the timer phase. It caches each level's segment start; anything new that moves a split time or rebuilds the levels must call `SegmentStartsChanged()`.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
   - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. `OnReset` clears that record. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
+  - A full rewrite in `Update()` must queue every file the settings and levels call for, whatever the phase. `FileQueue.EndSweep` empties any file in the component's folders (`OUTPUT_FOLDERS`, plus root files matching `OUTPUT_ROOT_FILES`) that wasn't queued, so a file written in only some phases would be emptied in the others.
   - The drain catches every exception per file, and `Update()` shows the latest in the settings panel (`ShowWriteError`). Only touch the settings control from the UI thread. Don't add file access that bypasses `FileQueue`: on the UI thread an exception would escape into LiveSplit's `Split()`/`Update()`.
 - **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`. A `ListLines` builds every file of one list a line at a time, so each file gets one line per split, blank where it has nothing.
 
 ## Making changes
 
 **Adding an output file:**
-1. Add a `FILE_*` template to the writer for its folder (see the file table above). Root files go in `RunInfoFiles`.
+1. Add a `FILE_*` template to the writer for its folder (see the file table above). Root files go in `RunInfoFiles`; a root file that isn't always written must also match `OUTPUT_ROOT_FILES` in the component, or it won't be emptied when it's no longer written.
 2. Write it from that writer's `Write*` function, in every phase branch.
 3. If it's a list column, make it a `FILE_LIST_*` template, give it a `StringBuilder` field in `ListLines` (created with `Add` in its constructor), and append its line in `AppendNames`, `AppendCompletedLine` or `AppendUpcomingLine`. Both lists then get it.
 4. Write it once per timing method only if its path contains `{0}`.
 5. Document it in `docs/output-files.md`, `README.md` and `CHANGELOG.md`.
 
-A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels` and `_files`, and call it from `WriteSplits()` or `Update()`.
+A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels` and `_files`, and call it from `WriteSplits()` or `Update()`. Add the folder to `OUTPUT_FOLDERS`, so its files are emptied when they're no longer written.
 
 **Adding a setting** (`OutputToFileSettings`, a WinForms `UserControl` with its layout in `.Designer.cs`/`.resx`):
 1. Add the property, plus its default and `DataBindings.Add` call in the constructor. Binding is what updates the property from the control.
