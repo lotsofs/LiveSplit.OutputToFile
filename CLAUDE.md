@@ -47,7 +47,7 @@ The code is in `UI/Components/`:
 
 | File | Holds |
 |---|---|
-| `OutputToFileComponent.cs` | The LiveSplit side: timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
+| `OutputToFileComponent.cs` | The LiveSplit side: counting timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
 | `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members and PB segment times |
 | `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex`, and this attempt's times and deltas (`LiveSegmentTime`, `RunDelta`, `IsGold`, …) |
 | `FileQueue.cs` | Writes the files on a background thread, skipping unchanged contents; keeps the latest write error |
@@ -65,11 +65,15 @@ The code is in `UI/Components/`:
   - Golds exist only at the last level. Keep the `lvl == Levels.Count - 1` guard on any gold output. `IsGold` decides what counts as a gold and includes that guard; don't test the gold delta instead, because it is also null when there is no gold.
 - **Timer phases.** `GetCurrentSubsplitIndex` and `GetPreviousSubsplitIndex` return sentinel values depending on the phase (−1/−2 when not running, `Count`/`Count−1` when finished). Every write path needs correct output for NotRunning, Running/Paused and Ended. Otherwise files keep stale values.
 - **Nothing per attempt is stored.** This attempt's times and deltas are computed from the run on every write, by `OutputWriter`'s `LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta` and `IsGold`. `CalculateSegments()` rebuilds the shared `SplitLevels` in place on every cache-key change, including every timer phase change, so don't keep per-attempt state in it: a pause would wipe it.
+- **Threads.** The timer event handlers can run on another thread: LiveSplit's server raises the events on its connection's thread.
+  - So the handlers only count events with `Interlocked.Increment`, and `Update()`, on the UI thread, does all the work on the next frame.
+  - Keep it that way. Don't touch the levels, the writers or the settings control from a handler; give `Update()` a count or a cache key instead.
+  - A handler that throws on the server's thread closes LiveSplit.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own check, `HasTimerChanged`, on what each timer file shows and the timer phase. It caches each level's segment start; anything new that moves a split time or rebuilds the levels must call `SegmentStartsChanged()`.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
-  - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. `OnReset` clears that record. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
+  - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. A reset clears that record, in the next `Update()`. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
   - A full rewrite in `Update()` must queue every file the settings and levels call for, whatever the phase. `FileQueue.EndSweep` empties any file in the component's folders (`OUTPUT_FOLDERS`, plus root files matching `OUTPUT_ROOT_FILES`) that wasn't queued, so a file written in only some phases would be emptied in the others.
-  - The drain catches every exception per file, and `Update()` shows the latest in the settings panel (`ShowWriteError`). Only touch the settings control from the UI thread. Don't add file access that bypasses `FileQueue`: on the UI thread an exception would escape into LiveSplit's `Split()`/`Update()`.
+  - The drain catches every exception per file, and `Update()` shows the latest in the settings panel (`ShowWriteError`). Only touch the settings control from the UI thread. Don't add file access that bypasses `FileQueue`: an exception would escape into LiveSplit's `Update()`.
 - **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`. A `ListLines` builds every file of one list a line at a time, so each file gets one line per split, blank where it has nothing.
 
 ## Making changes

@@ -30,23 +30,30 @@ Code is referred to by member name. The table below says which file each class i
 4. `GetSettings()` runs when the layout is saved. `GetSettingsHashCode()` is called on every refresh, but LiveSplit only uses it to decide whether to redraw, not to detect unsaved changes ([livesplit-notes.md](livesplit-notes.md#layout-save-prompt-and-the-settings-hash-read-in-source)).
 5. `Dispose()` unsubscribes from the events, then waits up to 2 seconds for queued files to be written.
 
+**Threads.**
+- The timer events can arrive on a thread other than the UI thread. LiveSplit's server raises them on its connection's thread ([livesplit-notes.md](livesplit-notes.md#which-thread-raises-the-timer-events-mostly-read-in-source)).
+- So the event handlers only count events (`Interlocked.Increment`). Everything else runs in `Update()`, on the UI thread, so the levels, the writers' caches and the settings control are only ever used from one thread. `FileQueue` locks its own state for its drain task.
+- The caller still changes LiveSplit's state outside the component. An `Update()` can therefore read a split half made, and an exception from that is caught and logged by LiveSplit.
+- `Update()` reads the event counts before any state, and an event always comes after its change. So such a change is counted, and the files are rewritten from the finished state on the next frame.
+- Don't do work in a handler. When the server drives the timer, a handler would race `Update()` over the levels and could throw. The server doesn't catch handler exceptions, so that closes LiveSplit.
+
 ## When files get written
 
 | Trigger | What runs |
 |---|---|
-| `OnStart` | `CalculateSegments()`, then `WriteSplits()` |
-| `OnSplit`, `OnSkipSplit`, `OnUndoSplit` | `TimerFiles.SegmentStartsChanged()`, then `WriteSplits()` |
-| `OnReset` | `FileQueue.ForgetWrittenFiles()`, `WriteSplits()`, then `CalculateSegments()` |
+| `OnStart`, `OnSplit`, `OnSkipSplit`, `OnUndoSplit`, `OnReset` | Counts the event (`_timerEvents`), a cache key, so the next `Update()` rewrites everything. `OnReset` also counts the reset (`_resets`). Several events in one frame cost one rewrite. |
 | `RunManuallyModified` | Counts the edit (`_runEdits`), a cache key, so the next `Update()` rewrites everything. Several edits in one frame cost one rewrite. |
-| `Update()` (every frame) | 0. If the latest write error changed, show it in the settings (`ShowWriteError`). <br>1. If any cache key changed, a full rewrite: `FileQueue.BeginSweep()`, `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. <br>2. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless what one of that method's files shows changed since its last write: the run timer's or a level's segment timer's whole second (truncated, sign included), or the timer phase. `TimerFiles` keeps each level's segment start, the time its segment timer counts from, and finds them again only after `SegmentStartsChanged()`, which the split events and `CalculateSegments()` call. A frame therefore costs a subtraction per level, not a search. After a full rewrite every timer file is written, because finding the segment starts again also forgets what the files show. <br>3. After a full rewrite: `FileQueue.EndSweep()`, which empties the output files the rewrite didn't write (see [Writing files](#writing-files)). |
+| `Update()` (every frame) | 0. Read the three counts, before any state. If the latest write error changed, show it in the settings (`ShowWriteError`). If the reset count changed, `FileQueue.ForgetWrittenFiles()`, so each attempt ends with every file written in full. <br>1. If any cache key changed, a full rewrite: `FileQueue.BeginSweep()`, `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, attempts, finished runs, total splits), then `WriteSplits()`. <br>2. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless what one of that method's files shows changed since its last write: the run timer's or a level's segment timer's whole second (truncated, sign included), or the timer phase. `TimerFiles` keeps each level's segment start, the time its segment timer counts from, and finds them again only after `SegmentStartsChanged()`, which `CalculateSegments()` calls. A frame therefore costs a subtraction per level, not a search. After a full rewrite every timer file is written, because finding the segment starts again also forgets what the files show. <br>3. After a full rewrite: `FileQueue.EndSweep()`, which empties the output files the rewrite didn't write (see [Writing files](#writing-files)). |
 
-The cache keys in `Update()` are attempt count, game name, category name, platform name, the `RunManuallyModified` count, the `Run` object (by reference), `FolderPath`, `SplitsBefore`, `SplitsAfter`, the four `Output*` settings and `CurrentPhase`.
+The cache keys in `Update()` are attempt count, game name, category name, platform name, the `RunManuallyModified` count, the timer event count, the `Run` object (by reference), `FolderPath`, `SplitsBefore`, `SplitsAfter`, the four `Output*` settings and `CurrentPhase`.
 
 Split edits are seen through `RunManuallyModified`: LiveSplit raises it after each change in Edit Splits, which edits the run in place, and after opening splits. Close Splits replaces the run without raising it, and so does every reset after it while LiveSplit is in timer-only mode. The `Run` key catches both. See [livesplit-notes.md](livesplit-notes.md#editing-and-opening-splits-read-in-source).
 
-Because the phase is a cache key, every start, pause, resume, finish and reset goes through row 2 of `Update()` one frame after the event handler has run, and so rebuilds the levels. That is harmless because the levels hold nothing about the current attempt (see [Per-level data](#per-level-data-splitlevel)).
+So every start, split, skip, undo and reset is written by a full rewrite on the next frame. So are a pause and a resume, through the phase key. Every rewrite rebuilds the levels, which is harmless because they hold nothing about the current attempt (see [Per-level data](#per-level-data-splitlevel)).
+- A mid-run split's `Update()` takes about 0.3 ms with 5 splits and 0.6 ms with 40 (Debug build, every output on).
+- The files reach the disk up to one frame after the event: about 25 ms at `RefreshRate` 40, or later if a LiveSplit message box is open.
 
-LiveSplit fires every event *after* it has updated the timer state. A handler therefore sees the new state: on `OnSplit` the index has already moved on, and on the last split the phase is already `Ended`. Details are in [livesplit-notes.md](livesplit-notes.md).
+LiveSplit fires every event *after* it has updated the timer state, and the rewrite comes after the event, so it sees the new state. Details are in [livesplit-notes.md](livesplit-notes.md).
 
 `WriteSplits()` runs these in order:
 
@@ -220,7 +227,7 @@ The functions branch on the phase separately and inconsistently. For example, `W
   | `OutputSubsplits` | Whether there is more than one level |
 
   Everything else is always written. Turning an output off empties its files on the next frame (see "Emptying old files" above).
-- The file *contents* are still built synchronously inside the LiveSplit event or `Update()` call; only the writing is in the background. On a split that is under a millisecond on the calling thread, with the writes taking about 35 ms on the drain task (40 splits, every output on).
+- The file *contents* are still built synchronously, inside `Update()` on the UI thread; only the writing is in the background. After a split, that is under a millisecond on the UI thread, and the writes take about 30 ms on the drain task (40 splits, every output on).
 
 ## Settings
 

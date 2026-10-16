@@ -102,7 +102,7 @@ static class Program
 
     static Time T(double s) => new Time(TimeSpan.FromSeconds(s), TimeSpan.FromSeconds(s));
 
-    // One LiveSplit frame, then wait for the files it queued. Call it after every event: phase changes are only acted on in Update().
+    // One LiveSplit frame, then wait for the files it queued. Call it after every event: the events only count, and Update() writes.
     static void Tick()
     {
         comp.Update(null, state, 0, 0, LayoutMode.Vertical);
@@ -125,8 +125,11 @@ Build it with `dotnet build`, then run `bin\Debug\net481\Harness.exe <output fol
 Things to know:
 
 - **Check `GameTime` outputs.** Game time is exact, while real time drifts. Usually that is a few milliseconds, but two runs of the same build through a long multi-scenario harness differed by up to 0.3 s in `RealTime` deltas (seen 2026-10-15). When comparing two builds, compare `RealTime` files only by which ones exist.
-- **Call `Tick()` after every event.** Several bugs only appear on the frame after the event, when `Update()` reacts to the phase change.
-- **Files are written in the background.** `Split()` and `Update()` only queue them, so call `comp.WaitForFileWrites()` before reading files; the sample's `Tick()` does. A failed write shows up in `comp.Settings.WriteError` on the next `Update()` after it fails. When timing, a stopwatch around `Split()` measures only the UI thread's part; time `WaitForFileWrites()` separately for the writes.
+- **Call `Tick()` after every event.** The timer events only count, and nothing is written until the next `Update()`.
+- **Files are written in the background.**
+  - `Update()` only queues them, so call `comp.WaitForFileWrites()` before reading files; the sample's `Tick()` does.
+  - A failed write shows up in `comp.Settings.WriteError` on the next `Update()` after it fails.
+  - When timing a split, time `Split()` and the next `Update()` together, since that `Update()` does the split's work. Time `WaitForFileWrites()` separately for the writes.
 - **Real time.** Setting `AdjustedStartTime` only affects real time while the timer is `Running`; while paused, real time stays frozen. `model.Pause()` toggles between pause and resume.
 - **Editing splits.** Edit Splits changes the run in place, then raises `RunManuallyModified`. To do the same, change `state.Run` (a name, a time, `Add`, `RemoveAt`), call `state.CallRunManuallyModified()`, then `Tick()`.
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
@@ -202,4 +205,3 @@ The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40
 | Code | Check | File | Today | Correct |
 |---|---|---|---|---|
 | ATM | `FileQueue` rewrites a timer-sized file 10 times a second for 180 s while [OBS-style reads](#reading-files-as-obs-does) with random gaps run | that file | 491 of 726,347 reads empty or short | none |
-| THR | 1,000 attempts of the base run's splits, at random game times within 3 s of their PB, each action [on a timer thread](#headless) after a random 0–25 ms, with `Update()` every 25 ms on the main thread; files compared with a fresh component's | all, and exceptions | 3 handler exceptions, 1 in `Update()`, 1 reset with wrong segment timers | no handler exceptions, no wrong files |

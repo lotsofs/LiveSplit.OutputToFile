@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using static System.Windows.Forms.AxHost;
 
@@ -45,6 +46,13 @@ namespace LiveSplit.UI.Components {
 		SplitLevels _levels;
 		// Writes the files on a background thread. Shared by the writers.
 		FileQueue _files;
+		// Timer events can arrive on another thread: LiveSplit's server raises them on its connection's thread. So the handlers
+		// only count them, and Update() does the work on the UI thread. Two threads using the levels at once would break them.
+		// Counts starts, splits, skips, undos and resets. A cache key in Update().
+		int _timerEvents;
+		// Counts resets, and the count Update() last acted on
+		int _resets;
+		int _resetsSeen;
 		// Counts RunManuallyModified, which LiveSplit raises after each edit in Edit Splits and when splits are opened. A cache key in Update().
 		int _runEdits;
 
@@ -100,26 +108,24 @@ namespace LiveSplit.UI.Components {
 			Settings.SetSettings(settings);
 		}
 
+		// The handlers only count, so they are safe on any thread. Update() rewrites everything on the next frame.
+
 		void state_OnStart(object sender, EventArgs e) {
-			CalculateSegments();
-			WriteSplits();
+			Interlocked.Increment(ref _timerEvents);
 		}
 
 		void state_OnSplitChange(object sender, EventArgs e) {
-			_timerFiles.SegmentStartsChanged();
-			WriteSplits();
+			Interlocked.Increment(ref _timerEvents);
 		}
 
 		void state_OnReset(object sender, TimerPhase e) {
-			// Write every file in full once per attempt
-			_files.ForgetWrittenFiles();
-			WriteSplits();
-			CalculateSegments();
+			Interlocked.Increment(ref _resets);
+			Interlocked.Increment(ref _timerEvents);
 		}
 
 		void state_RunManuallyModified(object sender, EventArgs e) {
-			// The run was edited in place, or replaced. Update() rewrites everything on the next frame.
-			_runEdits++;
+			// The run was edited in place, or replaced
+			Interlocked.Increment(ref _runEdits);
 		}
 
 		#endregion
@@ -145,9 +151,18 @@ namespace LiveSplit.UI.Components {
 		// and tell the internal component to display it. This function is called hundreds to
 		// thousands of times per second.
 		public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode) {
+			// Before any state: an event comes after its change to the state, so a change that this frame reads half made is counted, and rewritten, next frame
+			int timerEvents = Volatile.Read(ref _timerEvents);
+			int resets = Volatile.Read(ref _resets);
+			int runEdits = Volatile.Read(ref _runEdits);
 			// Write errors happen on the background thread; the settings control may only be touched here, on the UI thread
 			if (_files.TakeErrorChange(out string writeError)) {
 				Settings.ShowWriteError(writeError);
+			}
+			if (resets != _resetsSeen) {
+				_resetsSeen = resets;
+				// Write every file in full once per attempt. A reset is also a timer event, so the rewrite below follows.
+				_files.ForgetWrittenFiles();
 			}
 			Cache.Restart();
 			// Check for basic 'user loaded or changed splits' etc
@@ -155,7 +170,8 @@ namespace LiveSplit.UI.Components {
 			Cache["GameName"] = state.Run.GameName;
 			Cache["CategoryName"] = state.Run.CategoryName;
 			Cache["PlatformName"] = state.Run.Metadata.PlatformName;
-			Cache["RunEdits"] = _runEdits;
+			Cache["RunEdits"] = runEdits;
+			Cache["TimerEvents"] = timerEvents;
 			// Compared by reference. Close Splits replaces the run without raising RunManuallyModified.
 			Cache["Run"] = state.Run;
 			Cache["FolderPath"] = Settings.FolderPath;
@@ -201,7 +217,7 @@ namespace LiveSplit.UI.Components {
 		/// Blocks until every file queued so far is written. For tests: files are written on a background thread.
 		/// </summary>
 		public void WaitForFileWrites() {
-			_files.WaitForWrites(System.Threading.Timeout.Infinite);
+			_files.WaitForWrites(Timeout.Infinite);
 		}
 
 		// I do not know what this is for.

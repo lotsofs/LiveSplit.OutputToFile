@@ -58,7 +58,7 @@ An exception thrown by a state-event handler comes out of the `TimerModel` call 
 
 `TimerModel` raises each event synchronously on the thread that called it, and takes no lock ([TimerModel.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/TimerModel.cs)). So the thread depends on the caller.
 
-Read on 2026-10-16 in the LiveSplit source at `e16f72c`, then again at `683cd60` (1.8.37). Both reads included the component versions each commit pins (for 1.8.37: ASR `98d91bb`, ASL `9c1e207`, Racetime `051a2bf`). The exceptions are marked in the table. This is tracked as [THR](Defects.md#thr--timer-events-arrive-off-the-ui-thread).
+Read on 2026-10-16 in the LiveSplit source at `e16f72c`, then again at `683cd60` (1.8.37). Both reads included the component versions each commit pins (for 1.8.37: ASR `98d91bb`, ASL `9c1e207`, Racetime `051a2bf`). The exceptions are marked in the table. The component's handlers only count events, so the thread they run on doesn't matter to it ([architecture.md](architecture.md#lifecycle)).
 
 | Caller | Thread | How known |
 |---|---|---|
@@ -75,6 +75,8 @@ Read on 2026-10-16 in the LiveSplit source at `e16f72c`, then again at `683cd60`
   - The refresh calls `Update()` on every layout component through `UpdateAllComponents`, or on every visible one through `ComponentRenderer.Update` ([ComponentRenderer.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/UI/Components/ComponentRenderer.cs)). Neither skips zero-size components.
   - Exceptions from `Update()` are caught and logged.
   - The installed `settings.cfg` has `RefreshRate` 40, so a frame comes every 25 ms or so.
+  - The refresh skips everything while `DontRedraw` is set. LiveSplit sets it only around its own message boxes: error boxes, the "save your splits / layout?" prompts, and "update your best times?" or "save as Personal Best?" around a reset. Minimizing doesn't stop `Update()`.
+  - Modal dialogs such as Edit Splits don't stop it either. The refresh is `Invoke`d onto the form, and the dialog's message loop on the UI thread runs it.
 - An exception that an event handler throws during a pipe or TCP command isn't caught: `Connection.ReadCommands` wraps only the read ([Connection.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Server/Connection.cs)). Unhandled on a foreground thread, it ends LiveSplit; `LiveSplit.exe.config` has no `legacyUnhandledExceptionPolicy`. Read, not run.
   - `WsConnection.OnMessage` doesn't catch either. Whether websocket-sharp does wasn't checked.
 
@@ -120,7 +122,7 @@ Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60`
 - Close Splits resets the timer, then calls `SetRun` with a blank run, and doesn't raise the event.
   - LiveSplit then stays in timer-only mode. From then on, `TimerForm`'s `OnReset` handler replaces the run with a new blank one on every reset, also without the event.
   - `LiveSplitState.Run` is a plain property, so replacing the run raises nothing by itself.
-- Not known: whether LiveSplit keeps calling `Update()` while the Edit Splits dialog is open. If it doesn't, the files catch up when the dialog closes.
+- LiveSplit keeps calling `Update()` while the Edit Splits dialog is open, so edits reach the files as they're made ([which thread](#which-thread-raises-the-timer-events-mostly-read-in-source)).
 
 ## Not verified
 
