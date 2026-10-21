@@ -92,6 +92,27 @@ Read on 2026-10-16 in the LiveSplit source at `e16f72c`, then again at `683cd60`
 - `ComponentManager.LoadLayoutComponent(path, state)` creates a component from that file name, and loads the factories itself on first use. LiveSplit's layout loader passes it each component's `<Path>` from the layout file (not checked against a saved layout here).
 - So namespaces and class names can change without breaking saved layouts, but renaming the DLL would break them. Seen 2026-10-21: after the classes moved namespace, a headless program with `BasePath` set to a folder holding `Components\LiveSplit.OutputToFile.dll` got the factory and the component this way.
 
+## Update check (read in source, checked headless)
+
+Read on 2026-10-21 in the LiveSplit source at `683cd60` (1.8.37) and on master: [UpdateHelper.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Updates/UpdateHelper.cs), and `Updater.cs`, `Update.cs` and `FileChange.cs` in [src/UpdateManager](https://github.com/LiveSplit/LiveSplit/tree/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/UpdateManager). The prompt and the restart haven't been seen in LiveSplit. [releasing.md](releasing.md) has the release steps that follow from these facts.
+
+- At startup, `TimerForm.CheckForUpdates` checks LiveSplit itself, its updater, and every factory in `ComponentManager.ComponentFactories` (each component DLL in `Components\`, [above](#how-livesplit-finds-the-component-verified)).
+  - The check runs on a background task, and each factory type is checked only once per run of LiveSplit.
+  - It uses the factory's `IUpdateable` members: `UpdateName`, `XMLURL`, `UpdateURL`, `Version`.
+- The feed is read with `XmlReader.Create(XMLURL)`. Each child of the root element is parsed as an `<update version="…">`, with `<changelog>` holding `<change>` lines and `<files>` holding `<file path="…" localPath="…" status="Added|Changed|Removed">` (`localPath` is optional).
+  - Any exception is swallowed and keeps the entries parsed so far. A feed that can't be fetched therefore just means no update. So does an entry without `<files>` or `<changelog>`, an XML comment, or a one-part `version` such as `8`, for that entry and the ones after it.
+- There's an update when any entry's `version` is greater than the factory's `Version` (`System.Version` comparison). The dialog, "New updates are available", lists `UpdateName (highest version)` and the `<change>` lines of every newer entry.
+- On Yes, LiveSplit downloads `UpdateManagerV2.exe` and its config from `livesplit.org/update/`, starts it, and kills its own process.
+  - The updater downloads each file from `UpdateURL + path` to `localPath` (or `path`), relative to the LiveSplit folder, then starts LiveSplit again.
+  - Files are collected by `path` across all the newer entries, and downloaded in feed order.
+- The hosted `UpdateManagerV2.exe` was last modified 2026-02-22. Its strings include `localPath`, and it targets .NET Framework 4.8.1, so it can download over GitHub's TLS 1.2.
+
+Checked headless on 2026-10-21 with the installed `UpdateManager.dll` (1.8.37). A test program called `Updater`'s check, version and changelog methods and the internal `PerformUpdate` on local feeds, with `file://` downloads into a scratch LiveSplit folder:
+- the version comparisons, the changelog lines, and the parse failures above behaved as described;
+- with two entries that both list a file, newest first, the older release's file was installed last and won.
+
+The same program read an XML file from `raw.githubusercontent.com` with `XmlReader.Create`, and downloaded a release asset through GitHub's redirect with `WebClient`.
+
 ## Layout save prompt and the settings hash (read in source)
 
 Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60` (1.8.37) on 2026-10-16. These facts weren't checked by running LiveSplit.

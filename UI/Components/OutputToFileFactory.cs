@@ -15,12 +15,16 @@ namespace LiveSplit.UI.Components.OutputToFile
 
         public IComponent Create(LiveSplitState state) => new OutputToFileComponent(state);
 
+        // LiveSplit checks the feed at startup and offers any newer version listed there.
+        // docs/releasing.md has the feed's rules.
         public string UpdateName => ComponentName;
 
-        public string UpdateURL => "";
+        // Each file's path in the feed is relative to this: the release tag, then the asset name.
+        public string UpdateURL => "https://github.com/lotsofs/LiveSplit.OutputToFile/releases/download/";
 
-        public string XMLURL => UpdateURL + "";
+        public string XMLURL => "https://raw.githubusercontent.com/lotsofs/LiveSplit.OutputToFile/main/update.xml";
 
-        public Version Version => Version.Parse("1.0.0");
+        // AssemblyVersion in AssemblyInfo.cs, always four parts, so a feed entry for this release isn't newer.
+        public Version Version => typeof(OutputToFileFactory).Assembly.GetName().Version;
     }
 }

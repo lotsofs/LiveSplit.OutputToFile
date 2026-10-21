@@ -1,6 +1,25 @@
 # Project and README
 
-Build setup and end-user documentation. The index is [TODO.md](TODO.md). [output-files.md](output-files.md) is the accurate reference to bring the README in line with.
+Build setup, releases and end-user documentation. The index is [TODO.md](TODO.md). [output-files.md](output-files.md) is the accurate reference to bring the README in line with.
+
+## SEV — Release 7 is missing from the changelog
+
+GitHub has a release 7: tag `7` at `75b62eb` ("Merge remote-tracking branch 'joshimuz/main'"), published 2024-10-09 as a prerelease, with `LiveSplit.OutputToFile.dll` attached. Its notes list off-by-one fixes in the remaining-split files, `PlatformName.txt`, and split list changes.
+- CHANGELOG.md has no `## 7` section. Its Unreleased section compares with release 6, and lists `PlatformName.txt` under Added.
+- The local clone hasn't fetched tag `7`, though `75b62eb` is in `main`'s history.
+
+So users of release 7 read entries for changes they already have, and the next release has to be 8, not 7.
+
+**Evidence.** Read on 2026-10-21: `git ls-remote --tags origin`, GitHub's releases API, and CHANGELOG.md.
+
+**Plan.**
+1. `git fetch --tags origin`.
+2. Compare release 7's code and its DLL with release 6's and with `main`, as CLAUDE.md's changelog rules ask. Look at the output files, their contents, the settings, the wording and the file properties.
+3. Split Unreleased into a `## 7 (2024-10-09)` section, with what 7 already shipped, and an Unreleased section, with what came after, written for users of 7.
+
+**Verify.** Every Unreleased entry is a difference between release 7 and `main`, and every `## 7` entry a difference between 6 and 7.
+
+**Docs.** CHANGELOG.md. The "release 6" comparisons in the Unreleased entries, which may become "release 7".
 
 ## DOC — README is missing outputs and settings
 
@@ -58,17 +77,23 @@ The references aren't marked `<Private>false</Private>`, so `LiveSplit.Core.dll`
 
 **Docs.** None.
 
-## VER — Version stuck at 1.0.0 with no update URL
+## UPD — Update prompt not yet seen in LiveSplit
 
-The version is 1.0.0 in the factory's `Version` ([OutputToFileFactory.cs](../UI/Components/OutputToFileFactory.cs)) and in `AssemblyVersion`/`AssemblyFileVersion` ([AssemblyInfo.cs](../Properties/AssemblyInfo.cs)), and the factory's `UpdateURL` is empty.
+LiveSplit's startup update check is wired up, but it has only been checked headless. The feed parsing, the version comparison and the install were tested against the installed `UpdateManager.dll`, with local feeds and `file://` downloads. The prompt, the restart and a download from a real GitHub release haven't been seen in LiveSplit. `update.xml` stays empty until release 8 is published, so this can't be checked before then.
 
-**Evidence.** Read.
+**Evidence.** Read in the LiveSplit source, and checked headless on 2026-10-21 ([livesplit-notes.md](livesplit-notes.md#update-check-read-in-source-checked-headless)).
 
-**Plan.** Pick a version and keep the two in step, for example by reading the factory's version from the assembly. Decide whether to publish an update XML. If not, leave `UpdateURL` empty.
+**Plan.** After release 8 is published and its entry is in `update.xml`, following [releasing.md](releasing.md):
+1. Run `curl -sIL` on `https://github.com/lotsofs/LiveSplit.OutputToFile/releases/download/8/LiveSplit.OutputToFile.dll`. It should end in 200 with the asset's size.
+2. Build with `AssemblyVersion("7.9")` and deploy.
+3. Start LiveSplit. This shows windows, so ask whoever is at the machine first.
+   - Expect "New updates are available", listing "Output to File (8.0)" and release 8's lines.
+   - Choose Yes. LiveSplit should close, the updater should run, and LiveSplit should open again.
+4. Restore the version.
 
-**Verify.** LiveSplit's component list shows the new version.
+**Verify.** `Components\LiveSplit.OutputToFile.dll` has file version 8.0, and the next start shows no prompt.
 
-**Docs.** None.
+**Docs.** livesplit-notes.md: mark the update-check facts as seen in LiveSplit.
 
 ## RCC — Unused Release Candidate configuration
 

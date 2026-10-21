@@ -4,6 +4,10 @@
 
 A component for LiveSplit which outputs information to a text file in a folder you choose, which can then be added to OBS as a text source.
 
+## Updates
+
+From release 8 on, LiveSplit tells you at startup when a newer release is out, shows what changed, and asks whether to update. If you choose Yes, LiveSplit closes, installs the new release and opens again. Release 8 itself has to be installed by hand, by replacing `LiveSplit.OutputToFile.dll` in LiveSplit's `Components` folder while LiveSplit is closed.
+
 ## Output Directory Tree
 
 Total Splits is the number of splits.

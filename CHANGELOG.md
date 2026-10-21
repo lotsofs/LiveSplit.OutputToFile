@@ -18,6 +18,7 @@ What changed in Output to File between releases: the files it writes, what they 
   - Files are emptied, never deleted.
   - Only `TotalSplits*.txt` and the files in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\` are touched. **Don't keep files of your own in those folders:** the component treats everything in them as its own.
 - The settings are wider, and the outputs come first, above **Split List Writing**, in a group now called **Output** (release 6: **Additional Outputs**).
+- The DLL's version, shown in its file properties, is now the release number, `8.0`. It used to be `1.0.0.0`.
 
 ### Added
 
@@ -38,6 +39,7 @@ What changed in Output to File between releases: the files it writes, what they 
   `Number.txt` and `After.txt` show `-` before the timer starts and after the finish, when no split is current.
 - `CompletedSplits\`: every split completed so far, as a list with the same files as `SplitList\`, except `Highlight_CurrentSplit.txt` and the `Time_…_Upcoming.txt` files. Turn it on with the new **Completed splits** setting. Turning it off empties its files.
 - A **Split list** setting, to turn off `SplitList\`. Turning it off empties its files.
+- **Updates from LiveSplit.** When a newer release of Output to File is out, LiveSplit offers it at startup: it shows what changed and asks whether to update. Choosing Yes closes LiveSplit, installs the new release and opens LiveSplit again. This release itself still has to be installed by hand.
 
 ### Fixed
 

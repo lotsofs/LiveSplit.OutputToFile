@@ -8,8 +8,9 @@ Code is referred to by member name. The table below says which file each class i
 
 | File | Role |
 |---|---|
-| `Properties/AssemblyInfo.cs` | `[assembly: ComponentFactory(typeof(OutputToFileFactory))]`. This attribute is how LiveSplit finds the component in the DLL. |
-| `UI/Components/OutputToFileFactory.cs` | Name, description and category (Other) shown in the Layout Editor. `Create(state)` builds the component. |
+| `Properties/AssemblyInfo.cs` | `[assembly: ComponentFactory(typeof(OutputToFileFactory))]`. This attribute is how LiveSplit finds the component in the DLL. Also the version, `AssemblyVersion`, which is the release number as `N.0`. |
+| `UI/Components/OutputToFileFactory.cs` | Name, description and category (Other) shown in the Layout Editor. `Create(state)` builds the component. Its update members point LiveSplit's startup update check at `update.xml` on `main` and at the GitHub release downloads; `Version` is the assembly's version ([releasing.md](releasing.md)). |
+| `update.xml` | The update feed LiveSplit reads at startup: one entry per release since 8, newest first. Changed only when releasing. |
 | `UI/Components/OutputToFileComponent.cs` | The LiveSplit side: event handling, change detection in `Update()`, and when each writer runs. Owns the one `SplitLevels` instance, the one `FileQueue` and the four writers. |
 | `UI/Components/SplitLevels.cs` | `SplitLevels` (depths, display names, the levels) and `SplitLevel` (one level's members and arrays). Builds the levels and the PB segment times. |
 | `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`, and the live times and deltas (`LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta`, `IsGold`). |

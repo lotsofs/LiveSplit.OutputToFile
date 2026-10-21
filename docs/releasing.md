@@ -1,0 +1,61 @@
+# Releasing
+
+How to publish a release so that LiveSplit offers it to users. Releases are numbered by git tag (`1`, `2`, …). Release 8 is the first that LiveSplit can update. Earlier releases have no update URL, so their users have to install a newer release by hand once.
+
+## How users get the update
+
+When LiveSplit starts, it reads the feed at the factory's `XMLURL`: [update.xml](../update.xml) on `main`, served from `raw.githubusercontent.com`. If the feed lists a version above the installed DLL's `AssemblyVersion`, LiveSplit shows "New updates are available". The dialog lists "Output to File (version)" and the changelog lines of every newer entry, then asks "Do you want to update?".
+
+If the user clicks Yes, LiveSplit downloads its updater and closes itself. The updater downloads each `<file>` from the factory's `UpdateURL` plus the file's `path`, which is a GitHub release asset. It saves the file at `localPath` in the LiveSplit folder, and then restarts LiveSplit. [livesplit-notes.md](livesplit-notes.md#update-check-read-in-source-checked-headless) has the details and how they were checked.
+
+## Steps
+
+1. Set `AssemblyVersion` and `AssemblyFileVersion` in `Properties/AssemblyInfo.cs` to `N.0`, for release `N`.
+2. In [CHANGELOG.md](../CHANGELOG.md), turn "Unreleased" into `## N (date)`, and add an empty "Unreleased" above it.
+3. Build: `dotnet build LiveSplit.OutputToFile.sln -c Release`, with no warnings.
+4. Commit, tag the commit `N`, and push the commit and the tag.
+5. Create GitHub release `N` from that tag, with `bin\Release\LiveSplit.OutputToFile.dll` attached under that name. A prerelease works. A draft doesn't, because its assets can't be downloaded.
+6. Check the download: `curl -sIL https://github.com/lotsofs/LiveSplit.OutputToFile/releases/download/N/LiveSplit.OutputToFile.dll` should end in `200`, with the DLL's size.
+7. Only now add the release to [update.xml](../update.xml) (see below), and push it to `main`. Users are offered the release from their next LiveSplit start. `raw.githubusercontent.com` can serve the old feed for a few minutes.
+
+Keep that order. Once the feed names a version, users are offered it. If its DLL can't be downloaded yet, the updater shows an error after LiveSplit has already closed.
+
+## The feed
+
+Release 9's feed, for example:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+  <update version="9.0">
+    <files>
+      <file path="9/LiveSplit.OutputToFile.dll" localPath="Components/LiveSplit.OutputToFile.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>A short line for users.</change>
+    </changelog>
+  </update>
+  <update version="8.0">
+    <files />
+    <changelog>
+      <change>Release 8's lines, kept for users updating from 7 or earlier.</change>
+    </changelog>
+  </update>
+</updates>
+```
+
+- **Newest first.** Add each release at the top, and keep the older entries, so a user several releases behind sees every release's changes.
+- **Only the newest entry has a `<file>`.** When adding a release, move the `<file>` line up from the previous entry, change the tag in its `path`, and leave `<files />` behind. Every listed `path` is downloaded to the same `localPath`, in feed order. So an older entry listed below the newest would overwrite the new DLL with the old one.
+- **`version` is `N.0`.** It needs at least two parts, because a one-part version like `8` can't be parsed and hides the whole feed. `N.0` against the DLL's `N.0.0.0` doesn't count as newer, so users of the release aren't offered it again. A fix release can be `N.1`, with a matching `AssemblyVersion`.
+- **Every entry has both `<files>` and `<changelog>`,** even if empty. An entry missing one hides itself and every entry after it.
+- **No comments inside `<updates>`.** LiveSplit reads a comment there as a broken entry, which hides the entries after it. A comment above `<updates>` is fine.
+- **Changelog lines** are a few short user-facing lines, taken from that release's CHANGELOG section. The dialog shows every line from every newer entry, each as ` - line`. Put any **Action required** item first.
+- **Escape** `&` and `<` in the text as `&amp;` and `&lt;`.
+
+A broken feed shows no error anywhere: LiveSplit just offers no update. After pushing, check in PowerShell that the live feed is still well-formed XML. This line reads it the way LiveSplit does, and prints an error if it isn't:
+
+```powershell
+(New-Object Xml.XmlDocument).Load('https://raw.githubusercontent.com/lotsofs/LiveSplit.OutputToFile/main/update.xml')
+```
+
+That doesn't check the rules above; read the diff for those.

@@ -20,11 +20,12 @@ Read the doc that matches the task before editing:
 | [docs/testing.md](docs/testing.md) | Testing in LiveSplit by hand, or headless with a copy-paste test program, plus regression checks for the known bugs |
 | [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
 | [docs/DONE.md](docs/DONE.md) | Log of finished TODO items: what was done and when, newest first |
+| [docs/releasing.md](docs/releasing.md) | Cutting a release, and the rules of `update.xml`, the feed through which LiveSplit offers it to users |
 | [CHANGELOG.md](CHANGELOG.md) | What changed for users in each release, and what is unreleased |
 
 The docs refer to code by member name and file, not by line number. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section, and add a row to docs/DONE.md. Items finished in the same change share one row. When you find a defect you aren't fixing now, add both.
 
-**Changelog.** When a change is one a user of the latest release would notice (output files, their contents, settings, how LiveSplit behaves), add it under "Unreleased" in CHANGELOG.md, in the same change. Write it for users: what they see in the files or the settings, with no TODO codes or class names. A fix to something added since the latest release isn't an entry of its own; update that feature's entry if needed. Releases are the git tags (`1` … `6`); when one is tagged, "Unreleased" becomes its section.
+**Changelog.** When a change is one a user of the latest release would notice (output files, their contents, settings, how LiveSplit behaves), add it under "Unreleased" in CHANGELOG.md, in the same change. Write it for users: what they see in the files or the settings, with no TODO codes or class names. A fix to something added since the latest release isn't an entry of its own; update that feature's entry if needed. Releases are the git tags (`1`, `2`, …); when one is tagged, "Unreleased" becomes its section. [docs/releasing.md](docs/releasing.md) has the steps, including the update feed.
 
 ## Build / deploy
 

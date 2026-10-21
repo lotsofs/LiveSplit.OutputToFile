@@ -34,9 +34,10 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
+| [SEV](Project.md#sev--release-7-is-missing-from-the-changelog) | Changelog | GitHub has release 7 (2024-10-09, tag not fetched locally), but CHANGELOG.md has no section for it and lists its changes, such as `PlatformName.txt`, as Unreleased against release 6 | Medium |
 | [DOC](Project.md#doc--readme-is-missing-outputs-and-settings) | README | Undocumented: `CompletedSplits\`, `PlatformName.txt`, `*_Raw`/`Names_Indent_N` files, `{Header}` names, `Sign.txt` values, settings, install | Medium |
 | [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete) | README | The `Timers\GameTime` tree lists only `SegmentTimer_AllSplits.txt`, but every level is written | Low |
+| [UPD](Project.md#upd--update-prompt-not-yet-seen-in-livesplit) | Updates | LiveSplit's startup update prompt was only checked headless; after release 8 is published, see it in LiveSplit: the prompt, the install from GitHub and the restart | Medium |
 | [HNT](Project.md#hnt--livesplit-references-only-resolve-on-this-machine) | Build | The LiveSplit references use a HintPath that only exists on this machine; add an overridable `LiveSplitDir` | Low |
 | [PRV](Project.md#prv--livesplit-dlls-are-copied-into-bin) | Build | The LiveSplit DLLs get copied into `bin\` because the references aren't `<Private>false</Private>` | Low |
-| [VER](Project.md#ver--version-stuck-at-100-with-no-update-url) | Build | The version is 1.0.0 in both the factory and `AssemblyInfo.cs`, and `UpdateURL` is empty | Low |
 | [RCC](Project.md#rcc--unused-release-candidate-configuration) | Build | The solution has an unused "Release Candidate" configuration that maps to Release | Low |
