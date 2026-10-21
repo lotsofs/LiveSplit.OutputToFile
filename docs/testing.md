@@ -8,7 +8,7 @@ There is no test project. A change can be checked in two ways: in LiveSplit by h
 dotnet build LiveSplit.OutputToFile.sln -c Debug
 ```
 
-The build has one known warning, CS0219 (`currentSplitIndex`). Any other warning is new. It needs the .NET Framework 4.8.1 targeting pack (see CLAUDE.md).
+The build has no warnings, so any warning is new. It needs the .NET Framework 4.8.1 targeting pack (see CLAUDE.md).
 
 ## In LiveSplit
 

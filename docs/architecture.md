@@ -143,7 +143,7 @@ A dictionary's `.Count` is the number of timing methods (2), not the array lengt
 
 ### Live times and deltas
 
-This attempt's values are computed from the run whenever files are written, by these `OutputWriter` helpers. Each takes a timing method, a level and a local index, and returns null for a negative index, i.e. the sentinels in the table below. Subtracting a null gives null.
+This attempt's values are computed from the run whenever files are written, by these `OutputWriter` helpers. Each takes a timing method, a level and a local index, which must be a member's: callers handle −1 from the index helpers below first. Subtracting a null gives null.
 
 | Helper | Value |
 |---|---|
@@ -158,16 +158,18 @@ Computing them on every write is safe because PB times and best segments don't c
 
 ## Phase-dependent indexes
 
-Most write functions start from these two helpers, which return **local** indexes:
+Most write functions start from these two helpers, which return a **local** index, or −1 for none:
 
 | Timer phase | `GetCurrentSubsplitIndex(lvl)` | `GetPreviousSubsplitIndex(lvl)` |
 |---|---|---|
-| NotRunning | −1 | −2 |
+| NotRunning | −1 | −1 |
 | Running / Paused, before the level's first member is completed | 0 | −1 |
 | Running / Paused, otherwise | local index of the first member whose global index ≥ `CurrentSplitIndex` | that − 1 |
-| Ended | `Count` | `Count − 1` |
+| Ended | −1 | `Count − 1` |
 
-The functions branch on the phase separately and inconsistently. For example, `WritePreviousSplitTimes` only treats −1 as "no previous split", which lets NotRunning (−2) through to a code path that happens to write `-`. Check every phase when changing one of these functions.
+- The previous index is the last completed member, so the members up to it are the completed ones in every phase. That is the `CompletedSplits\` range, and what `WriteSplitListLevel` treats as completed.
+- The last split is a member of every level, so a running timer always has a current member. If none is found, the levels don't match the run, and `GetCurrentSubsplitIndex` throws.
+- The callers check the phase, or −1, before using an index. Check every phase when changing one of them.
 
 ## How the values are calculated
 

@@ -24,37 +24,36 @@ namespace LiveSplit.UI.Components {
 
 		#region subsplit indices
 
+		/// <summary>
+		/// The local index of the level's last completed member, or -1 if there is none:
+		/// -1 before the start and on the level's first member, the last member after the finish.
+		/// </summary>
 		protected int GetPreviousSubsplitIndex(int level) {
-			List<int> indices = Levels[level].Indices;
-			if (State.CurrentPhase == TimerPhase.Ended) {
-				return indices.Count - 1;
-			}
-			if (State.CurrentPhase == TimerPhase.NotRunning) {
-				return -2;
-			}
-			for (int i = 0; i < indices.Count; i++) {
-				if (indices[i] >= State.CurrentSplitIndex) {
-					return i - 1;
-				}
-			}
-			return -3; // Shouldn't happen
-		}
-
-		protected int GetCurrentSubsplitIndex(int level) {
-			List<int> indices = Levels[level].Indices;
-			if (State.CurrentPhase == TimerPhase.Ended) {
-				return indices.Count;
-			}
 			if (State.CurrentPhase == TimerPhase.NotRunning) {
 				return -1;
 			}
-			int currentSplitIndex = -1;
+			if (State.CurrentPhase == TimerPhase.Ended) {
+				return Levels[level].Indices.Count - 1;
+			}
+			return GetCurrentSubsplitIndex(level) - 1;
+		}
+
+		/// <summary>
+		/// The local index of the level's current member while the timer is running or paused, or -1 when there is no current split:
+		/// before the start and after the finish.
+		/// </summary>
+		protected int GetCurrentSubsplitIndex(int level) {
+			if (State.CurrentPhase != TimerPhase.Running && State.CurrentPhase != TimerPhase.Paused) {
+				return -1;
+			}
+			// The first member at or after the current split. The last split is a member of every level, so there is one.
+			List<int> indices = Levels[level].Indices;
 			for (int i = 0; i < indices.Count; i++) {
 				if (indices[i] >= State.CurrentSplitIndex) {
 					return i;
 				}
 			}
-			return -3; // Shouldn't happen
+			throw new InvalidOperationException($"Level {level} has no member at or after split {State.CurrentSplitIndex}: the levels don't match the run.");
 		}
 
 		#endregion
@@ -64,14 +63,13 @@ namespace LiveSplit.UI.Components {
 		// This attempt's times and deltas for a member of a level, by local index. They are computed from the run
 		// whenever files are written, never stored: PB times and best segments don't change during a run, and a
 		// completed split's SplitTime only changes when it is undone.
-		// A negative local index (the sentinels of the subsplit index functions) gives null.
+		// The local index must be a member's: callers handle -1 (no member) from the subsplit index functions themselves.
 		// Subtracting TimeSpan? values gives null when either is null.
 
 		/// <summary>
 		/// This attempt's split time
 		/// </summary>
 		protected TimeSpan? LiveRunTime(TimingMethod method, int lvl, int localIndex) {
-			if (localIndex < 0) return null;
 			return State.Run[Levels[lvl].Indices[localIndex]].SplitTime[method];
 		}
 
@@ -80,17 +78,15 @@ namespace LiveSplit.UI.Components {
 		/// The first member's segment time is its split time.
 		/// </summary>
 		protected TimeSpan? LiveSegmentTime(TimingMethod method, int lvl, int localIndex) {
-			if (localIndex <= 0) return LiveRunTime(method, lvl, localIndex);
+			if (localIndex == 0) return LiveRunTime(method, lvl, localIndex);
 			return LiveRunTime(method, lvl, localIndex) - LiveRunTime(method, lvl, localIndex - 1);
 		}
 
 		protected TimeSpan? RunDelta(TimingMethod method, int lvl, int localIndex) {
-			if (localIndex < 0) return null;
 			return LiveRunTime(method, lvl, localIndex) - State.Run[Levels[lvl].Indices[localIndex]].PersonalBestSplitTime[method];
 		}
 
 		protected TimeSpan? SegmentDelta(TimingMethod method, int lvl, int localIndex) {
-			if (localIndex < 0) return null;
 			return LiveSegmentTime(method, lvl, localIndex) - Levels[lvl].PbSegmentTimes[method][localIndex];
 		}
 
@@ -98,7 +94,7 @@ namespace LiveSplit.UI.Components {
 		/// Segment time minus best segment. Golds only exist at the last level.
 		/// </summary>
 		protected TimeSpan? GoldDelta(TimingMethod method, int lvl, int localIndex) {
-			if (lvl != Levels.Count - 1 || localIndex < 0) return null;
+			if (lvl != Levels.Count - 1) return null;
 			return LiveSegmentTime(method, lvl, localIndex) - State.Run[Levels[lvl].Indices[localIndex]].BestSegmentTime[method];
 		}
 
@@ -107,7 +103,7 @@ namespace LiveSplit.UI.Components {
 		/// Golds only exist at the last level.
 		/// </summary>
 		protected bool IsGold(TimingMethod method, int lvl, int localIndex) {
-			if (lvl != Levels.Count - 1 || localIndex < 0) return false;
+			if (lvl != Levels.Count - 1) return false;
 			TimeSpan? liveSegmentTime = LiveSegmentTime(method, lvl, localIndex);
 			if (liveSegmentTime == null) return false;
 			TimeSpan? goldTime = State.Run[Levels[lvl].Indices[localIndex]].BestSegmentTime[method];

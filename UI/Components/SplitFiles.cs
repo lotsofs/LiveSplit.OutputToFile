@@ -100,6 +100,7 @@ namespace LiveSplit.UI.Components {
 		void WritePreviousSplitTimes(TimingMethod method, int lvl) {
 			int previousSplitIndex = GetPreviousSubsplitIndex(lvl);
 			if (previousSplitIndex == -1) {
+				// No previous member: the timer isn't running, or the level's first member is current
 				MakeFile(FILE_PREVIOUS_SEGMENT_TIME, "-", method, lvl);
 				MakeFile(FILE_PREVIOUS_RUN_TIME, "-", method, lvl);
 				MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, "-", method, lvl);
@@ -132,9 +133,6 @@ namespace LiveSplit.UI.Components {
 		/// </summary>
 		Signs PreviousSign(bool isGold, TimeSpan? runDelta, TimeSpan? segmentDelta) {
 			bool ahead = runDelta < TimeSpan.Zero;
-			if (State.CurrentPhase == TimerPhase.NotRunning) {
-				return Signs.NotApplicable;
-			}
 			if (State.CurrentPhase == TimerPhase.Ended) {
 				if (isGold) return ahead ? Signs.PBGold : Signs.NoPBGold;
 				if (segmentDelta == null) return ahead ? Signs.PB : Signs.NoPB;

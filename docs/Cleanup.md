@@ -4,18 +4,6 @@ Settings UI and code tidying. None of these change output unless noted. The inde
 
 DUR and NSP both edit `TimeFormatter.cs`.
 
-## SNT — Sentinel indices instead of explicit phase handling
-
-`GetPreviousSubsplitIndex` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) returns −2 when the timer isn't running. `WritePreviousSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) relies on −2 ≠ −1 to reach the branch that writes `-`. The "shouldn't happen" −3 that both index helpers return would surface as an index crash.
-
-**Evidence.** Read.
-
-**Plan.** Handle NotRunning and Ended explicitly at each call site, and have the helpers return only real indices, or −1 for none.
-
-**Verify.** Output unchanged for a full run with subsplits, including undo, finish and reset.
-
-**Docs.** CLAUDE.md "Must-know before editing" (the timer-phases bullet). architecture.md "Phase-dependent indexes".
-
 ## BLK — CompletedSplits writes files that are always blank
 
 `Time_Run_Upcoming`, `Time_Segment_Upcoming`, `Time_Gold_Upcoming` and `Highlight_CurrentSplit` under `CompletedSplits\` never get content, because its range stops before the current split.
@@ -79,7 +67,6 @@ In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs), includ
 ## UNU — Unused members and variables
 
 - `InternalComponent` in `OutputToFileComponent`.
-- `currentSplitIndex` in `GetCurrentSubsplitIndex` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)), which gives the build's only warning, CS0219.
 - `level` in `WriteSplitInformation` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)).
 - `Settings.Mode`, which `GetSettingsControl` sets but nothing reads.
 
@@ -89,7 +76,7 @@ In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs), includ
 
 **Verify.** Build with no warnings.
 
-**Docs.** CLAUDE.md "Build / deploy" and testing.md "Build", which both name CS0219 as the expected warning.
+**Docs.** None.
 
 ## SGN — Some Signs values are never written
 

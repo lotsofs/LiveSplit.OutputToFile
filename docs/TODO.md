@@ -19,13 +19,12 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [SNT](Cleanup.md#snt--sentinel-indices-instead-of-explicit-phase-handling) | Subsplits | The subsplit index helpers return −2/−3 sentinels that callers rely on implicitly; handle timer phases explicitly | Low |
 | [BLK](Cleanup.md#blk--completedsplits-writes-files-that-are-always-blank) | CompletedSplits | The upcoming-time files and `Highlight_CurrentSplit.txt` under `CompletedSplits\` are always blank | Low |
 | [DUR](Cleanup.md#dur--durationstring-and-timerstring-are-identical) | Time format | `TimerString` duplicates `DurationString` and has no callers; one caller repeats `DurationString`'s null check | Low |
 | [NSP](Cleanup.md#nsp--timeformatter-has-its-own-namespace) | Time format | `TimeFormatter` is in `LiveSplit.OutputToFile.UI.Components.OutputToFile`; everything else is in `LiveSplit.UI.Components` | Low |
 | [SVR](Cleanup.md#svr--saved-settings-version-is-never-used) | Settings | The saved settings `Version` is read but never used; bump it when keys change or drop it | Low |
 | [USN](Cleanup.md#usn--unused-usings) | Code | Unused usings, including `using static System.Windows.Forms.AxHost` | Low |
-| [UNU](Cleanup.md#unu--unused-members-and-variables) | Code | Unused `InternalComponent`, `currentSplitIndex` (the CS0219 warning), `level` and `Settings.Mode` | Low |
+| [UNU](Cleanup.md#unu--unused-members-and-variables) | Code | Unused `InternalComponent`, `level` and `Settings.Mode` | Low |
 | [SGN](Cleanup.md#sgn--some-signs-values-are-never-written) | Sign.txt | The `Signs` values `Undetermined`, `Gained`, `Lost` and `Gold` are never written | Low |
 | [CMT](Cleanup.md#cmt--commented-out-code) | Code | Commented-out code blocks in the component | Low |
 | [TPL](Cleanup.md#tpl--wrong-or-misleading-template-comments) | Code | Leftover template comments that are wrong (`DrawVertical`, `Update`, `GetSettingsHashCode`, the factory) | Low |

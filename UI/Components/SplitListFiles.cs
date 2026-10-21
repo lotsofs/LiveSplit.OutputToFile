@@ -46,9 +46,9 @@ namespace LiveSplit.UI.Components {
 					WriteSplitListLevel(FOLDER_SPLITLIST, method, lvl, first, last);
 				}
 
-				// Every split before the current one
+				// Every completed split: none before the start, all after the finish
 				if (Settings.OutputCompletedSplits) {
-					WriteSplitListLevel(FOLDER_COMPLETEDSPLITS, method, lvl, 0, GetCurrentSubsplitIndex(lvl) - 1);
+					WriteSplitListLevel(FOLDER_COMPLETEDSPLITS, method, lvl, 0, GetPreviousSubsplitIndex(lvl));
 				}
 			}
 		}
@@ -57,15 +57,22 @@ namespace LiveSplit.UI.Components {
 		// and SplitsAfter after it, shifted to stay within the level
 		(int First, int Last) SplitListRange(int lvl) {
 			int count = Levels[lvl].Indices.Count;
-			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
 			int range = 1 + Settings.SplitsBefore + Settings.SplitsAfter;
 			if (range > count) {
 				return (0, count - 1);
 			}
-			if (State.CurrentPhase == TimerPhase.NotRunning || currentSubsplitIndex < Settings.SplitsBefore) {
+			// No current split before the start or after the finish: the first members, or the last
+			if (State.CurrentPhase == TimerPhase.NotRunning) {
 				return (0, range - 1);
 			}
-			if (State.CurrentPhase == TimerPhase.Ended || currentSubsplitIndex > count - 1 - Settings.SplitsAfter) {
+			if (State.CurrentPhase == TimerPhase.Ended) {
+				return (count - range, count - 1);
+			}
+			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
+			if (currentSubsplitIndex < Settings.SplitsBefore) {
+				return (0, range - 1);
+			}
+			if (currentSubsplitIndex > count - 1 - Settings.SplitsAfter) {
 				return (count - range, count - 1);
 			}
 			return (currentSubsplitIndex - Settings.SplitsBefore, currentSubsplitIndex + Settings.SplitsAfter);
@@ -73,13 +80,15 @@ namespace LiveSplit.UI.Components {
 
 		// Writes the files of one split list (folder) at one level, for the splits with local indices first to last.
 		void WriteSplitListLevel(string folder, TimingMethod method, int lvl, int first, int last) {
+			// -1 for none: no current split before the start or after the finish, nothing completed before the start
 			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
+			int previousSubsplitIndex = GetPreviousSubsplitIndex(lvl);
 			var lines = new ListLines(lvl == Levels.Count - 1, lvl + 1);
 
 			for (int spl = first; spl <= last; spl++) {
 				AppendNames(lines, lvl, spl);
 				if (spl == currentSubsplitIndex) lines.CurrentSplitHighlight.Append(HIGHLIGHT_FILL);
-				if (spl < currentSubsplitIndex) {
+				if (spl <= previousSubsplitIndex) {
 					AppendCompletedLine(lines, method, lvl, spl);
 				}
 				else {
