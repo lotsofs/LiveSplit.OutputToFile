@@ -64,7 +64,7 @@ The version is 1.0.0 in the factory's `Version` ([OutputToFileFactory.cs](../UI/
 
 **Evidence.** Read.
 
-**Plan.** Pick a version and keep the two in step, for example by reading the factory's version from the assembly. Decide whether to publish an update XML. If not, leave `UpdateURL` empty and drop the template comments ([TPL](Cleanup.md#tpl--wrong-or-misleading-template-comments)).
+**Plan.** Pick a version and keep the two in step, for example by reading the factory's version from the assembly. Decide whether to publish an update XML. If not, leave `UpdateURL` empty.
 
 **Verify.** LiveSplit's component list shows the new version.
 

@@ -81,9 +81,9 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			CalculateSegments();
 		}
 
+		// Draws nothing: the component only writes files
 		public void DrawHorizontal(Graphics g, LiveSplitState state, float height, Region clipRegion) { }
 
-		// We will be adding the ability to display the component across two rows in our settings menu.
 		public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion) { }
 
 		public Control GetSettingsControl(LayoutMode mode) {
@@ -136,9 +136,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			_splitListFiles.WriteSplitLists(TimingMethod.GameTime);
 		}
 
-		// This is the function where we decide what needs to be displayed at this moment in time,
-		// and tell the internal component to display it. This function is called hundreds to
-		// thousands of times per second.
+		// Called once per LiveSplit frame, on the UI thread. Rewrites every file when a cache key below has changed;
+		// the timer files have their own check.
 		public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode) {
 			// Before any state: an event comes after its change to the state, so a change that this frame reads half made is counted, and rewritten, next frame
 			int timerEvents = Volatile.Read(ref _timerEvents);
@@ -209,7 +208,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			_files.WaitForWrites(Timeout.Infinite);
 		}
 
-		// I do not know what this is for.
+		// LiveSplit only uses this to decide when to redraw the layout, so it has no visible effect: the component draws nothing
 		public int GetSettingsHashCode() => Settings.GetSettingsHashCode();
 	}
 }
