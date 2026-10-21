@@ -14,7 +14,6 @@ namespace LiveSplit.UI.Components.OutputToFile {
 	/// </summary>
 	public class OutputToFileComponent : IComponent {
 
-		protected InfoTextComponent InternalComponent { get; set; }
 		public OutputToFileSettings Settings { get; set; }
 		protected LiveSplitState State { get; set; }
 
@@ -88,7 +87,6 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion) { }
 
 		public Control GetSettingsControl(LayoutMode mode) {
-			Settings.Mode = mode;
 			return Settings;
 		}
 

@@ -19,7 +19,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [UNU](Cleanup.md#unu--unused-members-and-variables) | Code | Unused `InternalComponent`, `level` and `Settings.Mode` | Low |
 | [SGN](Cleanup.md#sgn--some-signs-values-are-never-written) | Sign.txt | The `Signs` values `Undetermined`, `Gained`, `Lost` and `Gold` are never written | Low |
 | [CMT](Cleanup.md#cmt--commented-out-code) | Code | Commented-out code blocks in the component | Low |
 | [TPL](Cleanup.md#tpl--wrong-or-misleading-template-comments) | Code | Leftover template comments that are wrong (`DrawVertical`, `Update`, `GetSettingsHashCode`, the factory) | Low |

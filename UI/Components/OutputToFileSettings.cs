@@ -8,7 +8,6 @@ namespace LiveSplit.UI.Components.OutputToFile
 	public partial class OutputToFileSettings : UserControl
 	{
 		public string FolderPath { get; set; }
-		public LayoutMode Mode { get; set; }
 		public int SplitsBefore { get; set; }
 		public int SplitsAfter { get; set; }
 		public bool OutputTimer { get; set; }

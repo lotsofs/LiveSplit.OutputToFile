@@ -2,20 +2,6 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-## UNU — Unused members and variables
-
-- `InternalComponent` in `OutputToFileComponent`.
-- `level` in `WriteSplitInformation` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)).
-- `Settings.Mode`, which `GetSettingsControl` sets but nothing reads.
-
-**Evidence.** Read.
-
-**Plan.** Remove them.
-
-**Verify.** Build with no warnings.
-
-**Docs.** None.
-
 ## SGN — Some Signs values are never written
 
 `Undetermined`, `Gained`, `Lost` and `Gold`, in [Signs.cs](../UI/Components/Signs.cs).

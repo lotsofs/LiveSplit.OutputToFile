@@ -31,10 +31,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		/// <summary>
 		/// Write non-timing related information about a split
 		/// </summary>
-		/// <param name="state"></param>
 		public void WriteSplitInformation() {
 			for (int lvl = 0; lvl < Levels.Count; lvl++) {
-				SplitLevel level = Levels[lvl];
 				WriteCurrentSplitInformation(lvl);
 				WritePreviousSplitInformation(lvl);
 			}
