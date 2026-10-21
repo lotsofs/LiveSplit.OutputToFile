@@ -19,7 +19,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [CMT](Cleanup.md#cmt--commented-out-code) | Code | Commented-out code blocks in the component | Low |
 | [TPL](Cleanup.md#tpl--wrong-or-misleading-template-comments) | Code | Leftover template comments that are wrong (`DrawVertical`, `Update`, `GetSettingsHashCode`, the factory) | Low |
 | [LAY](Cleanup.md#lay--settings-layout-leftovers) | Settings | The top table has 5 rows for 4 controls, and tab order is Folder → Split list → Output | Low |
 

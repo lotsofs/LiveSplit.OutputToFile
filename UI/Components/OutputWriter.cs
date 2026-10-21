@@ -127,11 +127,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				subsplitLevelTag = "SansSubsplits_Level" + (subsplitLevel + 1);
 			}
 			string file = string.Format(fileName, method.ToString(), subsplitLevelTag);
-			string c = contents;
-			//if (formatTime) {
-			//	c = CustomTimeFormat(contents, showPlus);
-			//}
-			MakeFile(file, c);
+			MakeFile(file, contents);
 		}
 
 		/// <summary>
@@ -141,11 +137,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		/// <param name="contents"></param>
 		protected void MakeFile(string fileName, string contents, TimingMethod method) {
 			string file = string.Format(fileName, method.ToString());
-			string c = contents;
-			//if (formatTime) {
-			//	c = CustomTimeFormat(contents, showPlus);
-			//}
-			MakeFile(file, c);
+			MakeFile(file, contents);
 		}
 
 		protected void MakeFile(string fileName, string contents) {

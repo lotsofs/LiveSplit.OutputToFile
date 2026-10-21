@@ -2,18 +2,6 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-## CMT — Commented-out code
-
-One block each in `GenerateLevels` and `GenerateNames` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), one line in `WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)), and one block in each of the two template-filling `MakeFile` overloads ([OutputWriter.cs](../UI/Components/OutputWriter.cs)).
-
-**Evidence.** Read.
-
-**Plan.** Delete it. Git history keeps it.
-
-**Verify.** Build.
-
-**Docs.** None.
-
 ## TPL — Wrong or misleading template comments
 
 In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs) unless another file is named:

@@ -79,10 +79,6 @@ namespace LiveSplit.UI.Components.OutputToFile {
 					}
 				}
 			}
-			// Move the last level to the start so that the output for 'all splits' is reliable to the user
-			//var allSplits = _splitLevelIndices[_splitLevelIndices.Count - 1];
-			//_splitLevelIndices.RemoveAt(_splitLevelIndices.Count - 1);
-			//_splitLevelIndices.Insert(0, allSplits);
 
 			// Make a list of times and deltae for each level
 			_levels = new SplitLevel[numberOfLevels];
@@ -109,9 +105,6 @@ namespace LiveSplit.UI.Components.OutputToFile {
 						name = name.Substring(1);
 					}
 				}
-				//var allSplits2 = _splitNamesByLevel[split][_splitNamesByLevel[split].Count - 1];
-				//_splitNamesByLevel[split].RemoveAt(_splitNamesByLevel[split].Count - 1);
-				//_splitNamesByLevel[split].Insert(0, allSplits2);
 			}
 		}
 
