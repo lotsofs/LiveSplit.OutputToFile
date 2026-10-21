@@ -145,6 +145,7 @@ Things to know:
     - With every action on the main thread, the folders match.
     - Damage needs the handler and an `Update()` to overlap, so a long run can compare only after actions that overlapped one, plus a sample of the rest.
 - **The settings control.** To test the settings UI, add `comp.Settings` to a `Form` you `Show()`, reach its private controls by reflection, type with `PostMessage(textBox.Handle, WM_CHAR, c, 0)`, and pump with `Application.DoEvents()`. Bindings only see focus changes and keys that go through the message loop. Remove the control before closing the form, which would dispose it. These forms appear on screen and take focus from whatever else is open, so warn whoever is at the machine first.
+  - To check only the bindings, no window is needed. Add `comp.Settings` to a `Form` that is never shown, and call the internal `Control.CreateControl(bool)` on the form by reflection, with `true`. That creates the handles, and the bindings then work both ways: setting a control's `Value` or `Checked` in code updates its property (seen headless, 2026-10-21). Typing and focus changes still need a shown form.
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.OutputToFile.UI.Components.OutputToFile.TimeFormatter")`.
 
 ### Reading files as OBS does

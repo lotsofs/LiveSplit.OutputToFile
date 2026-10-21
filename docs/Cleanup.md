@@ -4,18 +4,6 @@ Settings UI and code tidying. None of these change output unless noted. The inde
 
 DUR and NSP both edit `TimeFormatter.cs`.
 
-## HND — Dead change handlers in the settings control
-
-These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChanged`, `checkBoxOutputSubsplits_CheckedChanged`, `checkBoxOutputCompletedSplits_CheckedChanged`, `numericUpDownSplitListBefore_ValueChanged` and `numericUpDownSplitListAfter_ValueChanged`. Data binding does their job. The Subsplits one also sets the wrong property (`OutputSplitList`). `OutputToFileSettings_Load` is connected but empty.
-
-**Evidence.** Read: the Designer only wires up `buttonFolderPath_Click`, `checkBoxOutputSplitList_CheckedChanged` and `Load`.
-
-**Plan.** Delete the unconnected handlers, and the empty `Load` handler with its Designer wiring.
-
-**Verify.** Build. Change every setting, save the layout and reload it: all values kept.
-
-**Docs.** architecture.md "Settings", if it lists the handlers.
-
 ## SNT — Sentinel indices instead of explicit phase handling
 
 `GetPreviousSubsplitIndex` ([OutputWriter.cs](../UI/Components/OutputWriter.cs)) returns −2 when the timer isn't running. `WritePreviousSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) relies on −2 ≠ −1 to reach the branch that writes `-`. The "shouldn't happen" −3 that both index helpers return would surface as an index crash.

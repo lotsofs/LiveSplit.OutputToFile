@@ -41,11 +41,6 @@ namespace LiveSplit.UI.Components
 			this.checkBoxOutputCompletedSplits.DataBindings.Add("Checked", this, "OutputCompletedSplits", false, DataSourceUpdateMode.OnPropertyChanged);
 		}
 
-		private void OutputToFileSettings_Load(object sender, EventArgs e)
-		{
-
-		}
-
 		private int CreateSettingsNode(XmlDocument document, XmlElement parent)
 		{
 			return SettingsHelper.CreateSetting(document, parent, "Version", "0.1") ^
@@ -111,31 +106,8 @@ namespace LiveSplit.UI.Components
 			}
 		}
 
-		private void numericUpDownSplitListBefore_ValueChanged(object sender, EventArgs e)
-		{
-			SplitsBefore = (int)numericUpDownSplitListBefore.Value;
-		}
-
-		private void numericUpDownSplitListAfter_ValueChanged(object sender, EventArgs e)
-		{
-			SplitsAfter = (int)numericUpDownSplitListAfter.Value;
-		}
-
-		private void checkBoxOutputTimer_CheckedChanged(object sender, EventArgs e) {
-			OutputTimer = checkBoxOutputTimer.Checked;
-		}
-
 		private void checkBoxOutputSplitList_CheckedChanged(object sender, EventArgs e) {
-			OutputSplitList = checkBoxOutputSplitList.Checked;
 			groupBoxSplitList.Enabled = checkBoxOutputSplitList.Checked;
-		}
-
-		private void checkBoxOutputSubsplits_CheckedChanged(object sender, EventArgs e) {
-			OutputSplitList = checkBoxOutputSplitList.Checked;
-		}
-
-		private void checkBoxOutputCompletedSplits_CheckedChanged(object sender, EventArgs e) {
-			OutputCompletedSplits = checkBoxOutputCompletedSplits.Checked;
 		}
 	}
 }

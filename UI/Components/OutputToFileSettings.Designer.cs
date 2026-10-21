@@ -288,7 +288,6 @@
 			this.Controls.Add(this.tableLayoutPanelTop);
 			this.Name = "OutputToFileSettings";
 			this.Size = new System.Drawing.Size(457, 619);
-			this.Load += new System.EventHandler(this.OutputToFileSettings_Load);
 			this.tableLayoutPanelTop.ResumeLayout(false);
 			this.tableLayoutPanelTop.PerformLayout();
 			this.groupBoxFolderPath.ResumeLayout(false);
