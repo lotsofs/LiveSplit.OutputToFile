@@ -78,14 +78,14 @@ The code is in `UI/Components/`:
   - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. A reset clears that record, in the next `Update()`. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
   - A full rewrite in `Update()` must queue every file the settings and levels call for, whatever the phase. `FileQueue.EndSweep` empties any file in the component's folders (`OUTPUT_FOLDERS`, plus root files matching `OUTPUT_ROOT_FILES`) that wasn't queued, so a file written in only some phases would be emptied in the others.
   - The drain catches every exception per file, and `Update()` shows the latest in the settings panel (`ShowWriteError`). Only touch the settings control from the UI thread. Don't add file access that bypasses `FileQueue`: an exception would escape into LiveSplit's `Update()`.
-- **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ only in the range of splits that `WriteSplitLists` passes in. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`. A `ListLines` builds every file of one list a line at a time, so each file gets one line per split, blank where it has nothing.
+- **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ in the range of splits that `WriteSplitLists` passes in, and in `upcoming`: `CompletedSplits\` has no current or upcoming lines, so it leaves out the files only those fill. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`. A `ListLines` builds every file of one list a line at a time, so each file gets one line per split, blank where it has nothing.
 
 ## Making changes
 
 **Adding an output file:**
 1. Add a `FILE_*` template to the writer for its folder (see the file table above). Root files go in `RunInfoFiles`; a root file that isn't always written must also match `OUTPUT_ROOT_FILES` in the component, or it won't be emptied when it's no longer written.
 2. Write it from that writer's `Write*` function, in every phase branch.
-3. If it's a list column, make it a `FILE_LIST_*` template, give it a `StringBuilder` field in `ListLines` (created with `Add` in its constructor), and append its line in `AppendNames`, `AppendCompletedLine` or `AppendUpcomingLine`. Both lists then get it.
+3. If it's a list column, make it a `FILE_LIST_*` template, give it a `StringBuilder` field in `ListLines` (created with `Add` in its constructor), and append its line in `AppendNames`, `AppendCompletedLine` or `AppendUpcomingLine`. Both lists then get it, except a file that only `AppendUpcomingLine` fills: `Add` that one inside `if (upcoming)`, so only `SplitList\` gets it.
 4. Write it once per timing method only if its path contains `{0}`.
 5. Document it in `docs/output-files.md`, `README.md` and `CHANGELOG.md`.
 

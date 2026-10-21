@@ -35,7 +35,7 @@ What changed in Output to File between releases: the files it writes, what they 
   - `After.txt`: the number of splits after the current one.
 
   `Number.txt` and `After.txt` show `-` before the timer starts and after the finish, when no split is current.
-- `CompletedSplits\`: every split completed so far, as a list with the same files as `SplitList\`. Turn it on with the new **Completed splits** setting. Turning it off empties its files.
+- `CompletedSplits\`: every split completed so far, as a list with the same files as `SplitList\`, except `Highlight_CurrentSplit.txt` and the `Time_…_Upcoming.txt` files. Turn it on with the new **Completed splits** setting. Turning it off empties its files.
 - A **Split list** setting, to turn off `SplitList\`. Turning it off empties its files.
 
 ### Fixed

@@ -4,18 +4,6 @@ Settings UI and code tidying. None of these change output unless noted. The inde
 
 DUR and NSP both edit `TimeFormatter.cs`.
 
-## BLK — CompletedSplits writes files that are always blank
-
-`Time_Run_Upcoming`, `Time_Segment_Upcoming`, `Time_Gold_Upcoming` and `Highlight_CurrentSplit` under `CompletedSplits\` never get content, because its range stops before the current split.
-
-**Evidence.** Reproduced 2026-10-14.
-
-**Plan.** Stop writing them: don't create them in `ListLines` when the folder is `FOLDER_COMPLETEDSPLITS`. Nothing appends to them there, because every line is completed. Or document that they're blank.
-
-**Verify.** A fresh output folder after a run with Completed splits on doesn't contain them.
-
-**Docs.** output-files.md "CompletedSplits". README, if DOC has documented `CompletedSplits\` by then.
-
 ## DUR — DurationString and TimerString are identical
 
 `TimeFormatter.TimerString` is the same code as `DurationString` and has no callers. The `HasValue ? … : "-"` check for `GoldTime.txt` in `WriteCurrentSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) repeats null handling that `DurationString` already does.

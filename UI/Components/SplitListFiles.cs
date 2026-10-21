@@ -6,13 +6,14 @@ using System.Text;
 
 namespace LiveSplit.UI.Components {
 	/// <summary>
-	/// Writes SplitList\ and CompletedSplits\. Both lists write the same files, for different ranges of splits.
+	/// Writes SplitList\ and CompletedSplits\. Both lists write the same files, for different ranges of splits,
+	/// except that CompletedSplits\ leaves out the files only the current and upcoming splits fill.
 	/// </summary>
 	class SplitListFiles : OutputWriter {
 
 		const string HIGHLIGHT_FILL = "███████████████████████████████████████████";
 
-		// Both split lists write the same files, each under its own folder.
+		// Both split lists write the same files, each under its own folder, except the upcoming ones in CompletedSplits\.
 		// The FILE_LIST_* templates are relative to that folder: prefix one of the FOLDER_* constants.
 		const string FOLDER_SPLITLIST = @"SplitList\";
 		const string FOLDER_COMPLETEDSPLITS = @"CompletedSplits\";
@@ -43,12 +44,12 @@ namespace LiveSplit.UI.Components {
 			for (int lvl = startingLevel; lvl < Levels.Count; lvl++) {
 				if (Settings.OutputSplitList) {
 					var (first, last) = SplitListRange(lvl);
-					WriteSplitListLevel(FOLDER_SPLITLIST, method, lvl, first, last);
+					WriteSplitListLevel(FOLDER_SPLITLIST, method, lvl, first, last, upcoming: true);
 				}
 
-				// Every completed split: none before the start, all after the finish
+				// Every completed split: none before the start, all after the finish. No upcoming lines, so no upcoming files.
 				if (Settings.OutputCompletedSplits) {
-					WriteSplitListLevel(FOLDER_COMPLETEDSPLITS, method, lvl, 0, GetPreviousSubsplitIndex(lvl));
+					WriteSplitListLevel(FOLDER_COMPLETEDSPLITS, method, lvl, 0, GetPreviousSubsplitIndex(lvl), upcoming: false);
 				}
 			}
 		}
@@ -79,11 +80,12 @@ namespace LiveSplit.UI.Components {
 		}
 
 		// Writes the files of one split list (folder) at one level, for the splits with local indices first to last.
-		void WriteSplitListLevel(string folder, TimingMethod method, int lvl, int first, int last) {
+		// Without upcoming, the files of the current and upcoming splits are left out, so last must be at most the previous split.
+		void WriteSplitListLevel(string folder, TimingMethod method, int lvl, int first, int last, bool upcoming) {
 			// -1 for none: no current split before the start or after the finish, nothing completed before the start
 			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
 			int previousSubsplitIndex = GetPreviousSubsplitIndex(lvl);
-			var lines = new ListLines(lvl == Levels.Count - 1, lvl + 1);
+			var lines = new ListLines(lvl == Levels.Count - 1, upcoming, lvl + 1);
 
 			for (int spl = first; spl <= last; spl++) {
 				AppendNames(lines, lvl, spl);
@@ -153,35 +155,39 @@ namespace LiveSplit.UI.Components {
 		class ListLines {
 
 			public readonly StringBuilder Names, NamesRaw;
-			public readonly StringBuilder RunTimeCurrent, RunTimeUpcoming, RunDelta;
-			public readonly StringBuilder SegmentTimeUpcoming, SegmentDelta;
-			public readonly StringBuilder CurrentSplitHighlight;
+			public readonly StringBuilder RunTimeCurrent, RunDelta, SegmentDelta;
 			public readonly StringBuilder AheadGainedHighlight, AheadLostHighlight, BehindGainedHighlight, BehindLostHighlight;
+			// Only for the current split and those after it, which CompletedSplits never has. Null there.
+			public readonly StringBuilder RunTimeUpcoming, SegmentTimeUpcoming, CurrentSplitHighlight;
 			// Golds are only supported at the last level. Null at the other levels.
-			public readonly StringBuilder GoldDelta, GoldTimeUpcoming, GoldHighlight;
+			public readonly StringBuilder GoldDelta, GoldHighlight;
+			// Both: null at the other levels, and in CompletedSplits
+			public readonly StringBuilder GoldTimeUpcoming;
 			// Names_Indent_{depth}, one per depth up to the level's
 			public readonly StringBuilder[] Indents;
 
 			// Every file above with its FILE_LIST_* template
 			readonly List<(string Template, StringBuilder Lines)> _files = new List<(string, StringBuilder)>();
 
-			public ListLines(bool golds, int depths) {
+			public ListLines(bool golds, bool upcoming, int depths) {
 				Names = Add(FILE_LIST_NAMES);
 				NamesRaw = Add(FILE_LIST_NAMES_RAW);
 				RunTimeCurrent = Add(FILE_LIST_FINISH_TIME_LIVE);
-				RunTimeUpcoming = Add(FILE_LIST_FINISH_TIME_UPCOMING);
 				RunDelta = Add(FILE_LIST_RUN_DELTA);
-				SegmentTimeUpcoming = Add(FILE_LIST_SEGMENT_TIME_UPCOMING);
 				SegmentDelta = Add(FILE_LIST_SEGMENT_DELTA);
-				CurrentSplitHighlight = Add(FILE_LIST_CURRENT_SPLIT_HIGHLIGHT);
 				AheadGainedHighlight = Add(FILE_LIST_AHEAD_GAINED_HIGHLIGHT);
 				AheadLostHighlight = Add(FILE_LIST_AHEAD_LOST_HIGHLIGHT);
 				BehindGainedHighlight = Add(FILE_LIST_BEHIND_GAINED_HIGHLIGHT);
 				BehindLostHighlight = Add(FILE_LIST_BEHIND_LOST_HIGHLIGHT);
+				if (upcoming) {
+					RunTimeUpcoming = Add(FILE_LIST_FINISH_TIME_UPCOMING);
+					SegmentTimeUpcoming = Add(FILE_LIST_SEGMENT_TIME_UPCOMING);
+					CurrentSplitHighlight = Add(FILE_LIST_CURRENT_SPLIT_HIGHLIGHT);
+				}
 				if (golds) {
 					GoldDelta = Add(FILE_LIST_GOLD_DELTA);
-					GoldTimeUpcoming = Add(FILE_LIST_GOLD_TIME_UPCOMING);
 					GoldHighlight = Add(FILE_LIST_GOLD_HIGHLIGHT);
+					if (upcoming) GoldTimeUpcoming = Add(FILE_LIST_GOLD_TIME_UPCOMING);
 				}
 				Indents = new StringBuilder[depths];
 				for (int depth = 0; depth < depths; depth++) {

@@ -112,7 +112,7 @@ Each completed line has a fill in at most one highlight file, checked in the tab
 
 ## `CompletedSplits\{level}\` (Completed splits setting)
 
-The same files as `SplitList`, but the lines cover every completed member: none while the timer isn't running, and all members once the run is finished. `Time_*_Upcoming.txt` and `Highlight_CurrentSplit.txt` are therefore always blank lines.
+The same files as `SplitList`, but the lines cover every completed member: none while the timer isn't running, and all members once the run is finished. No line is current or upcoming, so `Highlight_CurrentSplit.txt` and the `Time_*_Upcoming.txt` files aren't written.
 
 ## Outputs turned off, and levels that are gone
 

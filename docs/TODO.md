@@ -19,7 +19,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [BLK](Cleanup.md#blk--completedsplits-writes-files-that-are-always-blank) | CompletedSplits | The upcoming-time files and `Highlight_CurrentSplit.txt` under `CompletedSplits\` are always blank | Low |
 | [DUR](Cleanup.md#dur--durationstring-and-timerstring-are-identical) | Time format | `TimerString` duplicates `DurationString` and has no callers; one caller repeats `DurationString`'s null check | Low |
 | [NSP](Cleanup.md#nsp--timeformatter-has-its-own-namespace) | Time format | `TimeFormatter` is in `LiveSplit.OutputToFile.UI.Components.OutputToFile`; everything else is in `LiveSplit.UI.Components` | Low |
 | [SVR](Cleanup.md#svr--saved-settings-version-is-never-used) | Settings | The saved settings `Version` is read but never used; bump it when keys change or drop it | Low |
