@@ -43,8 +43,7 @@ namespace LiveSplit.UI.Components.OutputToFile
 
 		private int CreateSettingsNode(XmlDocument document, XmlElement parent)
 		{
-			return SettingsHelper.CreateSetting(document, parent, "Version", "0.1") ^
-				SettingsHelper.CreateSetting(document, parent, "FolderPath", FolderPath) ^
+			return SettingsHelper.CreateSetting(document, parent, "FolderPath", FolderPath) ^
 				SettingsHelper.CreateSetting(document, parent, "SplitsBefore", SplitsBefore) ^
 				SettingsHelper.CreateSetting(document, parent, "SplitsAfter", SplitsAfter) ^
 				SettingsHelper.CreateSetting(document, parent, "OutputTimer", OutputTimer) ^
@@ -69,8 +68,6 @@ namespace LiveSplit.UI.Components.OutputToFile
 		public void SetSettings(XmlNode node)
 		{
 			var element = (XmlElement)node;
-			Version version = SettingsHelper.ParseVersion(element["Version"]);
-
 			FolderPath = SettingsHelper.ParseString(element["FolderPath"], string.Empty);
 			SplitsBefore = SettingsHelper.ParseInt(element["SplitsBefore"], 10);
 			SplitsAfter = SettingsHelper.ParseInt(element["SplitsAfter"], 10);

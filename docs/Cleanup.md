@@ -2,18 +2,6 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-## SVR — Saved settings Version is never used
-
-The saved `Version` (`0.1`) is read into a variable in `SetSettings` ([OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)) that's never used.
-
-**Evidence.** Read.
-
-**Plan.** If settings will ever need migrating, bump the version whenever keys change and branch on it in `SetSettings`. Otherwise drop the read.
-
-**Verify.** A layout saved with the old version still loads with the right values.
-
-**Docs.** CLAUDE.md "Making changes" (adding a setting), if bumping becomes a step.
-
 ## USN — Unused usings
 
 In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs), including an accidental `using static System.Windows.Forms.AxHost`. Most of the usings in `TimeFormatter.cs` are unused too.
