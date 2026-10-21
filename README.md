@@ -8,9 +8,13 @@ A component for LiveSplit which outputs information to a text file in a folder y
 
 Total Splits is the number of splits.
 
-Index is the number of splits finished (position/progress).
+Number is the current split's number, counting from 1. It's `-` before the timer starts and after the finish.
 
-Reverse Index is the number of splits remaining.
+Completed is the number of splits done, skipped ones included.
+
+Remaining is the number of splits not done yet, the current one included.
+
+After is the number of splits after the current one. It's `-` before the timer starts and after the finish.
 
 Highlights are a shaded bar to layer behind splits.
 
@@ -33,9 +37,11 @@ Split names in the output leave out the leading dashes and one space after them.
 |   
 +---CurrentSplit
 |   +---AllSplits
-|   |   |   Index.txt
+|   |   |   After.txt
+|   |   |   Completed.txt
 |   |   |   Name.txt
-|   |   |   ReverseIndex.txt
+|   |   |   Number.txt
+|   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
 |   |   |       GoldTime.txt
@@ -48,9 +54,11 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |           SegmentTime.txt
 |   |           
 |   +---SansSubsplits
-|   |   |   Index.txt
+|   |   |   After.txt
+|   |   |   Completed.txt
 |   |   |   Name.txt
-|   |   |   ReverseIndex.txt
+|   |   |   Number.txt
+|   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
 |   |   |       RunTime.txt
@@ -61,9 +69,11 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |           SegmentTime.txt
 |   |           
 |   +---SansSubsplits_Level2
-|   |   |   Index.txt
+|   |   |   After.txt
+|   |   |   Completed.txt
 |   |   |   Name.txt
-|   |   |   ReverseIndex.txt
+|   |   |   Number.txt
+|   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
 |   |   |       RunTime.txt

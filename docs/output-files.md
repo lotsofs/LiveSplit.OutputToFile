@@ -40,8 +40,10 @@ Written from `Update()`, but only when what one of them shows changes: the run t
 |---|---|---|---|
 | `Name.txt` | `-` | Current member's display name | `-` |
 | `Name_Raw.txt` | `-` | Current member's raw name | `-` |
-| `Index.txt` | `-1` | Number of members completed (0-based index of the current one) | `Count` |
-| `ReverseIndex.txt` | `Count` | `Count − Index − 1` | `-1` |
+| `Number.txt` | `-` | Current member's number, counting from 1 | `-` |
+| `Completed.txt` | `0` | Number of members completed, skipped ones included | `Count` |
+| `Remaining.txt` | `Count` | Number of members not completed, the current one included: `Count − Completed` | `0` |
+| `After.txt` | `-` | Number of members after the current one: `Remaining − 1` | `-` |
 | `{method}\SegmentTime.txt` | `-` | PB segment time of the current member | `-` |
 | `{method}\RunTime.txt` | `-` | PB split time of the current member | `-` |
 | `{method}\GoldTime.txt` (gold) | `-` | Best segment of the current split | `-` |

@@ -6,7 +6,7 @@ What changed in Output to File between releases: the files it writes, what they 
 
 ### Changed
 
-- **Output folders have moved, so OBS text sources need new paths.** Everything in `CurrentSplit\`, `PreviousSplit\` and `SplitList\` is now in a subfolder per subsplit level (see Added). The `AllSplits` subfolder has the same contents as before, so `CurrentSplit\Name.txt` is now `CurrentSplit\AllSplits\Name.txt`. Two files were renamed:
+- **Output folders have moved, so OBS text sources need new paths.** Everything in `CurrentSplit\`, `PreviousSplit\` and `SplitList\` is now in a subfolder per subsplit level (see Added). The `AllSplits` subfolder has the same contents as before, except `Index.txt` and `ReverseIndex.txt` (see Removed), so `CurrentSplit\Name.txt` is now `CurrentSplit\AllSplits\Name.txt`. Two files were renamed:
   - `TotalSplits.txt` is now `TotalSplits_AllSplits.txt`;
   - `Timers\RealTime\SegmentTimer.txt` is now `Timers\RealTime\SegmentTimer_AllSplits.txt`, and likewise under `GameTime`.
 - **Times are formatted differently.**
@@ -28,6 +28,13 @@ What changed in Output to File between releases: the files it writes, what they 
 - `Name_Raw.txt` in `CurrentSplit\` and `PreviousSplit\`, and `Names_Raw.txt` in the split list. These give split names exactly as typed in LiveSplit. The other name files leave out the leading dashes, one space after them, and the `{…}` part. To show a name that starts with a dash, put a space before it: a subsplit named `- -40` shows as `-40`.
 - `Names_Indent_0.txt`, `Names_Indent_1.txt`, … in the split list: one file per subsplit depth, with a split's name only on the line of a split at that depth. Each depth can then be its own OBS text source, indented differently.
 - `PlatformName.txt`: the platform set in the splits' metadata.
+- Split counts in `CurrentSplit\`, counted the way people count:
+  - `Number.txt`: the current split's number, starting at 1.
+  - `Completed.txt`: the number of splits done, skipped ones included.
+  - `Remaining.txt`: the number of splits not done yet, the current one included.
+  - `After.txt`: the number of splits after the current one.
+
+  `Number.txt` and `After.txt` show `-` before the timer starts and after the finish, when no split is current.
 - `CompletedSplits\`: every split completed so far, as a list with the same files as `SplitList\`. Turn it on with the new **Completed splits** setting. Turning it off empties its files.
 - A **Split list** setting, to turn off `SplitList\`. Turning it off empties its files.
 
@@ -44,6 +51,12 @@ What changed in Output to File between releases: the files it writes, what they 
 - Changes made in Edit Splits now show in the files straight away: renamed, added or removed splits, and changed times. So does opening another splits file. They used to wait until the timer was next started.
 - Typing a folder path in the settings no longer creates a folder full of output files for every letter typed. A typed path is used once you leave the box, press Enter or click OK; closing the settings with the X button drops it. Browse still uses the chosen folder at once.
 - **Browse** opens on the output folder that's set. It used to open on the folder containing it.
+
+### Removed
+
+- **`Index.txt` and `ReverseIndex.txt` in `CurrentSplit\` are gone. Point their text sources at `Completed.txt` and `Remaining.txt` instead.**
+  - `Completed.txt` shows what `Index.txt` did, except `0` instead of `-1` before the timer starts.
+  - `Remaining.txt` shows what `ReverseIndex.txt` did, except that before the timer starts it shows the number of splits, not one more.
 
 ## 6 (2023-05-29)
 
@@ -73,7 +86,7 @@ No changes from release 4.
 
 ### Added
 
-- `CurrentSplit_ReverseIndex.txt`: the number of splits after the current one.
+- `CurrentSplit_ReverseIndex.txt`: the number of splits left, the current one included.
 - `TotalSplits.txt` and `FinishedRunsCount.txt`.
 
 ### Fixed

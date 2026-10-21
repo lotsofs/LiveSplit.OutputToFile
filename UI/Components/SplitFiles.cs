@@ -13,8 +13,10 @@ namespace LiveSplit.UI.Components {
 		const string FILE_CURRENT_RUN_TIME = @"CurrentSplit\{1}\{0}\RunTime.txt";
 		const string FILE_CURRENT_NAME = @"CurrentSplit\{1}\Name.txt";
 		const string FILE_CURRENT_NAME_RAW = @"CurrentSplit\{1}\Name_Raw.txt";
-		const string FILE_CURRENT_INDEX = @"CurrentSplit\{1}\Index.txt";
-		const string FILE_CURRENT_REVERSEINDEX = @"CurrentSplit\{1}\ReverseIndex.txt";
+		const string FILE_CURRENT_NUMBER = @"CurrentSplit\{1}\Number.txt";
+		const string FILE_CURRENT_COMPLETED = @"CurrentSplit\{1}\Completed.txt";
+		const string FILE_CURRENT_REMAINING = @"CurrentSplit\{1}\Remaining.txt";
+		const string FILE_CURRENT_AFTER = @"CurrentSplit\{1}\After.txt";
 
 		const string FILE_PREVIOUS_SIGN = @"PreviousSplit\{1}\{0}\Sign.txt";
 		const string FILE_PREVIOUS_SEGMENT_TIME = @"PreviousSplit\{1}\{0}\SegmentTime.txt";
@@ -41,28 +43,28 @@ namespace LiveSplit.UI.Components {
 
 		void WriteCurrentSplitInformation(int lvl) {
 			IRun run = State.Run;
+			int count = Levels[lvl].Indices.Count;
 
-			if (State.CurrentPhase == TimerPhase.NotRunning) {
-				MakeFile(FILE_CURRENT_NAME, "-", null, lvl);
-				MakeFile(FILE_CURRENT_NAME_RAW, "-", null, lvl);
-				MakeFile(FILE_CURRENT_INDEX, "-1", null, lvl);
-				MakeFile(FILE_CURRENT_REVERSEINDEX, Levels[lvl].Indices.Count.ToString(), null, lvl);
-				return;
-			}
-			if (State.CurrentPhase == TimerPhase.Ended) {
-				MakeFile(FILE_CURRENT_NAME, "-", null, lvl);
-				MakeFile(FILE_CURRENT_NAME_RAW, "-", null, lvl);
-				MakeFile(FILE_CURRENT_INDEX, Levels[lvl].Indices.Count.ToString(), null, lvl);
-				MakeFile(FILE_CURRENT_REVERSEINDEX, "-1", null, lvl);
-				return;
-			}
+			// Members completed, skipped ones included: none before the start, all after the finish
+			int completed = GetPreviousSubsplitIndex(lvl) + 1;
+			MakeFile(FILE_CURRENT_COMPLETED, completed.ToString(), null, lvl);
+			MakeFile(FILE_CURRENT_REMAINING, (count - completed).ToString(), null, lvl);
 
 			int currLocalSplitIndex = GetCurrentSubsplitIndex(lvl);
+			if (currLocalSplitIndex == -1) {
+				// No current split: the timer isn't running, or the run is finished
+				MakeFile(FILE_CURRENT_NAME, "-", null, lvl);
+				MakeFile(FILE_CURRENT_NAME_RAW, "-", null, lvl);
+				MakeFile(FILE_CURRENT_NUMBER, "-", null, lvl);
+				MakeFile(FILE_CURRENT_AFTER, "-", null, lvl);
+				return;
+			}
+
 			int currGlobalSplitIndex = Levels[lvl].Indices[currLocalSplitIndex];
 			MakeFile(FILE_CURRENT_NAME_RAW, run[currGlobalSplitIndex].Name, null, lvl);
 			MakeFile(FILE_CURRENT_NAME, Levels.Names[currGlobalSplitIndex][lvl], null, lvl);
-			MakeFile(FILE_CURRENT_INDEX, currLocalSplitIndex.ToString(), null, lvl);
-			MakeFile(FILE_CURRENT_REVERSEINDEX, (Levels[lvl].Indices.Count - currLocalSplitIndex - 1).ToString(), null, lvl);
+			MakeFile(FILE_CURRENT_NUMBER, (currLocalSplitIndex + 1).ToString(), null, lvl);
+			MakeFile(FILE_CURRENT_AFTER, (count - currLocalSplitIndex - 1).ToString(), null, lvl);
 		}
 
 		void WritePreviousSplitInformation(int lvl) {
