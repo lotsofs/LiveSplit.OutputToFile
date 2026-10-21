@@ -51,15 +51,3 @@ LiveSplit's startup update check is wired up, but it has only been checked headl
 **Verify.** `Components\LiveSplit.OutputToFile.dll` has file version 8.0, and the next start shows no prompt.
 
 **Docs.** livesplit-notes.md: mark the update-check facts as seen in LiveSplit.
-
-## RCC — Unused Release Candidate configuration
-
-The solution has a "Release Candidate" configuration that just maps to Release ([LiveSplit.OutputToFile.sln](../LiveSplit.OutputToFile.sln)).
-
-**Evidence.** Read.
-
-**Plan.** Remove it from the solution.
-
-**Verify.** `dotnet build -c Debug` and `-c Release` still work.
-
-**Docs.** None.
