@@ -1,4 +1,4 @@
-﻿namespace LiveSplit.UI.Components {
+﻿namespace LiveSplit.UI.Components.OutputToFile {
 	// The values written to PreviousSplit\{level}\{method}\Sign.txt
 	enum Signs {
 		Undetermined,

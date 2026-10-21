@@ -1,6 +1,4 @@
 ﻿using LiveSplit.Model;
-using LiveSplit.OutputToFile.UI.Components;
-using LiveSplit.OutputToFile.UI.Components.OutputToFile;
 using LiveSplit.TimeFormatters;
 using System;
 using System.Collections.Generic;
@@ -13,7 +11,7 @@ using System.Threading;
 using System.Windows.Forms;
 using static System.Windows.Forms.AxHost;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// The LiveSplit side of the component: it reacts to timer events and to changes seen in Update(),
 	/// and decides when each group of files gets written. The writers do the writing:

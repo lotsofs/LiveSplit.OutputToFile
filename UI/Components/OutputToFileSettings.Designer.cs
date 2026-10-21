@@ -1,4 +1,4 @@
-﻿namespace LiveSplit.UI.Components
+﻿namespace LiveSplit.UI.Components.OutputToFile
 {
     partial class OutputToFileSettings
     {

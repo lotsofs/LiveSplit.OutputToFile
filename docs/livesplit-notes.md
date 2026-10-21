@@ -86,6 +86,12 @@ Read on 2026-10-16 in the LiveSplit source at `e16f72c`, then again at `683cd60`
 - `new StandardLayoutSettingsFactory().Create()`, `new Layout()`, `new Run(new StandardComparisonGeneratorsFactory())` and `new LiveSplitState(run, null, layout, layoutSettings, settings)` all work with a `null` form.
 - Loading a splits file (`StandardFormatsRunFactory`) needs the native `livesplit_core.dll` next to the program. LiveSplit ships it in its `x64\` and `x86\` folders.
 
+## How LiveSplit finds the component (verified)
+
+- `ComponentManager.LoadAllFactories` loads every DLL in `<BasePath>\Components\`. For each one it creates the factory named by `[assembly: ComponentFactory(typeof(…))]`, which here is in `Properties\AssemblyInfo.cs`. It keys the factory by the DLL's file name, `LiveSplit.OutputToFile.dll`.
+- `ComponentManager.LoadLayoutComponent(path, state)` creates a component from that file name, and loads the factories itself on first use. LiveSplit's layout loader passes it each component's `<Path>` from the layout file (not checked against a saved layout here).
+- So namespaces and class names can change without breaking saved layouts, but renaming the DLL would break them. Seen 2026-10-21: after the classes moved namespace, a headless program with `BasePath` set to a folder holding `Components\LiveSplit.OutputToFile.dll` got the factory and the component this way.
+
 ## Layout save prompt and the settings hash (read in source)
 
 Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60` (1.8.37) on 2026-10-16. These facts weren't checked by running LiveSplit.

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// Base for the classes that each write one group of output files.
 	/// Holds what they share: the timer state, the settings, the subsplit levels and the file queue.

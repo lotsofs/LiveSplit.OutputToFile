@@ -1,10 +1,9 @@
 ﻿using LiveSplit.Model;
-using LiveSplit.OutputToFile.UI.Components.OutputToFile;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// Writes SplitList\ and CompletedSplits\. Both lists write the same files, for different ranges of splits,
 	/// except that CompletedSplits\ leaves out the files only the current and upcoming splits fill.

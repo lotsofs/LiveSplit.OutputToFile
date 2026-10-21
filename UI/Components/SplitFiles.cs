@@ -1,8 +1,7 @@
 ﻿using LiveSplit.Model;
-using LiveSplit.OutputToFile.UI.Components.OutputToFile;
 using System;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// Writes CurrentSplit\ and PreviousSplit\: names, indexes, times, differences and Sign.txt.
 	/// </summary>

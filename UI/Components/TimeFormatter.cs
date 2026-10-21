@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiveSplit.OutputToFile.UI.Components.OutputToFile {
+namespace LiveSplit.UI.Components.OutputToFile {
 	static class TimeFormatter {
 
 		public enum TimeFormats {

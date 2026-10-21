@@ -1,8 +1,7 @@
 using LiveSplit.Model;
-using LiveSplit.OutputToFile.UI.Components.OutputToFile;
 using System;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// Writes Timers\: the run timer and each level's segment timer.
 	/// </summary>

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// Writes the output files on a background thread, so LiveSplit's UI thread only queues them.
 	/// Keeps only the latest contents per file, and skips contents that are already on disk.

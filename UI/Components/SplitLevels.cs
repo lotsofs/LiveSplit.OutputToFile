@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// The subsplit levels of the run. Level lvl contains the splits whose depth (number of leading dashes) is at most lvl.
 	/// The last level contains every split.

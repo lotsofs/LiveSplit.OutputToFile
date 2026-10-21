@@ -1,7 +1,7 @@
 ﻿using LiveSplit.Model;
 using System.Linq;
 
-namespace LiveSplit.UI.Components {
+namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// Writes the files in the root of the output folder: run information and split counts.
 	/// </summary>

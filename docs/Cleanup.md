@@ -2,18 +2,6 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-## NSP — TimeFormatter has its own namespace
-
-`TimeFormatter` is in `LiveSplit.OutputToFile.UI.Components.OutputToFile` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)), while everything else is in `LiveSplit.UI.Components`.
-
-**Evidence.** Read.
-
-**Plan.** Move it to `LiveSplit.UI.Components` and drop the matching `using` lines from `OutputToFileComponent`, `TimerFiles`, `SplitFiles` and `SplitListFiles`.
-
-**Verify.** Build.
-
-**Docs.** testing.md, whose reflection example uses the old namespace.
-
 ## SVR — Saved settings Version is never used
 
 The saved `Version` (`0.1`) is read into a variable in `SetSettings` ([OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)) that's never used.

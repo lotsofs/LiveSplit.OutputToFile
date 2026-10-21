@@ -1,7 +1,7 @@
 ﻿using LiveSplit.Model;
 using System;
 
-namespace LiveSplit.UI.Components
+namespace LiveSplit.UI.Components.OutputToFile
 {
     public class OutputToFileFactory : IComponentFactory
     {
