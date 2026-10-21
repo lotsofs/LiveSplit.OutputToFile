@@ -2,20 +2,6 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-DUR and NSP both edit `TimeFormatter.cs`.
-
-## DUR — DurationString and TimerString are identical
-
-`TimeFormatter.TimerString` is the same code as `DurationString` and has no callers. The `HasValue ? … : "-"` check for `GoldTime.txt` in `WriteCurrentSplitTimes` ([SplitFiles.cs](../UI/Components/SplitFiles.cs)) repeats null handling that `DurationString` already does.
-
-**Evidence.** Read.
-
-**Plan.** Delete `TimerString` and the redundant check.
-
-**Verify.** Build. `CurrentSplit\AllSplits\*\GoldTime.txt` still shows `-` for a split with no best segment.
-
-**Docs.** output-files.md "Formatting", if it lists `TimerString`.
-
 ## NSP — TimeFormatter has its own namespace
 
 `TimeFormatter` is in `LiveSplit.OutputToFile.UI.Components.OutputToFile` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)), while everything else is in `LiveSplit.UI.Components`.

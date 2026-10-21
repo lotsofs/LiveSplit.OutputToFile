@@ -166,8 +166,7 @@ namespace LiveSplit.UI.Components {
 			MakeFile(FILE_CURRENT_RUN_TIME, TimeFormatter.DurationString(curRunTime), method, lvl);
 			if (lvl == Levels.Count - 1) {
 				TimeSpan? curGoldTime = State.CurrentSplit.BestSegmentTime[method];
-				string curGoldTimeS = curGoldTime.HasValue ? TimeFormatter.DurationString(curGoldTime) : "-";
-				MakeFile(FILE_CURRENT_GOLD_TIME, curGoldTimeS, method, lvl);
+				MakeFile(FILE_CURRENT_GOLD_TIME, TimeFormatter.DurationString(curGoldTime), method, lvl);
 			}
 		}
 	}

@@ -130,6 +130,5 @@ From `TimeFormatter.cs`. Values are truncated, not rounded.
 |---|---|---|
 | `DurationString` | Times | `0:05`, `1:05`, `1:02:05`. Minutes are always shown, no decimals. Negatives get a `-` prefix. |
 | `DeltaString` | Differences | Always signed. Under 0.1 s: `+.05`. Under 60 s: `+5.2`. Otherwise `+1:05`. Negatives take the same forms: `-.05`, `-5.2`, `-1:05`. |
-| `TimerString` | Unused, identical to `DurationString` | |
 
 `null` is written as `-` everywhere.

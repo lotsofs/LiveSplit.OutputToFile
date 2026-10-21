@@ -59,16 +59,6 @@ namespace LiveSplit.OutputToFile.UI.Components.OutputToFile {
 			}
 		}
 
-		public static string TimerString(TimeSpan? t) {
-			if (t == null) return "-";
-			if (t.Value < TimeSpan.Zero) {
-				return "-" + FormatTime(t.Value.Negate(), TimeFormats.MSS);
-			}
-			else {
-				return FormatTime(t.Value, TimeFormats.MSS);
-			}
-		}
-
 		static string FormatTime(TimeSpan t, TimeFormats format) {
 			long ms = (long)t.TotalMilliseconds;
 			long hours = ms / 3600000;
