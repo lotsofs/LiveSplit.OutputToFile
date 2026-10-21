@@ -30,11 +30,11 @@ The docs refer to code by member name and file, not by line number. When a chang
 ## Build / deploy
 
 ```sh
-dotnet build LiveSplit.OutputToFile.sln -c Debug      # or -c Release
+dotnet build LiveSplit.OutputToFile.sln -c Debug      # or -c Release; add -p:LiveSplitDir=<folder> for another LiveSplit
 deploy.cmd                                            # build, then copy into LiveSplit's Components folder; deploy.cmd Release for Release
 ```
 
-- `deploy.cmd` refuses to run while LiveSplit is running, builds, and copies `bin\<config>\LiveSplit.OutputToFile.dll` only if the build succeeded. It finds `Components\` the same way the HintPath finds LiveSplit (below).
+- `deploy.cmd` refuses to run while LiveSplit is running, builds, and copies `bin\<config>\LiveSplit.OutputToFile.dll` only if the build succeeded. It copies into `Components\` in the `LiveSplitDir` folder (below), and builds against the same folder.
   - It's a batch file because PowerShell scripts are disabled on this machine. It runs from PowerShell (`.\deploy`), cmd or Git Bash (`cmd //c deploy.cmd`).
   - It calls Windows' `findstr.exe` by full path, because Git's `find` can shadow Windows' and would make the LiveSplit check pass silently.
 
@@ -42,7 +42,9 @@ deploy.cmd                                            # build, then copy into Li
 - It targets 4.8.1 because LiveSplit does from 1.8.30. With a lower target, MSBuild won't resolve the LiveSplit DLLs (MSB3274), and the build fails with missing `LiveSplit.Model` types.
 - Without the Developer Pack, the build can use the NuGet reference assemblies instead. Any SDK-style net481 build, such as the testing.md harness, puts them in the NuGet cache. Then pass `-p:TargetFrameworkRootPath=<NuGet cache>/microsoft.netframework.referenceassemblies.net481/<version>/build/`.
 - Old-style also means the csproj lists every source file. A new `.cs` file needs its own `<Compile Include>` line, or it isn't built. Put it in `namespace LiveSplit.UI.Components.OutputToFile`, like every other file. That namespace sees LiveSplit's `LiveSplit.UI.Components` and `LiveSplit.UI` without a `using`.
-- `LiveSplit.Core.dll` and `UpdateManager.dll` are referenced by HintPath `..\..\Programs\Streaming\LiveSplit\`, which is `D:\Programs\Streaming\LiveSplit`. The build fails if LiveSplit isn't installed there.
+- `LiveSplit.Core.dll` and `UpdateManager.dll` are referenced from the folder in the `LiveSplitDir` property. It defaults to `..\..\Programs\Streaming\LiveSplit` from the repo, which is `D:\Programs\Streaming\LiveSplit`. The build fails if LiveSplit isn't there.
+  - For another folder, pass `-p:LiveSplitDir=<folder>`, or set a `LiveSplitDir` environment variable, which MSBuild reads as the property. `deploy.cmd` reads only the environment variable.
+  - Give a full path without a trailing backslash: in `-p:LiveSplitDir="C:\x\"`, the backslash escapes the closing quote.
 - Deploying overwrites the DLL that LiveSplit actually loads. LiveSplit must be closed first, because it locks that DLL. `LiveSplitComponents.lnk` in the repo root is a gitignored shortcut to the `Components` folder. That folder also holds the user's `.backup` copies of older builds; leave them alone.
 - There are no tests and no linter. Verify changes headless (see docs/testing.md), or in LiveSplit.
 

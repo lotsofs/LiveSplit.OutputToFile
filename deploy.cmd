@@ -1,11 +1,13 @@
 @echo off
 rem Builds the component and copies the DLL into LiveSplit's Components folder, which LiveSplit loads it from.
 rem Usage: deploy [Debug|Release]   (Debug if left out)
-rem LiveSplit is expected where the csproj's HintPath points: ..\..\Programs\Streaming\LiveSplit from the repo.
+rem LiveSplit's folder is the LiveSplitDir environment variable, or ..\..\Programs\Streaming\LiveSplit from the repo, as in the csproj.
+rem The build reads LiveSplitDir from the environment too, so it references the LiveSplit the DLL is copied into.
 setlocal
 set "CONFIG=%~1"
 if "%CONFIG%"=="" set "CONFIG=Debug"
-set "COMPONENTS=%~dp0..\..\Programs\Streaming\LiveSplit\Components"
+if not defined LiveSplitDir set "LiveSplitDir=%~dp0..\..\Programs\Streaming\LiveSplit"
+set "COMPONENTS=%LiveSplitDir%\Components"
 
 rem LiveSplit locks the DLL while it runs, so the copy would fail. findstr by full path: Git's tools can shadow Windows' find.
 tasklist /FI "IMAGENAME eq LiveSplit.exe" /NH | "%SystemRoot%\System32\findstr.exe" /I /C:"LiveSplit.exe" >nul

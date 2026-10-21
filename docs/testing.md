@@ -52,15 +52,18 @@ A .NET Framework 4.8.1 console app that references `LiveSplit.Core.dll` and the 
     <OutputType>Exe</OutputType>
     <TargetFramework>net481</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <LiveSplitDir Condition=" '$(LiveSplitDir)' == '' ">D:\Programs\Streaming\LiveSplit</LiveSplitDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="LiveSplit.Core"><HintPath>D:\Programs\Streaming\LiveSplit\LiveSplit.Core.dll</HintPath></Reference>
-    <Reference Include="UpdateManager"><HintPath>D:\Programs\Streaming\LiveSplit\UpdateManager.dll</HintPath></Reference>
+    <Reference Include="LiveSplit.Core"><HintPath>$(LiveSplitDir)\LiveSplit.Core.dll</HintPath></Reference>
+    <Reference Include="UpdateManager"><HintPath>$(LiveSplitDir)\UpdateManager.dll</HintPath></Reference>
     <Reference Include="LiveSplit.OutputToFile"><HintPath>D:\Repositories\LiveSplit.OutputToFile\bin\Debug\LiveSplit.OutputToFile.dll</HintPath></Reference>
   </ItemGroup>
 </Project>
 ```
+
+It takes LiveSplit's folder from `LiveSplitDir`, like the component (see CLAUDE.md). The component's HintPath points at this clone's `bin\Debug`.
 
 `Program.cs`:
 

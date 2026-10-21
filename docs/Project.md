@@ -34,18 +34,6 @@ Under `Timers\GameTime`, the tree lists only `SegmentTimer_AllSplits.txt`, but t
 
 **Docs.** README.
 
-## HNT — LiveSplit references only resolve on this machine
-
-The LiveSplit references use a HintPath into `D:\Programs\Streaming\LiveSplit` (the `LiveSplit.Core` and `UpdateManager` references in [LiveSplit.OutputToFile.csproj](../LiveSplit.OutputToFile.csproj)), so the project won't build elsewhere.
-
-**Evidence.** Read.
-
-**Plan.** Add an overridable `LiveSplitDir` MSBuild property defaulting to the current path, and use it in both HintPaths.
-
-**Verify.** Builds unchanged here, and with `-p:LiveSplitDir=<other install>`.
-
-**Docs.** CLAUDE.md "Build / deploy". testing.md "Headless", whose harness uses the same paths.
-
 ## PRV — LiveSplit DLLs are copied into bin
 
 The references aren't marked `<Private>false</Private>`, so `LiveSplit.Core.dll` and `UpdateManager.dll` get copied into `bin\`. That's harmless unless the whole `bin` folder gets copied into `Components`.

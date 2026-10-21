@@ -2,7 +2,7 @@
 
 Things the component doesn't do yet. The index is [TODO.md](TODO.md).
 
-TST makes the Verify steps in the other detail docs repeatable, so it pays to do it early. Its test project will need [HNT](Project.md#hnt--livesplit-references-only-resolve-on-this-machine) to build anywhere but this machine.
+TST makes the Verify steps in the other detail docs repeatable, so it pays to do it early. Its test project can take LiveSplit's folder from the `LiveSplitDir` property, like the component (see CLAUDE.md "Build / deploy").
 
 ## TST — No automated tests
 
