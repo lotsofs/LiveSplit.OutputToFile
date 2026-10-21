@@ -2,18 +2,6 @@
 
 The index is [TODO.md](TODO.md).
 
-## GEN — GenerateSubsplitLevels runs twice
-
-`CalculateSegments` ([OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs)) runs `SplitLevels.GenerateSubsplitLevels` once per timing method. Its `method` parameter is unused, and the second call overwrites the first.
-
-**Evidence.** Read.
-
-**Plan.** Drop the parameter and the second call.
-
-**Verify.** Output unchanged for a full run with subsplits.
-
-**Docs.** architecture.md "Per-level data", which notes the double build.
-
 ## ATM — File writes aren't atomic
 
 `FileQueue.WriteFile` writes with `File.WriteAllText`, which empties the file and then writes it. An OBS text source that reads the file in between shows nothing for 1–2 s. As measured, that happens about once every 4 hours of running timer for each OBS text source on a timer file. Other files are almost never affected.

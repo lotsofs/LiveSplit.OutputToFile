@@ -137,7 +137,7 @@ With depths 0/1/2 (splits `A`, `-B`, `--C`, `D`) there are three levels: `SansSu
 
 Each `SplitLevel` holds its members, `Indices` (local index → global index), and `PbSegmentTimes`, a `Dictionary<TimingMethod, TimeSpan?[]>` with one array per timing method, indexed by **local** index. Each entry is the PB split time of this member minus the PB split time of the previous member. The first member gets its PB split time. An entry is null if either value is missing. `CalculatePBSegments` fills it during `CalculateSegments()`.
 
-`CalculateSegments()` rebuilds the levels and their arrays in place, in the one `SplitLevels` instance the writers share. It runs on every cache-key change, including every timer phase change, and builds the level structure twice (see [GEN](Performance.md#gen--generatesubsplitlevels-runs-twice)). So a level must hold nothing about the current attempt; anything stored there would be wiped by a pause.
+`CalculateSegments()` rebuilds the levels and their arrays in place, in the one `SplitLevels` instance the writers share. It runs on every cache-key change, including every timer phase change. So a level must hold nothing about the current attempt; anything stored there would be wiped by a pause.
 
 A dictionary's `.Count` is the number of timing methods (2), not the array length; use `[method].Length`.
 

@@ -20,7 +20,7 @@ namespace LiveSplit.UI.Components {
 		public int Count => _levels.Length;
 		public SplitLevel this[int lvl] => _levels[lvl];
 
-		public void GenerateSubsplitLevels(IRun run, bool outputSubsplits, TimingMethod method) {
+		public void GenerateSubsplitLevels(IRun run, bool outputSubsplits) {
 			int numberOfLevels = CalculateDepths(run);
 			// Names come from the subsplit levels even with Subsplits off, so AllSplits shows the same names either way
 			GenerateNames(run, numberOfLevels);

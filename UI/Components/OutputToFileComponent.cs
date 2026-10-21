@@ -131,8 +131,7 @@ namespace LiveSplit.UI.Components {
 		#endregion
 
 		void CalculateSegments() {
-			_levels.GenerateSubsplitLevels(State.Run, Settings.OutputSubsplits, TimingMethod.RealTime);
-			_levels.GenerateSubsplitLevels(State.Run, Settings.OutputSubsplits, TimingMethod.GameTime);
+			_levels.GenerateSubsplitLevels(State.Run, Settings.OutputSubsplits);
 			_levels.CalculatePBSegments(State.Run, TimingMethod.RealTime);
 			_levels.CalculatePBSegments(State.Run, TimingMethod.GameTime);
 			// The levels, or the phase, may have changed what the segment timers count from
