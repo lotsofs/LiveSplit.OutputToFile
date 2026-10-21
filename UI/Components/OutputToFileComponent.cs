@@ -1,15 +1,9 @@
 ﻿using LiveSplit.Model;
-using LiveSplit.TimeFormatters;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using static System.Windows.Forms.AxHost;
 
 namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>

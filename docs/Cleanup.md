@@ -2,18 +2,6 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-## USN — Unused usings
-
-In [OutputToFileComponent.cs](../UI/Components/OutputToFileComponent.cs), including an accidental `using static System.Windows.Forms.AxHost`. Most of the usings in `TimeFormatter.cs` are unused too.
-
-**Evidence.** Read.
-
-**Plan.** Remove them.
-
-**Verify.** Build.
-
-**Docs.** None.
-
 ## UNU — Unused members and variables
 
 - `InternalComponent` in `OutputToFileComponent`.

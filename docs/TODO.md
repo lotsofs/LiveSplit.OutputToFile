@@ -19,7 +19,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [USN](Cleanup.md#usn--unused-usings) | Code | Unused usings, including `using static System.Windows.Forms.AxHost` | Low |
 | [UNU](Cleanup.md#unu--unused-members-and-variables) | Code | Unused `InternalComponent`, `level` and `Settings.Mode` | Low |
 | [SGN](Cleanup.md#sgn--some-signs-values-are-never-written) | Sign.txt | The `Signs` values `Undetermined`, `Gained`, `Lost` and `Gold` are never written | Low |
 | [CMT](Cleanup.md#cmt--commented-out-code) | Code | Commented-out code blocks in the component | Low |
