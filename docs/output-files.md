@@ -76,8 +76,6 @@ These are the names of the `Signs` enum. "Ahead" and "PB" mean the run delta is 
 | `GainedAhead` / `GainedBehind` | `PBGained` / `NoPBGained` | The segment beat the PB segment |
 | `LostAhead` / `LostBehind` | `PBLost` / `NoPBLost` | The segment was slower than the PB segment |
 
-`Undetermined`, `Gained`, `Lost` and `Gold` exist in the enum but are never written.
-
 ## `SplitList\{level}\` (Split List setting)
 
 One line per member, for a window of `SplitsBefore + 1 + SplitsAfter` members around the current member. The window is chosen like this:

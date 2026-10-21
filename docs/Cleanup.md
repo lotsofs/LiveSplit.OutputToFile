@@ -2,18 +2,6 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-## SGN — Some Signs values are never written
-
-`Undetermined`, `Gained`, `Lost` and `Gold`, in [Signs.cs](../UI/Components/Signs.cs).
-
-**Evidence.** Read.
-
-**Plan.** Remove the unused values, or start writing them if a use turns up.
-
-**Verify.** Build.
-
-**Docs.** output-files.md "Sign values". README, if DOC has listed the `Sign.txt` values by then.
-
 ## CMT — Commented-out code
 
 One block each in `GenerateLevels` and `GenerateNames` ([SplitLevels.cs](../UI/Components/SplitLevels.cs)), one line in `WriteTimer` ([TimerFiles.cs](../UI/Components/TimerFiles.cs)), and one block in each of the two template-filling `MakeFile` overloads ([OutputWriter.cs](../UI/Components/OutputWriter.cs)).
