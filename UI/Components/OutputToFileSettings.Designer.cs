@@ -66,12 +66,11 @@
 			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 3);
 			this.tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanelTop.Name = "tableLayoutPanelTop";
-			this.tableLayoutPanelTop.RowCount = 5;
+			this.tableLayoutPanelTop.RowCount = 4;
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 51F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 74F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 77F));
-			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 170F));
-			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 8F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 549);
 			this.tableLayoutPanelTop.TabIndex = 0;
 			// 
@@ -142,7 +141,7 @@
 			this.groupBoxOutputSelection.Location = new System.Drawing.Point(3, 54);
 			this.groupBoxOutputSelection.Name = "groupBoxOutputSelection";
 			this.groupBoxOutputSelection.Size = new System.Drawing.Size(448, 68);
-			this.groupBoxOutputSelection.TabIndex = 2;
+			this.groupBoxOutputSelection.TabIndex = 1;
 			this.groupBoxOutputSelection.TabStop = false;
 			this.groupBoxOutputSelection.Text = "Output";
 			// 
@@ -154,7 +153,7 @@
 			this.checkBoxOutputSubsplits.Location = new System.Drawing.Point(119, 19);
 			this.checkBoxOutputSubsplits.Name = "checkBoxOutputSubsplits";
 			this.checkBoxOutputSubsplits.Size = new System.Drawing.Size(68, 17);
-			this.checkBoxOutputSubsplits.TabIndex = 3;
+			this.checkBoxOutputSubsplits.TabIndex = 1;
 			this.checkBoxOutputSubsplits.Text = "Subsplits";
 			this.checkBoxOutputSubsplits.UseVisualStyleBackColor = true;
 			// 
@@ -164,7 +163,7 @@
 			this.checkBoxOutputCompletedSplits.Location = new System.Drawing.Point(245, 19);
 			this.checkBoxOutputCompletedSplits.Name = "checkBoxOutputCompletedSplits";
 			this.checkBoxOutputCompletedSplits.Size = new System.Drawing.Size(102, 17);
-			this.checkBoxOutputCompletedSplits.TabIndex = 4;
+			this.checkBoxOutputCompletedSplits.TabIndex = 2;
 			this.checkBoxOutputCompletedSplits.Text = "Completed splits";
 			this.checkBoxOutputCompletedSplits.UseVisualStyleBackColor = true;
 			// 
@@ -176,7 +175,7 @@
 			this.checkBoxOutputSplitList.Location = new System.Drawing.Point(6, 42);
 			this.checkBoxOutputSplitList.Name = "checkBoxOutputSplitList";
 			this.checkBoxOutputSplitList.Size = new System.Drawing.Size(65, 17);
-			this.checkBoxOutputSplitList.TabIndex = 2;
+			this.checkBoxOutputSplitList.TabIndex = 3;
 			this.checkBoxOutputSplitList.Text = "Split List";
 			this.checkBoxOutputSplitList.UseVisualStyleBackColor = true;
 			this.checkBoxOutputSplitList.CheckedChanged += new System.EventHandler(this.checkBoxOutputSplitList_CheckedChanged);
@@ -187,7 +186,7 @@
 			this.checkBoxOutputTimer.Location = new System.Drawing.Point(6, 19);
 			this.checkBoxOutputTimer.Name = "checkBoxOutputTimer";
 			this.checkBoxOutputTimer.Size = new System.Drawing.Size(52, 17);
-			this.checkBoxOutputTimer.TabIndex = 1;
+			this.checkBoxOutputTimer.TabIndex = 0;
 			this.checkBoxOutputTimer.Text = "Timer";
 			this.checkBoxOutputTimer.UseVisualStyleBackColor = true;
 			// 
@@ -200,7 +199,7 @@
 			this.groupBoxSplitList.Location = new System.Drawing.Point(3, 128);
 			this.groupBoxSplitList.Name = "groupBoxSplitList";
 			this.groupBoxSplitList.Size = new System.Drawing.Size(448, 71);
-			this.groupBoxSplitList.TabIndex = 1;
+			this.groupBoxSplitList.TabIndex = 2;
 			this.groupBoxSplitList.TabStop = false;
 			this.groupBoxSplitList.Text = "Split List Writing";
 			// 

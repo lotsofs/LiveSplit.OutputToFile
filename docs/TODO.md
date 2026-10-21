@@ -19,7 +19,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [LAY](Cleanup.md#lay--settings-layout-leftovers) | Settings | The top table has 5 rows for 4 controls, and tab order is Folder → Split list → Output | Low |
+| [SCR](Cleanup.md#scr--settings-tab-scrolls-for-no-reason) | Settings | The Output to File settings tab has a scrollbar with nothing below the split list group: the control keeps its Designer height of 619 px | Low |
 
 ## Features and limitations — [Features.md](Features.md)
 

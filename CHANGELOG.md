@@ -17,6 +17,7 @@ What changed in Output to File between releases: the files it writes, what they 
 - When the layout loads, files left over from outputs that are now turned off, or from subsplit levels your splits no longer have, are emptied. So are the files at release 6's paths, such as `TotalSplits.txt` and `CurrentSplit\Name.txt`, so text sources still pointing at them show nothing.
   - Files are emptied, never deleted.
   - Only `TotalSplits*.txt` and the files in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\` are touched. **Don't keep files of your own in those folders:** the component treats everything in them as its own.
+- The settings are wider, and the outputs come first, above **Split List Writing**, in a group now called **Output** (release 6: **Additional Outputs**).
 
 ### Added
 

@@ -28,6 +28,18 @@ The build has no warnings, so any warning is new. It needs the .NET Framework 4.
    Look at both `AllSplits` and `SansSubsplits`.
 5. Repeat with a splits file that has no subsplits. There is only one level then, and level 0 is `AllSplits`.
 
+### Driving LiveSplit's UI
+
+A small UI Automation program (references `UIAutomationClient`, `UIAutomationTypes` and `WindowsBase`) can open the settings in the real LiveSplit, take screenshots and press Tab. Seen working 2026-10-21 with LiveSplit 1.8.37. It shows windows, takes focus and moves the mouse, so ask whoever is at the machine first.
+
+- **Layout.** `LiveSplit.exe -l <layout>`, started in LiveSplit's folder, loads that layout. Use a test layout with only this component and a scratch output folder, so nothing is written to the real one.
+- **Settings.** Back up `settings.cfg` and restore it afterwards: LiveSplit adds the layout to its recent layouts when it closes.
+- **Foreground.** A program in the background can't bring LiveSplit to the front with `SetForegroundWindow` alone. Attach to the foreground thread's input with `AttachThreadInput` first. Before every click or key press, check that the window there is LiveSplit's; otherwise the click lands on whatever is in front.
+- **Dialogs.** Right-click the main window for its menu. **Edit Layout...** opens the Layout Editor, and its **Layout Settings** button opens a dialog with a tab per component. UI Automation shows these dialogs as children of the window that owns them, not as top-level windows.
+- **Tab order.** A WinForms control's `Name` is its UI Automation `AutomationId`, so reading `AutomationElement.FocusedElement` after each `{TAB}` gives the tab order. A focused `NumericUpDown` shows up as the panel that holds it.
+- **Screenshots.** A window's bounds include an invisible border about 7 px wide that shows what's behind it. Compare screenshots inside that border.
+- **Closing.** Cancel the dialogs before closing LiveSplit; an open dialog stops it from closing.
+
 ## Headless
 
 A .NET Framework 4.8.1 console app that references `LiveSplit.Core.dll` and the built component. It builds a `Run`, drives it through `TimerModel`, calls `Update()` to stand in for LiveSplit's frames, and reads the files back. Keep it outside the repo, for example in a scratch folder.

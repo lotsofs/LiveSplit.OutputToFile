@@ -2,14 +2,17 @@
 
 Settings UI and code tidying. None of these change output unless noted. The index is [TODO.md](TODO.md).
 
-## LAY — Settings layout leftovers
+## SCR — Settings tab scrolls for no reason
 
-`tableLayoutPanelTop` has 5 rows for 4 controls (the last is the write-error label) ([OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)), and tab order goes Folder → Split list → Output.
+The Output to File tab in Layout Settings has a vertical scrollbar, with nothing to scroll to below Split List Writing. The settings control is 619 px tall, though its content ends at about 205 px.
+- The Designer gives the control `Size` 457 × 619, and `tableLayoutPanelTop` 454 × 549 ([OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)).
+- Both are `AutoSize` in the default `GrowOnly` mode, so they never shrink below that.
+- Release 6's control was 329 × 330, with no scrollbar.
 
-**Evidence.** Read.
+**Evidence.** Reproduced 2026-10-21 in LiveSplit 1.8.37: a screenshot of the tab shows the scrollbar, and the headless layout check measures the control at 619 px. The cause is read.
 
-**Plan.** Remove the spare rows and set the tab order to match the visual order.
+**Plan.** Make the control and `tableLayoutPanelTop` `AutoSizeMode = GrowAndShrink`, or shrink their Designer sizes to the content, so the control is as tall as its content. A shown write error must still make the control grow to fit it.
 
-**Verify.** Open the settings in LiveSplit: same look, and Tab moves top to bottom.
+**Verify.** In LiveSplit, the tab has no scrollbar. Headless, every group keeps its bounds, and a long write error shows in full.
 
-**Docs.** None.
+**Docs.** None. The scrollbar appeared after release 6, so the fix needs no changelog entry.
