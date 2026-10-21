@@ -2,25 +2,6 @@
 
 Build setup, releases and end-user documentation. The index is [TODO.md](TODO.md). [output-files.md](output-files.md) is the accurate reference to bring the README in line with.
 
-## SEV — Release 7 is missing from the changelog
-
-GitHub has a release 7: tag `7` at `75b62eb` ("Merge remote-tracking branch 'joshimuz/main'"), published 2024-10-09 as a prerelease, with `LiveSplit.OutputToFile.dll` attached. Its notes list off-by-one fixes in the remaining-split files, `PlatformName.txt`, and split list changes.
-- CHANGELOG.md has no `## 7` section. Its Unreleased section compares with release 6, and lists `PlatformName.txt` under Added.
-- The local clone hasn't fetched tag `7`, though `75b62eb` is in `main`'s history.
-
-So users of release 7 read entries for changes they already have, and the next release has to be 8, not 7.
-
-**Evidence.** Read on 2026-10-21: `git ls-remote --tags origin`, GitHub's releases API, and CHANGELOG.md.
-
-**Plan.**
-1. `git fetch --tags origin`.
-2. Compare release 7's code and its DLL with release 6's and with `main`, as CLAUDE.md's changelog rules ask. Look at the output files, their contents, the settings, the wording and the file properties.
-3. Split Unreleased into a `## 7 (2024-10-09)` section, with what 7 already shipped, and an Unreleased section, with what came after, written for users of 7.
-
-**Verify.** Every Unreleased entry is a difference between release 7 and `main`, and every `## 7` entry a difference between 6 and 7.
-
-**Docs.** CHANGELOG.md. The "release 6" comparisons in the Unreleased entries, which may become "release 7".
-
 ## DOC — README is missing outputs and settings
 
 Not documented:

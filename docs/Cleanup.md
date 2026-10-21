@@ -7,7 +7,7 @@ Settings UI and code tidying. None of these change output unless noted. The inde
 The Output to File tab in Layout Settings has a vertical scrollbar, with nothing to scroll to below Split List Writing. The settings control is 619 px tall, though its content ends at about 205 px.
 - The Designer gives the control `Size` 457 × 619, and `tableLayoutPanelTop` 454 × 549 ([OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)).
 - Both are `AutoSize` in the default `GrowOnly` mode, so they never shrink below that.
-- Release 6's control was 329 × 330, with no scrollbar.
+- Release 6's control was 329 × 330, with no scrollbar. Release 7's is already 457 × 619 (measured headless 2026-10-21), so its users have the scrollbar too.
 
 **Evidence.** Reproduced 2026-10-21 in LiveSplit 1.8.37: a screenshot of the tab shows the scrollbar, and the headless layout check measures the control at 619 px. The cause is read.
 
@@ -15,4 +15,4 @@ The Output to File tab in Layout Settings has a vertical scrollbar, with nothing
 
 **Verify.** In LiveSplit, the tab has no scrollbar. Headless, every group keeps its bounds, and a long write error shows in full.
 
-**Docs.** None. The scrollbar appeared after release 6, so the fix needs no changelog entry.
+**Docs.** CHANGELOG.md, under Fixed: release 7 has the scrollbar.

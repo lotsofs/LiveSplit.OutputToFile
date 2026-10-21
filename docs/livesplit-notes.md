@@ -6,7 +6,7 @@ Facts about LiveSplit that the code depends on. Most of them can't be seen from 
 - The installed copy is `D:\Programs\Streaming\LiveSplit`: LiveSplit 1.8.37, ProductVersion `1.0.0+683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1`. LiveSplit doesn't stamp a release number into its DLLs, so the commit hash is the version; the 1.8.37 tag points at that commit.
 - The facts were first checked on 2026-10-14 at `e16f72c` (May 2024), then all of them again on 2026-10-16 after the update to 1.8.37. Only `PlatformName` had changed.
 - Re-check these facts after updating LiveSplit.
-- From 1.8.37, LiveSplit is built for .NET Framework 4.8.1, so a project referencing its DLLs must target 4.8.1 too.
+- From 1.8.30, LiveSplit is built for .NET Framework 4.8.1, so a project referencing its DLLs must target 4.8.1 too; 1.8.29 and earlier target 4.6.1. Read in LiveSplit's `Directory.Build.props` at those tags on 2026-10-21. The installed 1.8.37 was the first 4.8.1 build used here.
 
 ## Timer state by phase (verified)
 

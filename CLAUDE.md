@@ -25,7 +25,7 @@ Read the doc that matches the task before editing:
 
 The docs refer to code by member name and file, not by line number. When a change makes a doc wrong, update the doc in the same change. When you finish a TODO item, delete its index row and its detail section, and add a row to docs/DONE.md. Items finished in the same change share one row. When you find a defect you aren't fixing now, add both.
 
-**Changelog.** When a change is one a user of the latest release would notice (output files, their contents, settings, how LiveSplit behaves), add it under "Unreleased" in CHANGELOG.md, in the same change. Write it for users: what they see in the files or the settings, with no TODO codes or class names. A fix to something added since the latest release isn't an entry of its own; update that feature's entry if needed. Releases are the git tags (`1`, `2`, …); when one is tagged, "Unreleased" becomes its section. [docs/releasing.md](docs/releasing.md) has the steps, including the update feed.
+**Changelog.** When a change is one a user of the latest release would notice (output files, their contents, settings, how LiveSplit behaves), add it under "Unreleased" in CHANGELOG.md, in the same change. Write it for users: what they see in the files or the settings, with no TODO codes or class names. A fix to something added since the latest release isn't an entry of its own; update that feature's entry if needed. Releases are the git tags (`1`, `2`, …); when one is tagged, "Unreleased" becomes its section. Each section describes what the release's download does, and the downloads of releases 5 and 6 weren't built from their tags. [docs/releasing.md](docs/releasing.md) has the steps, including the update feed, and which code each download was built from.
 
 ## Build / deploy
 
@@ -39,7 +39,7 @@ deploy.cmd                                            # build, then copy into Li
   - It calls Windows' `findstr.exe` by full path, because Git's `find` can shadow Windows' and would make the LiveSplit check pass silently.
 
 - This is an old-style (non-SDK) csproj. `dotnet build` works without Visual Studio as long as the .NET Framework 4.8.1 targeting pack (the 4.8.1 Developer Pack) is installed. The build has no warnings, so any warning is new.
-- It targets 4.8.1 because LiveSplit does from 1.8.37. With a lower target, MSBuild won't resolve the LiveSplit DLLs (MSB3274), and the build fails with missing `LiveSplit.Model` types.
+- It targets 4.8.1 because LiveSplit does from 1.8.30. With a lower target, MSBuild won't resolve the LiveSplit DLLs (MSB3274), and the build fails with missing `LiveSplit.Model` types.
 - Without the Developer Pack, the build can use the NuGet reference assemblies instead. Any SDK-style net481 build, such as the testing.md harness, puts them in the NuGet cache. Then pass `-p:TargetFrameworkRootPath=<NuGet cache>/microsoft.netframework.referenceassemblies.net481/<version>/build/`.
 - Old-style also means the csproj lists every source file. A new `.cs` file needs its own `<Compile Include>` line, or it isn't built. Put it in `namespace LiveSplit.UI.Components.OutputToFile`, like every other file. That namespace sees LiveSplit's `LiveSplit.UI.Components` and `LiveSplit.UI` without a `using`.
 - `LiveSplit.Core.dll` and `UpdateManager.dll` are referenced by HintPath `..\..\Programs\Streaming\LiveSplit\`, which is `D:\Programs\Streaming\LiveSplit`. The build fails if LiveSplit isn't installed there.

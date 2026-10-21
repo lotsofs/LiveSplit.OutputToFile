@@ -20,6 +20,21 @@ If the user clicks Yes, LiveSplit downloads its updater and closes itself. The u
 
 Keep that order. Once the feed names a version, users are offered it. If its DLL can't be downloaded yet, the updater shows an error after LiveSplit has already closed.
 
+Build the release from the tagged commit, and don't replace a release's DLL later. The changelog describes each release's download, and a download that doesn't match its tag makes the next comparison harder (see below).
+
+## Past releases
+
+Which code each download on GitHub was built from. Checked on 2026-10-21 by building every tag and comparing it with the download: first each DLL's types, members and string literals, then the output of both through the same headless scenarios. Only real-time highlights differed, by a few milliseconds.
+
+| Release | Tag date | Download | Built from |
+|---|---|---|---|
+| 1–4 | 2023-02-17 to 2023-03-31 | uploaded with the tag | its tag |
+| 5 | 2023-03-31 | replaced 2023-05-29 | tag `6`'s code, which fixed negative differences shown as `-` |
+| 6 | 2023-05-29 | replaced 2023-06-01 | `dc1e61b`, the first subsplits commit, a minute before the upload |
+| 7 | 2024-10-09 | uploaded with the tag | its tag |
+
+The downloads that were replaced aren't on GitHub any more, so what they contained isn't known. Tags `4` and `5` are the same commit.
+
 ## The feed
 
 Release 9's feed, for example:

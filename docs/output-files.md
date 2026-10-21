@@ -118,7 +118,7 @@ Turning off the Timer, Split list or Completed splits setting empties that outpu
 - the files of a level that is gone, because Subsplits was turned off or the splits no longer have that many dashes;
 - `Names_Indent_{n}.txt` for a depth no longer present.
 
-The files stay, with no contents, and are filled again when the output or level comes back. Leftovers like these from earlier sessions are emptied when the layout is loaded. Nothing is deleted. Only the component's own files are emptied, and only in the folder currently set. Its own files are everything in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\`, and the `TotalSplits*.txt` files. That includes any other file kept in those folders, and the files release 6 wrote there.
+The files stay, with no contents, and are filled again when the output or level comes back. Leftovers like these from earlier sessions are emptied when the layout is loaded. Nothing is deleted. Only the component's own files are emptied, and only in the folder currently set. Its own files are everything in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\`, and the `TotalSplits*.txt` files. That includes any other file kept in those folders, and the files older releases wrote there.
 
 ## Formatting
 
