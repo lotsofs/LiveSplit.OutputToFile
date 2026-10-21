@@ -19,7 +19,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [DEF](Cleanup.md#def--three-different-sets-of-settings-defaults) | Settings | The Designer, the constructor and the `SetSettings` fallbacks each have different defaults (6/4, 10/10, 3/2; Completed splits on or off) | Low |
 | [BRW](Cleanup.md#brw--browse-opens-the-parent-of-the-current-folder) | Settings | Browse opens the parent of the current folder, and the dialog is never disposed | Low |
 | [HND](Cleanup.md#hnd--dead-change-handlers-in-the-settings-control) | Settings | Unconnected `CheckedChanged`/`ValueChanged` handlers (one sets the wrong property) and an empty `Load` handler | Low |
 | [SNT](Cleanup.md#snt--sentinel-indices-instead-of-explicit-phase-handling) | Subsplits | The subsplit index helpers return −2/−3 sentinels that callers rely on implicitly; handle timer phases explicitly | Low |

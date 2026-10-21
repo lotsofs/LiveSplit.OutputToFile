@@ -77,8 +77,8 @@ namespace LiveSplit.UI.Components
 			Version version = SettingsHelper.ParseVersion(element["Version"]);
 
 			FolderPath = SettingsHelper.ParseString(element["FolderPath"], string.Empty);
-			SplitsBefore = SettingsHelper.ParseInt(element["SplitsBefore"], 3);
-			SplitsAfter = SettingsHelper.ParseInt(element["SplitsAfter"], 2);
+			SplitsBefore = SettingsHelper.ParseInt(element["SplitsBefore"], 10);
+			SplitsAfter = SettingsHelper.ParseInt(element["SplitsAfter"], 10);
 			OutputTimer = SettingsHelper.ParseBool(element["OutputTimer"], false);
 			OutputSplitList = SettingsHelper.ParseBool(element["OutputSplitList"], true);
 			OutputSubsplits = SettingsHelper.ParseBool(element["OutputSubsplits"], true);

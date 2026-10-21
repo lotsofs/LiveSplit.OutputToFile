@@ -4,20 +4,6 @@ Settings UI and code tidying. None of these change output unless noted. The inde
 
 DUR and NSP both edit `TimeFormatter.cs`.
 
-## DEF — Three different sets of settings defaults
-
-- Designer: 6 before, 4 after, Completed splits checked (`InitializeComponent` in [OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)).
-- Constructor: 10, 10, unchecked (the `OutputToFileSettings` constructor in [OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)).
-- `SetSettings` fallback: 3, 2.
-
-**Evidence.** Read.
-
-**Plan.** Pick one set. Make the constructor the source, and make the Designer and the `SetSettings` fallbacks agree with it.
-
-**Verify.** A newly added component and a layout saved without these keys both show the chosen defaults.
-
-**Docs.** architecture.md "Settings". README, if [DOC](Project.md#doc--readme-is-missing-outputs-and-settings) has documented the settings by then.
-
 ## BRW — Browse opens the parent of the current folder
 
 `buttonFolderPath_Click` ([OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)) should use `FolderPath` rather than `Path.GetDirectoryName(FolderPath)`. The `FolderBrowserDialog` is never disposed either.

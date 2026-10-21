@@ -161,8 +161,6 @@
 			// checkBoxOutputCompletedSplits
 			// 
 			this.checkBoxOutputCompletedSplits.AutoSize = true;
-			this.checkBoxOutputCompletedSplits.Checked = true;
-			this.checkBoxOutputCompletedSplits.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkBoxOutputCompletedSplits.Location = new System.Drawing.Point(245, 19);
 			this.checkBoxOutputCompletedSplits.Name = "checkBoxOutputCompletedSplits";
 			this.checkBoxOutputCompletedSplits.Size = new System.Drawing.Size(102, 17);
@@ -232,7 +230,7 @@
 			this.numericUpDownSplitListBefore.Size = new System.Drawing.Size(120, 20);
 			this.numericUpDownSplitListBefore.TabIndex = 0;
 			this.numericUpDownSplitListBefore.Value = new decimal(new int[] {
-            6,
+            10,
             0,
             0,
             0});
@@ -245,7 +243,7 @@
 			this.numericUpDownSplitListAfter.Size = new System.Drawing.Size(120, 20);
 			this.numericUpDownSplitListAfter.TabIndex = 1;
 			this.numericUpDownSplitListAfter.Value = new decimal(new int[] {
-            4,
+            10,
             0,
             0,
             0});

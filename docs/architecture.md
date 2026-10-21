@@ -233,17 +233,19 @@ The functions branch on the phase separately and inconsistently. For example, `W
 
 `OutputToFileSettings` exposes these plain properties:
 
-| Property | Type |
-|---|---|
-| `FolderPath` | string |
-| `SplitsBefore` | int |
-| `SplitsAfter` | int |
-| `OutputTimer` | bool |
-| `OutputSplitList` | bool |
-| `OutputSubsplits` | bool |
-| `OutputCompletedSplits` | bool |
+| Property | Type | Default |
+|---|---|---|
+| `FolderPath` | string | empty |
+| `SplitsBefore` | int | 10 |
+| `SplitsAfter` | int | 10 |
+| `OutputTimer` | bool | off |
+| `OutputSplitList` | bool | on |
+| `OutputSubsplits` | bool | on |
+| `OutputCompletedSplits` | bool | off |
 
 Each one is bound to its control with `DataBindings.Add` in the constructor. All but `FolderPath` use `DataSourceUpdateMode.OnPropertyChanged`, so a change applies at once.
+
+- The constructor sets the defaults. The controls' initial values in the Designer file and the `SetSettings` fallbacks, used when a key is missing from the layout, are the same. Until a control's handle is created, it shows its Designer value rather than the bound property.
 
 - `FolderPath` uses `OnValidation`: a typed path applies only when focus leaves the textbox, through Tab, a click on another control, OK, or Enter (which clicks the dialog's AcceptButton; see [livesplit-notes.md](livesplit-notes.md#layout-settings-dialog-read-in-source)). Applying every keystroke would write a full set of files to each partial path, because `FolderPath` is a cache key.
   - The Browse button has `CausesValidation = false`, so moving focus to it doesn't apply a partly typed path. Its handler sets `FolderPath` and the textbox itself. A path typed and then left unbrowsed applies at the next focus change to another control.

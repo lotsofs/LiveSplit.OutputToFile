@@ -93,7 +93,7 @@ A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, 
 
 **Adding a setting** (`OutputToFileSettings`, a WinForms `UserControl` with its layout in `.Designer.cs`/`.resx`):
 1. Add the property, plus its default and `DataBindings.Add` call in the constructor. Binding is what updates the property from the control.
-2. Add the control in the Designer file. A `*_Changed` handler is only needed for side effects, like enabling a group box.
+2. Add the control in the Designer file, with the constructor's default as its initial value. A `*_Changed` handler is only needed for side effects, like enabling a group box.
 3. Add it to `CreateSettingsNode`. That method handles both the XML save and `GetSettingsHashCode`. LiveSplit uses the hash only to decide whether to redraw. The save-on-close prompt doesn't depend on it.
-4. Add it to `SetSettings`, which loads the XML. The fallback value applies to layouts saved before the key existed.
+4. Add it to `SetSettings`, which loads the XML. The fallback value applies to layouts saved before the key existed. Use the constructor's default, unless older layouts need another value to keep their old behaviour.
 5. If the setting affects output, add it to the `Cache[...]` keys in `Update()`.
