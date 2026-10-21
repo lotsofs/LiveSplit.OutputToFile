@@ -98,14 +98,16 @@ namespace LiveSplit.UI.Components
 
 		private void buttonFolderPath_Click(object sender, EventArgs e)
 		{
-			var dialog = new FolderBrowserDialog();
-			if (Directory.Exists(FolderPath))
+			using (var dialog = new FolderBrowserDialog())
 			{
-				dialog.SelectedPath = Path.GetDirectoryName(FolderPath);
-			}
-			if (dialog.ShowDialog() == DialogResult.OK)
-			{
-				FolderPath = this.textBoxFolderPath.Text = dialog.SelectedPath;
+				if (Directory.Exists(FolderPath))
+				{
+					dialog.SelectedPath = FolderPath;
+				}
+				if (dialog.ShowDialog() == DialogResult.OK)
+				{
+					FolderPath = this.textBoxFolderPath.Text = dialog.SelectedPath;
+				}
 			}
 		}
 

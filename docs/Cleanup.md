@@ -4,18 +4,6 @@ Settings UI and code tidying. None of these change output unless noted. The inde
 
 DUR and NSP both edit `TimeFormatter.cs`.
 
-## BRW — Browse opens the parent of the current folder
-
-`buttonFolderPath_Click` ([OutputToFileSettings.cs](../UI/Components/OutputToFileSettings.cs)) should use `FolderPath` rather than `Path.GetDirectoryName(FolderPath)`. The `FolderBrowserDialog` is never disposed either.
-
-**Evidence.** Read.
-
-**Plan.** Use `FolderPath`, and wrap the dialog in `using`.
-
-**Verify.** With a folder set, Browse opens on that folder.
-
-**Docs.** None.
-
 ## HND — Dead change handlers in the settings control
 
 These handlers aren't connected to any control: `checkBoxOutputTimer_CheckedChanged`, `checkBoxOutputSubsplits_CheckedChanged`, `checkBoxOutputCompletedSplits_CheckedChanged`, `numericUpDownSplitListBefore_ValueChanged` and `numericUpDownSplitListAfter_ValueChanged`. Data binding does their job. The Subsplits one also sets the wrong property (`OutputSplitList`). `OutputToFileSettings_Load` is connected but empty.

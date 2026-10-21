@@ -43,6 +43,7 @@ What changed in Output to File between releases: the files it writes, what they 
 - A file that can't be written, because it's locked or read-only or its drive is gone, no longer stops the other files from being written. The error is shown in red in the component's settings.
 - Changes made in Edit Splits now show in the files straight away: renamed, added or removed splits, and changed times. So does opening another splits file. They used to wait until the timer was next started.
 - Typing a folder path in the settings no longer creates a folder full of output files for every letter typed. A typed path is used once you leave the box, press Enter or click OK; closing the settings with the X button drops it. Browse still uses the chosen folder at once.
+- **Browse** opens on the output folder that's set. It used to open on the folder containing it.
 
 ## 6 (2023-05-29)
 
