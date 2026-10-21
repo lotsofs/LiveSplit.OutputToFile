@@ -37,5 +37,4 @@ When an item is finished, delete its row here and its section in the detail doc,
 | [DOC](Project.md#doc--readme-is-missing-outputs-and-settings) | README | Undocumented: `CompletedSplits\`, `PlatformName.txt`, `*_Raw`/`Names_Indent_N` files, `{Header}` names, `Sign.txt` values, settings, install | Medium |
 | [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete) | README | The `Timers\GameTime` tree lists only `SegmentTimer_AllSplits.txt`, but every level is written | Low |
 | [UPD](Project.md#upd--update-prompt-not-yet-seen-in-livesplit) | Updates | LiveSplit's startup update prompt was only checked headless; after release 8 is published, see it in LiveSplit: the prompt, the install from GitHub and the restart | Medium |
-| [PRV](Project.md#prv--livesplit-dlls-are-copied-into-bin) | Build | The LiveSplit DLLs get copied into `bin\` because the references aren't `<Private>false</Private>` | Low |
 | [RCC](Project.md#rcc--unused-release-candidate-configuration) | Build | The solution has an unused "Release Candidate" configuration that maps to Release | Low |

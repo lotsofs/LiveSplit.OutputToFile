@@ -34,18 +34,6 @@ Under `Timers\GameTime`, the tree lists only `SegmentTimer_AllSplits.txt`, but t
 
 **Docs.** README.
 
-## PRV — LiveSplit DLLs are copied into bin
-
-The references aren't marked `<Private>false</Private>`, so `LiveSplit.Core.dll` and `UpdateManager.dll` get copied into `bin\`. That's harmless unless the whole `bin` folder gets copied into `Components`.
-
-**Evidence.** Read.
-
-**Plan.** Mark both references `<Private>false</Private>`. A [TST](Features.md#tst--no-automated-tests) project then has to reference them itself.
-
-**Verify.** After a clean build, `bin\Debug` holds only this component's files.
-
-**Docs.** None.
-
 ## UPD — Update prompt not yet seen in LiveSplit
 
 LiveSplit's startup update check is wired up, but it has only been checked headless. The feed parsing, the version comparison and the install were tested against the installed `UpdateManager.dll`, with local feeds and `file://` downloads. The prompt, the restart and a download from a real GitHub release haven't been seen in LiveSplit. `update.xml` stays empty until release 8 is published, so this can't be checked before then.

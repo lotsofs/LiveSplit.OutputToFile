@@ -45,6 +45,7 @@ deploy.cmd                                            # build, then copy into Li
 - `LiveSplit.Core.dll` and `UpdateManager.dll` are referenced from the folder in the `LiveSplitDir` property. It defaults to `..\..\Programs\Streaming\LiveSplit` from the repo, which is `D:\Programs\Streaming\LiveSplit`. The build fails if LiveSplit isn't there.
   - For another folder, pass `-p:LiveSplitDir=<folder>`, or set a `LiveSplitDir` environment variable, which MSBuild reads as the property. `deploy.cmd` reads only the environment variable.
   - Give a full path without a trailing backslash: in `-p:LiveSplitDir="C:\x\"`, the backslash escapes the closing quote.
+  - Both references are `<Private>False</Private>`, so the build doesn't copy LiveSplit's DLLs into `bin\`, and `bin\<config>` holds only the component's DLL and PDB. Give any new reference to a LiveSplit DLL the same.
 - Deploying overwrites the DLL that LiveSplit actually loads. LiveSplit must be closed first, because it locks that DLL. `LiveSplitComponents.lnk` in the repo root is a gitignored shortcut to the `Components` folder. That folder also holds the user's `.backup` copies of older builds; leave them alone.
 - There are no tests and no linter. Verify changes headless (see docs/testing.md), or in LiveSplit.
 
