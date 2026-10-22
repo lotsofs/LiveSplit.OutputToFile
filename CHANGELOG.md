@@ -4,6 +4,8 @@ What changed in Output to File between releases: the files it writes, what they 
 
 ## Unreleased
 
+## 8 (2026-10-22)
+
 ### Action required
 
 - **If your LiveSplit is older than 1.8.37, update it first.** This release is built and tested with 1.8.37, and hasn't been tried with older versions.
