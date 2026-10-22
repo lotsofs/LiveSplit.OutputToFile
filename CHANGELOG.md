@@ -68,6 +68,7 @@ What changed in Output to File between releases: the files it writes, what they 
 - Typing a folder path in the settings no longer creates a folder full of output files for every letter typed. A typed path is used once you leave the box, press Enter or click OK; closing the settings with the X button drops it. Browse still uses the chosen folder at once.
 - **Browse** opens on the output folder that's set. It used to open on the folder containing it.
 - Tab moves through the settings in the order they're shown. It used to go from the folder to **Split List Writing** and then to **Output**.
+- The **Output to File** tab in Layout Settings no longer has a scrollbar. Release 7 showed one, with only empty space below the settings to scroll to.
 - A split with no name, or with only dashes such as `-`, no longer stops the component from loading. Release 7 failed to load it, and starting or splitting the timer then ran into errors.
 - A first split with more dashes than there are subsplit levels, such as `---A` when no other split has more than one dash, now shows in `AllSplits`. Release 7 left it out of every folder.
 - The last split always counts as a top-level split. Its dashes no longer add a subsplit level, and it shows without them in `SansSubsplits` (release 7: `--C` for a last split named `--C`).

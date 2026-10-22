@@ -221,8 +221,9 @@ namespace LiveSplit.UI.Components.OutputToFile
 		public void ShowWriteError(string error)
 		{
 			WriteError = error;
-			labelWriteError.Text = error ?? string.Empty;
+			// Visible first: while the settings aren't on screen, hiding the label doesn't shrink the table, but changing its text then does
 			labelWriteError.Visible = error != null;
+			labelWriteError.Text = error ?? string.Empty;
 		}
 
 		private void buttonFolderPath_Click(object sender, EventArgs e)

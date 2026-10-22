@@ -130,6 +130,12 @@ Things to know:
     - Damage needs the handler and an `Update()` to overlap, so a long run can compare only after actions that overlapped one, plus a sample of the rest.
 - **The settings control.** To test the settings UI, add `comp.Settings` to a `Form` you `Show()`, reach its private controls by reflection, type with `PostMessage(textBox.Handle, WM_CHAR, c, 0)`, and pump with `Application.DoEvents()`. Bindings only see focus changes and keys that go through the message loop. Remove the control before closing the form, which would dispose it. These forms appear on screen and take focus from whatever else is open, so warn whoever is at the machine first.
   - To check only the bindings, no window is needed. Add `comp.Settings` to a `Form` that is never shown, and call the internal `Control.CreateControl(bool)` on the form by reflection, with `true`. That creates the handles, and the bindings then work both ways: setting a control's `Value` or `Checked` in code updates its property (seen headless, 2026-10-21). Typing and focus changes still need a shown form.
+  - To see the control in LiveSplit's own Layout Settings dialog, still without a window (seen 2026-10-22):
+    - Load `LiveSplit.View.dll` from LiveSplit's folder, and resolve its dependencies from there too, with `AppDomain.AssemblyResolve`.
+    - Create `LiveSplit.View.LayoutSettingsDialog` by reflection. Pass it the layout settings, a `Layout` whose `LayoutComponents` holds `new LayoutComponent("LiveSplit.OutputToFile.dll", component)`, and the component.
+    - Create its handles as above, select the component's page in its private `tabControl`, and call the dialog's `PerformLayout()`.
+    - The page's `WS_VSCROLL` window style then says whether the tab scrolls.
+- **A run needs a split.** The component's constructor throws on a run without splits (seen 2026-10-22). LiveSplit refuses to load a splits file without splits ([livesplit-notes.md](livesplit-notes.md#running-livesplit-code-outside-livesplit-verified)).
 - **Private members.** `TimeFormatter` is internal. Reach it by reflection: `typeof(OutputToFileComponent).Assembly.GetType("LiveSplit.UI.Components.OutputToFile.TimeFormatter")`. Its `DurationString` and `DeltaString` take a `TimeSpan?` and a `FormatAccuracy`, which is public.
 - **Formats.** Expected strings use LiveSplit's minus sign `−` (U+2212) for negatives, and the default accuracies: Seconds for times, Flex for differences. Change them with `comp.Settings.TimeAccuracy` and `DeltaAccuracy`, then `Tick()`.
 

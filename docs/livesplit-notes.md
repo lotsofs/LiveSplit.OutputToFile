@@ -143,6 +143,7 @@ Read on 2026-10-16 in the LiveSplit source at `e16f72c`, then again at `683cd60`
 - `new StandardSettingsFactory().Create()` throws `NullReferenceException` outside the app. Use `new LiveSplit.Options.Settings()` instead.
 - `new StandardLayoutSettingsFactory().Create()`, `new Layout()`, `new Run(new StandardComparisonGeneratorsFactory())` and `new LiveSplitState(run, null, layout, layoutSettings, settings)` all work with a `null` form.
 - Loading a splits file (`StandardFormatsRunFactory`) needs the native `livesplit_core.dll` next to the program. LiveSplit ships it in its `x64\` and `x86\` folders.
+- `StandardFormatsRunFactory` refuses a splits file without splits: it throws "Run factory created a run without at least one segment" (seen 2026-10-22).
 
 ## How LiveSplit finds the component (verified)
 
@@ -186,7 +187,7 @@ Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60`
 - `SettingsHelper.CreateSetting` returns `value.GetHashCode()` (0 for null), so a bool contributes 0 or 1.
 - The layout hash combines values with the same `^` chain as this component, so two changes can cancel out there too. So do the built-in Splits, Subsplits, Timer and Title components, read at `e16f72c` only.
 
-## Layout Settings dialog (read in source)
+## Layout Settings dialog (read in source, size checked headless)
 
 Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60` (1.8.37) on 2026-10-16. Both times the source was matched against the method calls in the installed `LiveSplit.View.dll`. Not checked by running LiveSplit.
 
@@ -194,6 +195,10 @@ Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60`
 - When it opens, the dialog saves each component's `GetSettings()`. Cancel calls `SetSettings` with that saved XML on every component, then closes.
 - OK only closes. It is the dialog's AcceptButton, so Enter in a textbox clicks it ([LayoutSettingsDialog.Designer.cs:92](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/LayoutSettingsDialog.Designer.cs#L92)).
 - There is no CancelButton and no closing handler, so closing with X restores nothing and Escape doesn't cancel.
+
+Checked headless on 2026-10-22 with the installed `LiveSplit.View.dll` (1.8.37), building the dialog without showing it ([testing.md](testing.md#headless)):
+- The dialog is 520 × 675 px at 96 DPI, and a component's tab page has a client area of 476 × 561 px.
+- A settings control taller than 561 px gives the page a vertical scrollbar, which narrows it to 459 px. A shorter one gives it none.
 
 ## Editing and opening splits (read in source)
 

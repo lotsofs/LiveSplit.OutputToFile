@@ -70,6 +70,7 @@
 			// tableLayoutPanelTop
 			// 
 			this.tableLayoutPanelTop.AutoSize = true;
+			this.tableLayoutPanelTop.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.tableLayoutPanelTop.ColumnCount = 1;
 			this.tableLayoutPanelTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxFolderPath, 0, 0);
@@ -87,7 +88,7 @@
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 166F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 549);
+			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 468);
 			this.tableLayoutPanelTop.TabIndex = 0;
 			// 
 			// groupBoxFolderPath
@@ -427,9 +428,10 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoSize = true;
+			this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.Controls.Add(this.tableLayoutPanelTop);
 			this.Name = "OutputToFileSettings";
-			this.Size = new System.Drawing.Size(457, 619);
+			this.Size = new System.Drawing.Size(457, 471);
 			this.tableLayoutPanelTop.ResumeLayout(false);
 			this.tableLayoutPanelTop.PerformLayout();
 			this.groupBoxFolderPath.ResumeLayout(false);

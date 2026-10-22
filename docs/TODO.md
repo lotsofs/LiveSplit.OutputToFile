@@ -19,7 +19,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [SCR](Cleanup.md#scr--settings-tab-scrolls-for-no-reason) | Settings | The Output to File settings tab has a scrollbar with nothing below the Time Format group: the control keeps its Designer height of 619 px | Low |
+| [SET](Cleanup.md#set--architecturemds-settings-section-is-out-of-date) | Docs | architecture.md's Settings section leaves out the Comparisons and Time Format settings: their properties, bindings, handlers and XML keys | Low |
 
 ## Features and limitations — [Features.md](Features.md)
 

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace LiveSplit.UI.Components.OutputToFile.Tests {
 	/// <summary>
-	/// Saving and loading the settings, and the controls' bindings. No window is shown.
+	/// Saving and loading the settings, the controls' bindings, and the control's size. No window is shown.
 	/// </summary>
 	public class SettingsTests {
 
@@ -104,9 +104,8 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 			using (var form = new Form())
 			using (var settings = new OutputToFileSettings()) {
 				form.Controls.Add(settings);
-				// Creates the handles without showing the form: the bindings only work with them
-				typeof(Control).GetMethod("CreateControl", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(bool) }, null)
-					.Invoke(form, new object[] { true });
+				// The bindings only work with handles
+				CreateHandles(form);
 
 				Control<CheckBox>(settings, "checkBoxOutputCompletedSplits").Checked = true;
 				Assert.True(settings.OutputCompletedSplits);
@@ -121,6 +120,36 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				// Removed first, or disposing the form would dispose it twice
 				form.Controls.Remove(settings);
 			}
+		}
+
+		// LiveSplit's Layout Settings tab scrolls when the control is taller than the tab
+		[Fact]
+		public void ControlIsAsTallAsItsContents() {
+			using (var form = new Form())
+			using (var settings = new OutputToFileSettings()) {
+				form.Controls.Add(settings);
+				CreateHandles(form);
+				var table = Control<TableLayoutPanel>(settings, "tableLayoutPanelTop");
+				var timeFormat = Control<GroupBox>(settings, "groupBoxTimeFormat");
+				var error = Control<Label>(settings, "labelWriteError");
+				int contents = timeFormat.Bottom + timeFormat.Margin.Bottom + table.Margin.Bottom;
+				Assert.Equal(contents, settings.Height);
+
+				settings.ShowWriteError(@"Couldn't write SplitList\AllSplits\RealTime\Current Comparison\Time_Run_Upcoming.txt (12:00:00): " + new string('x', 300));
+				Assert.True(error.Height > 3 * error.Font.Height, "the error wraps onto several lines");
+				Assert.Equal(error.Bottom + error.Margin.Bottom + table.Margin.Bottom, settings.Height);
+
+				settings.ShowWriteError(null);
+				Assert.Equal(contents, settings.Height);
+
+				form.Controls.Remove(settings);
+			}
+		}
+
+		// Creates the handles without showing the form
+		static void CreateHandles(Form form) {
+			typeof(Control).GetMethod("CreateControl", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(bool) }, null)
+				.Invoke(form, new object[] { true });
 		}
 
 		static T Control<T>(OutputToFileSettings settings, string name) where T : Control {
