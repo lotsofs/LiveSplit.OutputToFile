@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A LiveSplit layout component (.NET Framework 4.8.1 class library, WinForms) that draws nothing. Instead it writes split and timer information to `.txt` files in a user-chosen folder, for use as OBS text sources. `README.md` is the end-user documentation of the output folder tree, and `CHANGELOG.md` the end-user changelog.
+A LiveSplit layout component (.NET Framework 4.8.1 class library, WinForms) that draws nothing. Instead it writes split and timer information to `.txt` files in a user-chosen folder, for use as OBS text sources. `README.md` is the end-user documentation (installing, the settings, the output files and their folder tree), and `CHANGELOG.md` the end-user changelog.
 
 Remotes: `origin` is this fork (lotsofs); `joshimuz` is a related fork that changes are sometimes merged from.
 
@@ -15,7 +15,7 @@ Read the doc that matches the task before editing:
 | Doc | Read it for |
 |---|---|
 | [docs/architecture.md](docs/architecture.md) | How it works: event flow, subsplit levels (with a worked example), the per-level arrays, phase-dependent indexes, how each value is calculated, file writing, settings |
-| [docs/output-files.md](docs/output-files.md) | Every output file, its contents in each timer phase, and the `Sign.txt` values and time formats. More complete and accurate than the README tree. |
+| [docs/output-files.md](docs/output-files.md) | Every output file, its contents in each timer phase, and the `Sign.txt` values and time formats. More detailed than the README, which describes the same files for users. |
 | [docs/livesplit-notes.md](docs/livesplit-notes.md) | LiveSplit behavior the code relies on: event order, when PB and best segments update, `GraphicsCache`. Each fact is marked verified or not. |
 | [docs/testing.md](docs/testing.md) | The tests in `Tests\`: running them, their snapshots, adding one. Testing in LiveSplit by hand, or headless from code, and the checks too long to be tests |
 | [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
@@ -109,3 +109,4 @@ A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, 
    - There is no settings version, because a missing key is how an older layout shows. If a key ever has to change meaning, add a version key then, and treat a layout without it (or with the `0.1` that earlier builds saved) as older.
    - `SettingsHelper.ParseVersion` returns 1.0.0.0 for a missing key, so check whether the key is there, not its number.
 5. If the setting affects output, add it to the `Cache[...]` keys in `Update()`.
+6. Describe it in the Settings section of `README.md`, and in `CHANGELOG.md`.

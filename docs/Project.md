@@ -1,26 +1,6 @@
 # Project and README
 
-Build setup, releases and end-user documentation. The index is [TODO.md](TODO.md). [output-files.md](output-files.md) is the accurate reference to bring the README in line with.
-
-## DOC — README is missing outputs and settings
-
-Not documented:
-
-- the `CompletedSplits\` folder;
-- `PlatformName.txt`;
-- the `*_Raw.txt` and `Names_Indent_N.txt` files;
-- the `{Header}` section-name syntax;
-- the possible `Sign.txt` values;
-- the settings, including the red line that shows the latest file that couldn't be written;
-- how to install.
-
-**Evidence.** Read: the README against the `FILE_*` templates and [output-files.md](output-files.md).
-
-**Plan.** Add each to the README. Install is: copy the DLL into LiveSplit's `Components` folder, then Layout Editor → Other → "Output to File".
-
-**Verify.** Every `FILE_*` template appears in the README tree.
-
-**Docs.** README. output-files.md's opening note that the README is incomplete.
+Build setup, releases and end-user documentation. The index is [TODO.md](TODO.md). [output-files.md](output-files.md) is the accurate reference that the README follows.
 
 ## UPD — Update prompt not yet seen in LiveSplit
 
