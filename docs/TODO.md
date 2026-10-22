@@ -28,7 +28,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 | [TST](Features.md#tst--no-automated-tests) | Tests | No test project; turn the headless harness and regression checks in testing.md into one | Medium |
 | [CMP](Features.md#cmp--deltas-ignore-the-selected-comparison) | Comparisons | Deltas always use Personal Best, ignoring the comparison selected in LiveSplit | Medium |
 | [FMT](Features.md#fmt--time-format-is-fixed) | Time format | Time and delta formats are hard-coded, with no setting; replaces the `// TODO` in `TimeFormatter.cs` | Low |
-| [GLD](Features.md#gld--golds-only-exist-at-the-allsplits-level) | Golds | Golds are only reported at `AllSplits`; a section's gold should be its best time within one attempt, from `SegmentHistory`, not a sum of golds | Low |
 
 ## Project and README — [Project.md](Project.md)
 

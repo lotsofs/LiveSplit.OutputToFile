@@ -1,12 +1,12 @@
 # Output files
 
-Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against a test run that produced 159 files (5 splits, one subsplit level, all outputs on). The README's tree is incomplete ([DOC](Project.md#doc--readme-is-missing-outputs-and-settings), [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete)).
+Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the regression base run in [testing.md](testing.md#regression-checks), which produces 165 files with every output on. The README's tree is incomplete ([DOC](Project.md#doc--readme-is-missing-outputs-and-settings), [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete)).
 
 How to read the paths:
 
 - `{level}` is `AllSplits`, `SansSubsplits` or `SansSubsplits_Level{n}`, where `{n}` (2 or more) is the shallowest depth that level leaves out; see [architecture.md](architecture.md#levels). Without subsplits, only `AllSplits` exists.
 - `{method}` is `RealTime` or `GameTime`. Every timed file exists once per method.
-- "Gold" files exist only under `AllSplits`.
+- "Gold" files compare with a member's best segment at that level. A member that is a single split has that split's best segment, so the gold files in `AllSplits` show LiveSplit's own golds. A section of several splits has the fastest time it took within one attempt, from the splits' history ([architecture.md](architecture.md#best-segments)). It isn't the sum of its splits' golds. A section that no attempt has completed has no best segment, so its first completion is a gold.
 - `-` means no value. Times use the formats in [Formatting](#formatting).
 - "Member" means a split that belongs to the level. "Current" and "previous" are relative to that level. For example, the current `SansSubsplits` member while the runner is on a subsplit is the section that subsplit belongs to.
 
@@ -46,7 +46,7 @@ Written from `Update()`, but only when what one of them shows changes: the run t
 | `After.txt` | `-` | Number of members after the current one: `Remaining − 1` | `-` |
 | `{method}\SegmentTime.txt` | `-` | PB segment time of the current member | `-` |
 | `{method}\RunTime.txt` | `-` | PB split time of the current member | `-` |
-| `{method}\GoldTime.txt` (gold) | `-` | Best segment of the current split | `-` |
+| `{method}\GoldTime.txt` (gold) | `-` | Best segment of the current member | `-` |
 
 ## `PreviousSplit\{level}\`
 
@@ -71,7 +71,7 @@ These are the names of the `Signs` enum. "Ahead" and "PB" mean the run delta is 
 | During the run | At the finish | Meaning |
 |---|---|---|
 | `NotApplicable` | | No run delta: no PB time, a skipped split, or the timer isn't running |
-| `GoldAhead` / `GoldBehind` | `PBGold` / `NoPBGold` | The segment beat the best segment, or the split has no best segment yet. `AllSplits` only. |
+| `GoldAhead` / `GoldBehind` | `PBGold` / `NoPBGold` | The segment beat the member's best segment, or the member has none yet |
 | `Ahead` / `Behind` | `PB` / `NoPB` | No segment delta |
 | `GainedAhead` / `GainedBehind` | `PBGained` / `NoPBGained` | The segment beat the PB segment |
 | `LostAhead` / `LostBehind` | `PBLost` / `NoPBLost` | The segment was slower than the PB segment |

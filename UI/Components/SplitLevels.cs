@@ -153,10 +153,98 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				}
 			}
 		}
+
+		/// <summary>
+		/// Each member's best segment: the fastest it was done within one attempt, or null if it never was.
+		/// A member of one split has that split's best segment. A member of several takes it from the segment history,
+		/// because the sum of its splits' best segments is a time nobody ran.
+		/// </summary>
+		public void CalculateBestSegments(IRun run, TimingMethod method) {
+			// The members of several splits, with the global indices of their first split's predecessor (-1 for the start) and their last split
+			var sections = new List<(TimeSpan?[] Bests, int LocalIndex, int Start, int End)>();
+			foreach (SplitLevel level in _levels) {
+				List<int> indices = level.Indices;
+				var bests = new TimeSpan?[indices.Count];
+				level.BestSegmentTimes[method] = bests;
+				for (int localIndex = 0; localIndex < indices.Count; localIndex++) {
+					int globalIndex = indices[localIndex];
+					int prevGlobalIndex = localIndex == 0 ? -1 : indices[localIndex - 1];
+					if (globalIndex == prevGlobalIndex + 1) {
+						bests[localIndex] = run[globalIndex].BestSegmentTime[method];
+					}
+					else {
+						sections.Add((bests, localIndex, prevGlobalIndex, globalIndex));
+					}
+				}
+			}
+			if (sections.Count == 0) return;
+
+			// Every attempt in the history, with the last split it has an entry for. Edits can remove an attempt's entry on any split,
+			// the first included, so look at them all.
+			var lastSplits = new Dictionary<int, int>();
+			for (int i = 0; i < run.Count; i++) {
+				foreach (int attempt in run[i].SegmentHistory.Keys) {
+					lastSplits[attempt] = i;
+				}
+			}
+
+			var times = new TimeSpan?[run.Count];
+			var anchors = new int[run.Count];
+			foreach (var attempt in lastSplits) {
+				AttemptSplitTimes(run, method, attempt.Key, attempt.Value, times, anchors);
+				foreach (var section in sections) {
+					TimeSpan? endTime = times[section.End];
+					if (endTime == null) continue;
+					TimeSpan? startTime = section.Start == -1 ? TimeSpan.Zero : times[section.Start];
+					int startAnchor = section.Start == -1 ? -1 : anchors[section.Start];
+					// Both ends must count from the same split, with no gap in the history between them
+					if (startTime == null || anchors[section.End] != startAnchor) continue;
+					TimeSpan? segmentTime = endTime - startTime;
+					TimeSpan? best = section.Bests[section.LocalIndex];
+					if (best == null || segmentTime < best) {
+						section.Bests[section.LocalIndex] = segmentTime;
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// One attempt's split times, from its segment history: times[i] is the time from split anchors[i] to split i, or null if
+		/// the attempt has no time there. lastSplit is the last split the attempt has an entry for.
+		/// LiveSplit records each split's time since the attempt's last recorded split, so adding them up gives the split times.
+		/// They count from the start (anchor -1) until a split has no entry, where an edit removed it (clearing a best segment,
+		/// Clean Sum of Best). The next split with a time then counts from itself, since its entry includes time from before the gap.
+		/// </summary>
+		static void AttemptSplitTimes(IRun run, TimingMethod method, int attempt, int lastSplit, TimeSpan?[] times, int[] anchors) {
+			Array.Clear(times, lastSplit + 1, run.Count - lastSplit - 1);
+			TimeSpan time = TimeSpan.Zero;
+			int anchor = -1;
+			bool afterGap = false;
+			for (int i = 0; i <= lastSplit; i++) {
+				times[i] = null;
+				if (!run[i].SegmentHistory.TryGetValue(attempt, out Time entry)) {
+					afterGap = true;
+					continue;
+				}
+				// Null for a skipped split: its time is in the next entry
+				TimeSpan? segmentTime = entry[method];
+				if (segmentTime == null) continue;
+				if (afterGap) {
+					afterGap = false;
+					anchor = i;
+					time = TimeSpan.Zero;
+				}
+				else {
+					time += segmentTime.Value;
+				}
+				times[i] = time;
+				anchors[i] = anchor;
+			}
+		}
 	}
 
 	/// <summary>
-	/// One subsplit level: which splits it contains, and its PB segment times.
+	/// One subsplit level: which splits it contains, and its PB segment times and best segments.
 	/// Arrays are indexed by local index, i.e. position in Indices.
 	/// Nothing here may describe the current attempt: CalculateSegments() rebuilds every level on any cache key change, including timer phase changes.
 	/// </summary>
@@ -166,11 +254,14 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		public List<int> Indices;
 
 		public Dictionary<TimingMethod, TimeSpan?[]> PbSegmentTimes;
+		// The fastest each member was done within one attempt, from SplitLevels.CalculateBestSegments
+		public Dictionary<TimingMethod, TimeSpan?[]> BestSegmentTimes;
 
 		public SplitLevel(List<int> indices) {
 			Indices = indices;
 			int count = indices.Count;
 			PbSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
+			BestSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
 		}
 	}
 }

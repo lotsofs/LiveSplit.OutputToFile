@@ -124,6 +124,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			_levels.GenerateSubsplitLevels(State.Run, Settings.OutputSubsplits);
 			_levels.CalculatePBSegments(State.Run, TimingMethod.RealTime);
 			_levels.CalculatePBSegments(State.Run, TimingMethod.GameTime);
+			_levels.CalculateBestSegments(State.Run, TimingMethod.RealTime);
+			_levels.CalculateBestSegments(State.Run, TimingMethod.GameTime);
 			// The levels, or the phase, may have changed what the segment timers count from
 			_timerFiles.SegmentStartsChanged();
 		}

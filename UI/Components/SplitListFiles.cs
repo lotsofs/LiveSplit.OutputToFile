@@ -84,7 +84,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			// -1 for none: no current split before the start or after the finish, nothing completed before the start
 			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
 			int previousSubsplitIndex = GetPreviousSubsplitIndex(lvl);
-			var lines = new ListLines(lvl == Levels.Count - 1, upcoming, lvl + 1);
+			var lines = new ListLines(upcoming, lvl + 1);
 
 			for (int spl = first; spl <= last; spl++) {
 				AppendNames(lines, lvl, spl);
@@ -122,16 +122,16 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			TimeSpan? segmentDelta = SegmentDelta(method, lvl, spl);
 			lines.RunTimeCurrent.Append(TimeFormatter.DurationString(split.SplitTime[method]));
 			lines.RunDelta.Append(TimeFormatter.DeltaString(runDelta));
-			if (lvl == Levels.Count - 1) lines.GoldDelta.Append(TimeFormatter.DeltaString(GoldDelta(method, lvl, spl)));
+			lines.GoldDelta.Append(TimeFormatter.DeltaString(GoldDelta(method, lvl, spl)));
 			lines.SegmentDelta.Append(TimeFormatter.DeltaString(segmentDelta));
 			HighlightFile(lines, method, lvl, spl, runDelta, segmentDelta)?.Append(HIGHLIGHT_FILL);
 		}
 
-		// The current split and those after it: their PB times
+		// The current split and those after it: their PB times and best segments
 		void AppendUpcomingLine(ListLines lines, TimingMethod method, int lvl, int spl) {
 			var split = State.Run[Levels[lvl].Indices[spl]];
 			lines.RunTimeUpcoming.Append(TimeFormatter.DurationString(split.PersonalBestSplitTime[method]));
-			if (lvl == Levels.Count - 1) lines.GoldTimeUpcoming.Append(TimeFormatter.DurationString(split.BestSegmentTime[method]));
+			lines.GoldTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].BestSegmentTimes[method][spl]));
 			lines.SegmentTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].PbSegmentTimes[method][spl]));
 		}
 
@@ -154,39 +154,33 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		class ListLines {
 
 			public readonly StringBuilder Names, NamesRaw;
-			public readonly StringBuilder RunTimeCurrent, RunDelta, SegmentDelta;
-			public readonly StringBuilder AheadGainedHighlight, AheadLostHighlight, BehindGainedHighlight, BehindLostHighlight;
+			public readonly StringBuilder RunTimeCurrent, RunDelta, SegmentDelta, GoldDelta;
+			public readonly StringBuilder AheadGainedHighlight, AheadLostHighlight, BehindGainedHighlight, BehindLostHighlight, GoldHighlight;
 			// Only for the current split and those after it, which CompletedSplits never has. Null there.
-			public readonly StringBuilder RunTimeUpcoming, SegmentTimeUpcoming, CurrentSplitHighlight;
-			// Golds are only supported at the last level. Null at the other levels.
-			public readonly StringBuilder GoldDelta, GoldHighlight;
-			// Both: null at the other levels, and in CompletedSplits
-			public readonly StringBuilder GoldTimeUpcoming;
+			public readonly StringBuilder RunTimeUpcoming, SegmentTimeUpcoming, GoldTimeUpcoming, CurrentSplitHighlight;
 			// Names_Indent_{depth}, one per depth up to the level's
 			public readonly StringBuilder[] Indents;
 
 			// Every file above with its FILE_LIST_* template
 			readonly List<(string Template, StringBuilder Lines)> _files = new List<(string, StringBuilder)>();
 
-			public ListLines(bool golds, bool upcoming, int depths) {
+			public ListLines(bool upcoming, int depths) {
 				Names = Add(FILE_LIST_NAMES);
 				NamesRaw = Add(FILE_LIST_NAMES_RAW);
 				RunTimeCurrent = Add(FILE_LIST_FINISH_TIME_LIVE);
 				RunDelta = Add(FILE_LIST_RUN_DELTA);
 				SegmentDelta = Add(FILE_LIST_SEGMENT_DELTA);
+				GoldDelta = Add(FILE_LIST_GOLD_DELTA);
 				AheadGainedHighlight = Add(FILE_LIST_AHEAD_GAINED_HIGHLIGHT);
 				AheadLostHighlight = Add(FILE_LIST_AHEAD_LOST_HIGHLIGHT);
 				BehindGainedHighlight = Add(FILE_LIST_BEHIND_GAINED_HIGHLIGHT);
 				BehindLostHighlight = Add(FILE_LIST_BEHIND_LOST_HIGHLIGHT);
+				GoldHighlight = Add(FILE_LIST_GOLD_HIGHLIGHT);
 				if (upcoming) {
 					RunTimeUpcoming = Add(FILE_LIST_FINISH_TIME_UPCOMING);
 					SegmentTimeUpcoming = Add(FILE_LIST_SEGMENT_TIME_UPCOMING);
+					GoldTimeUpcoming = Add(FILE_LIST_GOLD_TIME_UPCOMING);
 					CurrentSplitHighlight = Add(FILE_LIST_CURRENT_SPLIT_HIGHLIGHT);
-				}
-				if (golds) {
-					GoldDelta = Add(FILE_LIST_GOLD_DELTA);
-					GoldHighlight = Add(FILE_LIST_GOLD_HIGHLIGHT);
-					if (upcoming) GoldTimeUpcoming = Add(FILE_LIST_GOLD_TIME_UPCOMING);
 				}
 				Indents = new StringBuilder[depths];
 				for (int depth = 0; depth < depths; depth++) {

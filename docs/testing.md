@@ -143,6 +143,11 @@ Things to know:
   - When timing a split, time `Split()` and the next `Update()` together, since that `Update()` does the split's work. Time `WaitForFileWrites()` separately for the writes.
 - **Real time.** Setting `AdjustedStartTime` only affects real time while the timer is `Running`; while paused, real time stays frozen. `model.Pause()` toggles between pause and resume.
 - **Editing splits.** Edit Splits changes the run in place, then raises `RunManuallyModified`. To do the same, change `state.Run` (a name, a time, `Add`, `RemoveAt`), call `state.CallRunManuallyModified()`, then `Tick()`.
+- **Segment history.** Section golds come from the history, so a test of them needs attempts in it. Play each attempt through `TimerModel` and end it with `model.Reset()`, which records it as LiveSplit does. Print `SegmentHistory` to see what was recorded.
+  - To make the holes that edits leave, change a copy of the run (`(IRun)state.Run.Clone()`), then call `run.FixSplits()` as the editor does. Clearing a split's best segment is `run[i].BestSegmentTime = new Time()`. Clean Sum of Best is `run[i].SegmentHistory.Remove(attempt)`.
+  - Then `state.Run = run`, `state.CallRunManuallyModified()` and `Tick()`.
+  - Reach the bests through the component's private `_levels` field by reflection: `SplitLevels.Count`, its indexer, and each `SplitLevel`'s `BestSegmentTimes`.
+- **Loading a splits file.** `new StandardFormatsRunFactory(stream, path).Create(new StandardComparisonGeneratorsFactory())`, with `livesplit_core.dll` from LiveSplit's `x64\` folder next to the harness ([livesplit-notes.md](livesplit-notes.md#running-livesplit-code-outside-livesplit-verified)).
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
 - **Don't delete output files mid-run.** `FileQueue` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
 - **Changing a setting.** Set the property, such as `comp.Settings.OutputSplitList = false`, then `Tick()`. The `Output*` settings are cache keys, so the next `Update()` rewrites everything and empties the files that are no longer written.
@@ -212,7 +217,9 @@ The share of bad reads is then the chance that an OBS read lands on a write. Div
 
 These checks reproduce bugs tracked in [TODO.md](TODO.md); the Code column names the item. Each one shows today's output and the correct output, so a fix can be confirmed.
 
-The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. The splits happen at 9.5, 21, 28, 39 and 48 s of game time, with a `Tick()` after each.
+The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. The splits happen at 9.5, 21, 28, 39 and 48 s of game time, with a `Tick()` after each. With every output on, it produces 165 files.
+
+The base run has no segment history. So in `SansSubsplits`, `Area A` and `Area B`, which span several splits, have no best segment: their gold files show `-`, and completing them counts as a gold.
 
 | Code | Check | File | Today | Correct |
 |---|---|---|---|---|

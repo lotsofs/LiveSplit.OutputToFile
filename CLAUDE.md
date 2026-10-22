@@ -56,7 +56,7 @@ The code is in `UI/Components/`:
 | File | Holds |
 |---|---|
 | `OutputToFileComponent.cs` | The LiveSplit side: counting timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
-| `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members and PB segment times |
+| `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members, PB segment times and best segments |
 | `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex`, and this attempt's times and deltas (`LiveSegmentTime`, `RunDelta`, `IsGold`, …) |
 | `FileQueue.cs` | Writes the files on a background thread, skipping unchanged contents; keeps the latest write error |
 | `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …) |
@@ -70,9 +70,9 @@ The code is in `UI/Components/`:
 - **Levels.** A split's depth is its number of leading `-`. Level `lvl` contains the splits with depth ≤ `lvl`.
   - The **last** level holds every split and is tagged `AllSplits`. Level 0 is `SansSubsplits`; levels in between are `SansSubsplits_Level{lvl+1}`, named after the depth they leave out. With a single level, level 0 is `AllSplits`.
   - `Levels[lvl].Indices` maps **local** index → **global** index, i.e. into `State.Run`. Mixing the two up is a recurring bug source. Only at the last level are they the same.
-  - Golds exist only at the last level. Keep the `lvl == Levels.Count - 1` guard on any gold output. `IsGold` decides what counts as a gold and includes that guard; don't test the gold delta instead, because it is also null when there is no gold.
+  - Golds exist at every level. Each member's best is in `SplitLevel.BestSegmentTimes`: a single split's best segment, or for a section of several splits, the fastest it was done within one attempt, from the segment history. `IsGold` decides what counts as a gold. Don't test the gold delta instead: a member with no best yet has a null delta, but its first completion is a gold.
 - **Timer phases.** `GetCurrentSubsplitIndex` returns −1 unless the timer is Running or Paused. `GetPreviousSubsplitIndex` returns −1 when there is no completed member (before the start, or on the level's first member) and the last member after the finish. The live-time helpers (`LiveRunTime`, …) need a member's index, so handle −1 first. Every write path needs correct output for NotRunning, Running/Paused and Ended. Otherwise files keep stale values.
-- **Nothing per attempt is stored.** This attempt's times and deltas are computed from the run on every write, by `OutputWriter`'s `LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta` and `IsGold`. `CalculateSegments()` rebuilds the shared `SplitLevels` in place on every cache-key change, including every timer phase change, so don't keep per-attempt state in it: a pause would wipe it.
+- **Nothing per attempt is stored.** This attempt's times and deltas are computed from the run on every write, by `OutputWriter`'s `LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta` and `IsGold`. `CalculateSegments()` rebuilds the shared `SplitLevels` in place on every cache-key change, including every timer phase change, so don't keep per-attempt state in it: a pause would wipe it. It recomputes the PB segments and best segments each time; both change only on reset or when splits are edited.
 - **Threads.** The timer event handlers can run on another thread: LiveSplit's server raises the events on its connection's thread.
   - So the handlers only count events with `Interlocked.Increment`, and `Update()`, on the UI thread, does all the work on the next frame.
   - Keep it that way. Don't touch the levels, the writers or the settings control from a handler; give `Update()` a count or a cache key instead.

@@ -61,8 +61,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		#region live times and deltas
 
 		// This attempt's times and deltas for a member of a level, by local index. They are computed from the run
-		// whenever files are written, never stored: PB times and best segments don't change during a run, and a
-		// completed split's SplitTime only changes when it is undone.
+		// whenever files are written, never stored: PB times, best segments and the segment history don't change during a run,
+		// and a completed split's SplitTime only changes when it is undone.
 		// The local index must be a member's: callers handle -1 (no member) from the subsplit index functions themselves.
 		// Subtracting TimeSpan? values gives null when either is null.
 
@@ -91,22 +91,19 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		}
 
 		/// <summary>
-		/// Segment time minus best segment. Golds only exist at the last level.
+		/// Segment time minus the member's best segment at this level
 		/// </summary>
 		protected TimeSpan? GoldDelta(TimingMethod method, int lvl, int localIndex) {
-			if (lvl != Levels.Count - 1) return null;
-			return LiveSegmentTime(method, lvl, localIndex) - State.Run[Levels[lvl].Indices[localIndex]].BestSegmentTime[method];
+			return LiveSegmentTime(method, lvl, localIndex) - Levels[lvl].BestSegmentTimes[method][localIndex];
 		}
 
 		/// <summary>
-		/// Whether a completed member's segment is a gold: it beat the best segment, or the split has none yet.
-		/// Golds only exist at the last level.
+		/// Whether a completed member's segment is a gold: it beat the member's best segment, or the member has none yet.
 		/// </summary>
 		protected bool IsGold(TimingMethod method, int lvl, int localIndex) {
-			if (lvl != Levels.Count - 1) return false;
 			TimeSpan? liveSegmentTime = LiveSegmentTime(method, lvl, localIndex);
 			if (liveSegmentTime == null) return false;
-			TimeSpan? goldTime = State.Run[Levels[lvl].Indices[localIndex]].BestSegmentTime[method];
+			TimeSpan? goldTime = Levels[lvl].BestSegmentTimes[method][localIndex];
 			return goldTime == null || liveSegmentTime < goldTime;
 		}
 

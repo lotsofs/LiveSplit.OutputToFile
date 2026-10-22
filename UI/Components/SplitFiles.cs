@@ -104,7 +104,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				MakeFile(FILE_PREVIOUS_RUN_TIME, "-", method, lvl);
 				MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, "-", method, lvl);
 				MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, "-", method, lvl);
-				if (lvl == Levels.Count - 1) MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, "-", method, lvl);
+				MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, "-", method, lvl);
 				MakeFile(FILE_PREVIOUS_SIGN, Signs.NotApplicable.ToString(), method, lvl);
 				return;
 			}
@@ -120,10 +120,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			MakeFile(FILE_PREVIOUS_RUN_TIME, TimeFormatter.DurationString(runTime), method, lvl);
 			MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, TimeFormatter.DeltaString(segmentDelta), method, lvl);
 			MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, TimeFormatter.DeltaString(runDelta), method, lvl);
-			// Golds are not supported for subsplits, so do not even bother writing a '-' for those levels
-			if (lvl == Levels.Count - 1) {
-				MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, TimeFormatter.DeltaString(goldDelta), method, lvl);
-			}
+			MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, TimeFormatter.DeltaString(goldDelta), method, lvl);
 			MakeFile(FILE_PREVIOUS_SIGN, PreviousSign(isGold, runDelta, segmentDelta).ToString(), method, lvl);
 		}
 
@@ -151,7 +148,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			if (State.CurrentPhase == TimerPhase.NotRunning || State.CurrentPhase == TimerPhase.Ended) {
 				MakeFile(FILE_CURRENT_SEGMENT_TIME, "-", method, lvl);
 				MakeFile(FILE_CURRENT_RUN_TIME, "-", method, lvl);
-				if (lvl == Levels.Count - 1) MakeFile(FILE_CURRENT_GOLD_TIME, "-", method, lvl);
+				MakeFile(FILE_CURRENT_GOLD_TIME, "-", method, lvl);
 				return;
 			}
 
@@ -159,12 +156,10 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			int currentAllSplitsIndex = Levels[lvl].Indices[currentSubsplitIndex];
 			TimeSpan? curSegTime = level.PbSegmentTimes[method][currentSubsplitIndex];
 			TimeSpan? curRunTime = State.Run[currentAllSplitsIndex].PersonalBestSplitTime[method];
+			TimeSpan? curGoldTime = level.BestSegmentTimes[method][currentSubsplitIndex];
 			MakeFile(FILE_CURRENT_SEGMENT_TIME, TimeFormatter.DurationString(curSegTime), method, lvl);
 			MakeFile(FILE_CURRENT_RUN_TIME, TimeFormatter.DurationString(curRunTime), method, lvl);
-			if (lvl == Levels.Count - 1) {
-				TimeSpan? curGoldTime = State.CurrentSplit.BestSegmentTime[method];
-				MakeFile(FILE_CURRENT_GOLD_TIME, TimeFormatter.DurationString(curGoldTime), method, lvl);
-			}
+			MakeFile(FILE_CURRENT_GOLD_TIME, TimeFormatter.DurationString(curGoldTime), method, lvl);
 		}
 	}
 }

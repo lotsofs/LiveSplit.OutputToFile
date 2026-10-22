@@ -12,7 +12,7 @@ Code is referred to by member name. The table below says which file each class i
 | `UI/Components/OutputToFileFactory.cs` | Name, description and category (Other) shown in the Layout Editor. `Create(state)` builds the component. Its update members point LiveSplit's startup update check at `update.xml` on `main` and at the GitHub release downloads; `Version` is the assembly's version ([releasing.md](releasing.md)). |
 | `update.xml` | The update feed LiveSplit reads at startup: one entry per release since 8, newest first. Changed only when releasing. |
 | `UI/Components/OutputToFileComponent.cs` | The LiveSplit side: event handling, change detection in `Update()`, and when each writer runs. Owns the one `SplitLevels` instance, the one `FileQueue` and the four writers. |
-| `UI/Components/SplitLevels.cs` | `SplitLevels` (depths, display names, the levels) and `SplitLevel` (one level's members and arrays). Builds the levels and the PB segment times. |
+| `UI/Components/SplitLevels.cs` | `SplitLevels` (depths, display names, the levels) and `SplitLevel` (one level's members and arrays). Builds the levels, the PB segment times and the best segments. |
 | `UI/Components/OutputWriter.cs` | Abstract base of the writers. Holds the state, settings, levels and file queue they share, the `MakeFile` overloads, `GetCurrentSubsplitIndex`/`GetPreviousSubsplitIndex`, and the live times and deltas (`LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta`, `IsGold`). |
 | `UI/Components/FileQueue.cs` | Writes the files on a background thread: skips unchanged contents, keeps the latest contents per file, records the latest write error, and empties the output files a full rewrite no longer writes. |
 | `UI/Components/RunInfoFiles.cs` | Writer for the root files. |
@@ -83,7 +83,7 @@ The depths are counted even when the Subsplits setting is off, because the displ
 Level `lvl` contains every split whose depth is ≤ `lvl`, in order. `Levels[lvl].Indices` lists their **global** indices, meaning indices into `State.Run`. Position within that list is the **local** index.
 
 - Level 0 contains top-level splits only.
-- The last level (`Levels.Count - 1`) contains every split. Local index equals global index there. The current gold time (`State.CurrentSplit.BestSegmentTime` in `WriteCurrentSplitTimes`) relies on this.
+- The last level (`Levels.Count - 1`) contains every split. Local index equals global index there.
 
 Folder names come from `MakeFile` in `OutputWriter`:
 
@@ -136,11 +136,35 @@ With depths 0/1/2 (splits `A`, `-B`, `--C`, `D`) there are three levels: `SansSu
 
 ## Per-level data: `SplitLevel`
 
-Each `SplitLevel` holds its members, `Indices` (local index → global index), and `PbSegmentTimes`, a `Dictionary<TimingMethod, TimeSpan?[]>` with one array per timing method, indexed by **local** index. Each entry is the PB split time of this member minus the PB split time of the previous member. The first member gets its PB split time. An entry is null if either value is missing. `CalculatePBSegments` fills it during `CalculateSegments()`.
+Each `SplitLevel` holds its members, `Indices` (local index → global index), and two arrays per timing method, each a `Dictionary<TimingMethod, TimeSpan?[]>` indexed by **local** index:
+
+- `PbSegmentTimes`: the PB split time of this member minus the PB split time of the previous member. The first member gets its PB split time. An entry is null if either value is missing. `CalculatePBSegments` fills it.
+- `BestSegmentTimes`: the member's best segment, which golds are measured against. `CalculateBestSegments` fills it (below).
+
+`CalculateSegments()` fills both, for both timing methods.
 
 `CalculateSegments()` rebuilds the levels and their arrays in place, in the one `SplitLevels` instance the writers share. It runs on every cache-key change, including every timer phase change. So a level must hold nothing about the current attempt; anything stored there would be wiped by a pause.
 
 A dictionary's `.Count` is the number of timing methods (2), not the array length; use `[method].Length`.
+
+### Best segments
+
+A member that is one split (it directly follows the previous member, or the start) gets that split's `BestSegmentTime`, so `AllSplits`, where every member is one split, shows LiveSplit's own golds.
+
+A member of several splits, a *section*, gets the fastest time it took within one attempt, or null if no attempt completed it. It isn't the sum of its splits' best segments: what happens in one split can affect a later one, so that sum is a lower bound, not a time anyone ran.
+
+`CalculateBestSegments` takes those times from the segment history ([livesplit-notes.md](livesplit-notes.md#segment-history-partly-verified)):
+
+1. List the section members of every level. With none (no subsplits), stop: nothing reads the history.
+2. Collect every attempt key on any split, with the last split it has an entry for. Every split counts, not only the first, because edits can remove an attempt's entry on any split.
+3. For each attempt, `AttemptSplitTimes` rebuilds its split times by adding up its entries, up to its last entry:
+   - A null entry is a skipped split. It has no time, and its time is in the next entry.
+   - A missing entry is a hole, left by an edit (clearing a best segment, Clean Sum of Best, moving a split). The next split with an entry starts the count again from itself (its *anchor*), because its entry includes time from before the hole.
+4. A section counts that attempt when the attempt has a time at its last split and at the split before its first (or the section starts the run), and both count from the same anchor. Its time is the difference; the best is the minimum over attempts.
+
+The history changes only on reset and when splits are edited, both of which cause a full rewrite. Each rewrite recomputes the bests anyway; it is cheap. With the 1,317-split, seven-level GTA SA 100% file (25 attempts in its history), it adds up to about 1 ms. A mid-run split's `Update()` there takes about 11 ms instead of 9 ms without section golds, mostly for the extra gold files (Debug build, every output on, measured 2026-10-21).
+
+A section's best can be faster than its splits' best segments added up, when those disagree with the history. In the GTA SA file, an attempt that ran before a split was inserted, or that skipped one, has one entry covering both splits, faster than their two best segments together.
 
 ### Live times and deltas
 
@@ -152,10 +176,10 @@ This attempt's values are computed from the run whenever files are written, by t
 | `LiveSegmentTime` | `LiveRunTime` minus the previous member's. The first member gets its `LiveRunTime`. |
 | `RunDelta` | `LiveRunTime − PersonalBestSplitTime` |
 | `SegmentDelta` | `LiveSegmentTime − PbSegmentTimes` |
-| `GoldDelta` | `LiveSegmentTime − BestSegmentTime`, last level only |
+| `GoldDelta` | `LiveSegmentTime − BestSegmentTimes` |
 | `IsGold` | See [How the values are calculated](#how-the-values-are-calculated) |
 
-Computing them on every write is safe because PB times and best segments don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)). A completed split's `SplitTime` changes only when it is undone, and then it no longer counts as completed.
+Computing them on every write is safe because PB times, best segments and the segment history don't change during a run ([livesplit-notes.md](livesplit-notes.md#comparison-data-verified)). A completed split's `SplitTime` changes only when it is undone, and then it no longer counts as completed.
 
 ## Phase-dependent indexes
 
@@ -178,11 +202,11 @@ Most write functions start from these two helpers, which return a **local** inde
 - **Timing methods:** every timed file is written once for `RealTime` and once for `GameTime`. Game time is `null`, written as `-`, until the game time is initialized.
 - **Run delta:** live split time minus PB split time, for the same split.
 - **Segment delta:** live segment minus PB segment, at this level.
-- **Gold delta:** live segment minus `BestSegmentTime`, at the last level only. Best segments and PB times don't change during a run; LiveSplit updates them on reset. Comparisons made during the run therefore use the values from before the run.
-- **Gold** (`OutputWriter.IsGold`): at the last level only, the live segment exists and either the split has no best segment yet or the live segment beats it. A skipped split, and the split after it, have no live segment, so they aren't golds. `Sign.txt` and the highlights both use this rule.
+- **Gold delta:** live segment minus the member's best segment at this level (`BestSegmentTimes`, see [Best segments](#best-segments)). Best segments, the history and PB times don't change during a run; LiveSplit updates them on reset. Comparisons made during the run therefore use the values from before the run.
+- **Gold** (`OutputWriter.IsGold`): the live segment exists and either the member has no best segment yet or the live segment beats it. A section that no attempt has completed has none, so its first completion is a gold. A skipped member, and the member after it, have no live segment, so they aren't golds. `Sign.txt` and the highlights both use this rule.
 - **`Sign.txt`** (`SplitFiles.PreviousSign`): a decision chain over gold, run delta and segment delta. "Ahead" or "PB" means run delta < 0. The values are listed in [output-files.md](output-files.md#sign-values).
 - **Highlights** (`SplitListFiles.HighlightFile`): each completed line gets at most one highlight. A skipped split, which has no live split time, gets none. Otherwise the first that applies, in this order:
-  1. Gold: the segment is a gold, last level only.
+  1. Gold: the segment is a gold.
   2. AheadGained: run delta < 0 and segment delta < 0.
   3. AheadLost: run delta < 0.
   4. BehindGained: segment delta < 0.
@@ -201,7 +225,7 @@ Most write functions start from these two helpers, which return a **local** inde
   - `{1}` the level tag;
   - `{2}` the indent index, `Names_Indent_*` only. Those files are pre-formatted with `{2}` filled in and `{1}` re-inserted as a literal (`IndentFile` in `SplitListFiles`).
 - The split list templates (`FILE_LIST_*`) are relative to the list folder. `WriteSplitListLevel` prefixes them with `FOLDER_SPLITLIST` (`SplitList\`) or `FOLDER_COMPLETEDSPLITS` (`CompletedSplits\`), so both lists write the same files, except the files only current and upcoming lines fill, which `CompletedSplits\` has none of.
-- `WriteSplitListLevel` builds a list in a new `ListLines`: one `StringBuilder` field per file, which the helpers append to directly, and a list of each field with its template, for ending lines and writing. The gold fields exist only at the last level and are null elsewhere. The upcoming fields (`RunTimeUpcoming`, `SegmentTimeUpcoming`, `GoldTimeUpcoming`, `CurrentSplitHighlight`) exist only when `WriteSplitLists` passes `upcoming`, for `SplitList\`, and are null otherwise; nothing appends to them then, because the range ends at the previous member. `Indents` has one per depth up to the level. `EndLine` ends a line in every file at once, so each file gets one line per split, blank where nothing was appended.
+- `WriteSplitListLevel` builds a list in a new `ListLines`: one `StringBuilder` field per file, which the helpers append to directly, and a list of each field with its template, for ending lines and writing. The upcoming fields (`RunTimeUpcoming`, `SegmentTimeUpcoming`, `GoldTimeUpcoming`, `CurrentSplitHighlight`) exist only when `WriteSplitLists` passes `upcoming`, for `SplitList\`, and are null otherwise; nothing appends to them then, because the range ends at the previous member. `Indents` has one per depth up to the level. `EndLine` ends a line in every file at once, so each file gets one line per split, blank where nothing was appended.
 - There are three `MakeFile` overloads, in `OutputWriter`:
   - `(template, contents, method?, level)` fills `{0}` and `{1}`;
   - `(template, contents, method)` fills `{0}`;

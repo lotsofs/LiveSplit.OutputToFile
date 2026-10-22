@@ -32,17 +32,38 @@ Each event fires **after** the state change, so a handler sees the new state:
 | `OnSkipSplit` | Index has moved forward; the skipped split's time is empty |
 | `OnUndoSplit` | Index has moved back |
 | `OnPause` / `OnResume` | Phase is `Paused` / `Running` |
-| `OnReset` | `NotRunning`, index −1. PB split times and best segments are **already updated** if the run improved them, and the attempt is already in `AttemptHistory`. The `TimerPhase` argument is the phase *before* the reset. |
+| `OnReset` | `NotRunning`, index −1. PB split times and best segments are **already updated** if the run improved them, and the attempt is already in `AttemptHistory`. The `TimerPhase` argument is the phase *before* the reset. The segment history already has the attempt too, and `Run.FixSplits()`, which tidies it, runs only after the handlers (both read in source). |
 
 ## Comparison data (verified)
 
-- `PersonalBestSplitTime` and `BestSegmentTime` **don't change during a run**. LiveSplit updates them on reset, before `OnReset` fires. Comparisons made during the run, including in the finished state, therefore use the values from before the run.
+- `PersonalBestSplitTime` and `BestSegmentTime` **don't change during a run**. LiveSplit updates them on reset, before `OnReset` fires. Comparisons made during the run, including in the finished state, therefore use the values from before the run. The [segment history](#segment-history-partly-verified) also gains the attempt only on reset (read in source).
 - `AttemptHistory` gets one entry per reset attempt. Unfinished attempts have a `null` time.
 - `Run.Metadata` is never null. With no platform set, `PlatformName` depends on where the run came from:
   - `""` in a run loaded from a splits file (`StandardFormatsRunFactory`);
   - `null` in a new `Run`, and in the blank run of new or closed splits (`StandardRunFactory`).
 
   At `e16f72c` a new `Run` had `""`. The component writes either as an empty `PlatformName.txt`.
+
+## Segment history (partly verified)
+
+The component takes the best segments of sections from the history ([architecture.md](architecture.md#best-segments)). The source was read on 2026-10-21 at `683cd60` (1.8.37): `UpdateSegmentHistory` in [TimerModel.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/TimerModel.cs), `FixSplits` and the import methods in [IRun.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/IRun.cs), `Clean` in [SumOfBest.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/SumOfBest.cs), and the split edits in [RunEditorDialog.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/RunEditorDialog.cs).
+
+Verified headless on 2026-10-21, by dumping the history after resets and edits through `TimerModel` and `Run.FixSplits()`:
+- `ISegment.SegmentHistory` is a `SegmentHistory`, a `Dictionary<int, Time>` keyed by attempt index. Attempt indices start at 1.
+- On reset, each split reached in the attempt gets an entry: its split time minus the attempt's last *recorded* split time, or minus zero for the first. Splits from the one in progress on are left out.
+- A skipped split gets a null entry, and its time is in the next recorded entry. So adding up an attempt's non-null entries for splits 0 … i gives its split time at i, when entry i isn't null.
+- `FixSplits()` removes null entries that no recorded entry follows, such as a skip just before a reset.
+- Clearing a split's best segment, then `FixSplits()`, removes every entry of that split that has a time for that method. Null entries stay. Nothing is added to the next split, so the attempts have a hole there. `FixSplits()` then sets the best segment again from the PB segment, if the PB has one.
+
+Read in source only:
+- A reset that doesn't update the splits (`Reset(false)`) records nothing.
+- Clean Sum of Best removes each entry it flags and the user confirms, which leaves a hole.
+- Moving a split up or down removes both swapped splits' entries in each attempt where one is null and the other isn't.
+- Deleting a split adds each of its entries to the attempt's next non-null entry. Where it had no entry, the next split's entry is removed instead.
+- Inserting a split gives it a null entry for every attempt, as if every attempt had skipped it.
+- `ImportSegmentHistory` adds the PB as two pseudo-attempts with keys ≤ 0, one per timing method. `ImportBestSegment` adds one entry, on one split, with a new key ≤ 0. `FixSplits()` moves entries whose key is above the highest attempt index to new keys ≤ 0.
+- `FixSplits()` raises an entry that is faster than its split's best segment to the best segment. That only happens after a best segment was edited to be slower. The split times rebuilt from such an attempt are then too slow by the difference.
+- `FixSplits()` removes an entry with a key ≤ 0 whose times all equal another attempt's entry on the same split.
 
 ## `GraphicsCache` (verified)
 

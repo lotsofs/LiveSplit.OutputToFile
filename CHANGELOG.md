@@ -32,12 +32,13 @@ What changed in Output to File between releases: the files it writes, what they 
 
   `Number.txt` and `After.txt` show `-` before the timer starts and after the finish, when no split is current.
 - `CompletedSplits\`: every split completed so far, as a list with the same files as `SplitList\`, except `Highlight_CurrentSplit.txt` and the `Time_…_Upcoming.txt` files. Turn it on with the new **Completed splits** setting. Turning it off empties its files.
+- Golds in the `SansSubsplits` folders: `GoldTime.txt`, `GoldDifference.txt`, `Delta_Gold.txt`, `Highlight_Gold.txt` and `Time_Gold_Upcoming.txt`, and gold values in `Sign.txt`. A section that groups several splits has its own gold: the fastest you have done the whole section within one attempt, from your splits' history, not its subsplits' golds added up. A section you have never finished in one attempt has no gold yet, so finishing it counts as one.
 - **Updates from LiveSplit.** When a newer release of Output to File is out, LiveSplit offers it at startup: it shows what changed and asks whether to update. Choosing Yes closes LiveSplit, installs the new release and opens LiveSplit again. This release itself still has to be installed by hand.
 
 ### Fixed
 
 - `PreviousSplit\…\Sign.txt` says `GainedAhead` or `GainedBehind` when a split beat its PB segment without being a gold. It used to say `LostAhead` or `LostBehind`.
-- `Sign.txt` in the `SansSubsplits` folders no longer reports golds. Golds are only counted in `AllSplits`, but release 7 reported a gold there for every split.
+- `Sign.txt` in the `SansSubsplits` folders reports a gold only when the section beat its gold (see Added). Release 7 reported a gold there for every split.
 - `Sign.txt` no longer reports a gold for the split after a skipped split.
 - A split that has no best segment yet is now filled in `Highlight_Gold.txt`, matching `Sign.txt`, which already called it a gold.
 - A skipped split is no longer filled in `Highlight_BehindLost.txt` in the split list. Its line is now blank in every highlight file.

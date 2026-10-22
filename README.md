@@ -29,6 +29,8 @@ In addition to the ``AllSplits`` folder, which takes into consideration every sp
 
 Split names in the output leave out the leading dashes and one space after them. To show a name that starts with a dash, put a space before it: a subsplit named ``- -40`` shows as ``-40``.
 
+Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In the ``SansSubsplits`` folders, a section that groups several splits has its own gold: the fastest you have done the whole section within one attempt, taken from your splits' history. That's usually slower than its subsplits' golds added up, because those come from different attempts. A section you have never finished in one attempt has no gold yet, so finishing it counts as one.
+
 ```
 |   AttemptCount.txt
 |   CategoryName.txt
@@ -65,10 +67,12 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
+|   |   |       GoldTime.txt
 |   |   |       RunTime.txt
 |   |   |       SegmentTime.txt
 |   |   |       
 |   |   \---RealTime
+|   |           GoldTime.txt
 |   |           RunTime.txt
 |   |           SegmentTime.txt
 |   |           
@@ -80,10 +84,12 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
+|   |   |       GoldTime.txt
 |   |   |       RunTime.txt
 |   |   |       SegmentTime.txt
 |   |   |       
 |   |   \---RealTime
+|   |           GoldTime.txt
 |   |           RunTime.txt
 |   |           SegmentTime.txt
 |   |           
@@ -115,6 +121,7 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |   Name.txt
 |   |   |   
 |   |   +---GameTime
+|   |   |       GoldDifference.txt
 |   |   |       RunDifference.txt
 |   |   |       RunTime.txt
 |   |   |       SegmentDifference.txt
@@ -122,6 +129,7 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |       Sign.txt
 |   |   |       
 |   |   \---RealTime
+|   |           GoldDifference.txt
 |   |           RunDifference.txt
 |   |           RunTime.txt
 |   |           SegmentDifference.txt
@@ -132,6 +140,7 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |   Name.txt
 |   |   |   
 |   |   +---GameTime
+|   |   |       GoldDifference.txt
 |   |   |       RunDifference.txt
 |   |   |       RunTime.txt
 |   |   |       SegmentDifference.txt
@@ -139,6 +148,7 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |       Sign.txt
 |   |   |       
 |   |   \---RealTime
+|   |           GoldDifference.txt
 |   |           RunDifference.txt
 |   |           RunTime.txt
 |   |           SegmentDifference.txt
@@ -187,23 +197,29 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |   Names.txt
 |   |   |   
 |   |   +---GameTime
+|   |   |       Delta_Gold.txt
 |   |   |       Delta_Run.txt
 |   |   |       Delta_Segment.txt
 |   |   |       Highlight_AheadGained.txt
 |   |   |       Highlight_AheadLost.txt
 |   |   |       Highlight_BehindGained.txt
 |   |   |       Highlight_BehindLost.txt
+|   |   |       Highlight_Gold.txt
+|   |   |       Time_Gold_Upcoming.txt
 |   |   |       Time_Run_Current.txt
 |   |   |       Time_Run_Upcoming.txt
 |   |   |       Time_Segment_Upcoming.txt
 |   |   |       
 |   |   \---RealTime
+|   |           Delta_Gold.txt
 |   |           Delta_Run.txt
 |   |           Delta_Segment.txt
 |   |           Highlight_AheadGained.txt
 |   |           Highlight_AheadLost.txt
 |   |           Highlight_BehindGained.txt
 |   |           Highlight_BehindLost.txt
+|   |           Highlight_Gold.txt
+|   |           Time_Gold_Upcoming.txt
 |   |           Time_Run_Current.txt
 |   |           Time_Run_Upcoming.txt
 |   |           Time_Segment_Upcoming.txt
@@ -213,23 +229,29 @@ Split names in the output leave out the leading dashes and one space after them.
 |   |   |   Names.txt
 |   |   |   
 |   |   +---GameTime
+|   |   |       Delta_Gold.txt
 |   |   |       Delta_Run.txt
 |   |   |       Delta_Segment.txt
 |   |   |       Highlight_AheadGained.txt
 |   |   |       Highlight_AheadLost.txt
 |   |   |       Highlight_BehindGained.txt
 |   |   |       Highlight_BehindLost.txt
+|   |   |       Highlight_Gold.txt
+|   |   |       Time_Gold_Upcoming.txt
 |   |   |       Time_Run_Current.txt
 |   |   |       Time_Run_Upcoming.txt
 |   |   |       Time_Segment_Upcoming.txt
 |   |   |       
 |   |   \---RealTime
+|   |           Delta_Gold.txt
 |   |           Delta_Run.txt
 |   |           Delta_Segment.txt
 |   |           Highlight_AheadGained.txt
 |   |           Highlight_AheadLost.txt
 |   |           Highlight_BehindGained.txt
 |   |           Highlight_BehindLost.txt
+|   |           Highlight_Gold.txt
+|   |           Time_Gold_Upcoming.txt
 |   |           Time_Run_Current.txt
 |   |           Time_Run_Upcoming.txt
 |   |           Time_Segment_Upcoming.txt
