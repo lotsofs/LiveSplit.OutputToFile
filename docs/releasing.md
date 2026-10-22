@@ -56,8 +56,9 @@ Which code each download on GitHub was built from. Checked on 2026-10-21 by buil
 | 5 | 2023-03-31 | replaced 2023-05-29 | tag `6`'s code, which fixed negative differences shown as `-` |
 | 6 | 2023-05-29 | replaced 2023-06-01 | `dc1e61b`, the first subsplits commit, a minute before the upload |
 | 7 | 2024-10-09 | uploaded with the tag | its tag |
+| 8 | 2026-10-22 | uploaded with the tag | its tag |
 
-The downloads that were replaced aren't on GitHub any more, so what they contained isn't known. Tags `4` and `5` are the same commit.
+The downloads that were replaced aren't on GitHub any more, so what they contained isn't known. Tags `4` and `5` are the same commit. Release 8's download was checked against the build of its tag by SHA-256 when it was uploaded.
 
 ## The feed
 

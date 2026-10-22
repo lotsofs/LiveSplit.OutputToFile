@@ -1,3 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <updates>
+  <update version="8.0">
+    <files>
+      <file path="8/LiveSplit.OutputToFile.dll" localPath="Components/LiveSplit.OutputToFile.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Now checks for updates to this component.</change>
+    </changelog>
+  </update>
 </updates>
