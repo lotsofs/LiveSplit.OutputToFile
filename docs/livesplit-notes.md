@@ -151,9 +151,9 @@ Read on 2026-10-16 in the LiveSplit source at `e16f72c`, then again at `683cd60`
 - `ComponentManager.LoadLayoutComponent(path, state)` creates a component from that file name, and loads the factories itself on first use. LiveSplit's layout loader passes it each component's `<Path>` from the layout file (not checked against a saved layout here).
 - So namespaces and class names can change without breaking saved layouts, but renaming the DLL would break them. Seen 2026-10-21: after the classes moved namespace, a headless program with `BasePath` set to a folder holding `Components\LiveSplit.OutputToFile.dll` got the factory and the component this way.
 
-## Update check (read in source, checked headless)
+## Update check (read in source, seen in LiveSplit)
 
-Read on 2026-10-21 in the LiveSplit source at `683cd60` (1.8.37) and on master: [UpdateHelper.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Updates/UpdateHelper.cs), and `Updater.cs`, `Update.cs` and `FileChange.cs` in [src/UpdateManager](https://github.com/LiveSplit/LiveSplit/tree/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/UpdateManager). The prompt and the restart haven't been seen in LiveSplit. [releasing.md](releasing.md) has the release steps that follow from these facts.
+Read on 2026-10-21 in the LiveSplit source at `683cd60` (1.8.37) and on master: [UpdateHelper.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Updates/UpdateHelper.cs), and `Updater.cs`, `Update.cs` and `FileChange.cs` in [src/UpdateManager](https://github.com/LiveSplit/LiveSplit/tree/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/UpdateManager). [releasing.md](releasing.md) has the release steps that follow from these facts.
 
 - At startup, `TimerForm.CheckForUpdates` checks LiveSplit itself, its updater, and every factory in `ComponentManager.ComponentFactories` (each component DLL in `Components\`, [above](#how-livesplit-finds-the-component-verified)).
   - The check runs on a background task, and each factory type is checked only once per run of LiveSplit.
@@ -171,6 +171,11 @@ Checked headless on 2026-10-21 with the installed `UpdateManager.dll` (1.8.37). 
 - with two entries that both list a file, newest first, the older release's file was installed last and won.
 
 The same program read an XML file from `raw.githubusercontent.com` with `XmlReader.Create`, and downloaded a release asset through GitHub's redirect with `WebClient`.
+
+Seen in LiveSplit 1.8.37 on 2026-10-23, with a build set to version 7.9 in `Components\` and release 8 in the live feed:
+- At startup, LiveSplit offered the update. Yes closed LiveSplit, and it opened again by itself, as reported by the person at the machine.
+- The DLL in `Components\` was then release 8's GitHub download, byte for byte (SHA-256).
+- The next start showed no prompt.
 
 ## Layout save prompt and the settings hash (read in source)
 

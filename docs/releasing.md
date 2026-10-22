@@ -6,7 +6,7 @@ How to publish a release so that LiveSplit offers it to users. Releases are numb
 
 When LiveSplit starts, it reads the feed at the factory's `XMLURL`: [update.xml](../update.xml) on `main`, served from `raw.githubusercontent.com`. If the feed lists a version above the installed DLL's `AssemblyVersion`, LiveSplit shows "New updates are available". The dialog lists "Output to File (version)" and the changelog lines of every newer entry, then asks "Do you want to update?".
 
-If the user clicks Yes, LiveSplit downloads its updater and closes itself. The updater downloads each `<file>` from the factory's `UpdateURL` plus the file's `path`, which is a GitHub release asset. It saves the file at `localPath` in the LiveSplit folder, and then restarts LiveSplit. [livesplit-notes.md](livesplit-notes.md#update-check-read-in-source-checked-headless) has the details and how they were checked.
+If the user clicks Yes, LiveSplit downloads its updater and closes itself. The updater downloads each `<file>` from the factory's `UpdateURL` plus the file's `path`, which is a GitHub release asset. It saves the file at `localPath` in the LiveSplit folder, and then restarts LiveSplit. [livesplit-notes.md](livesplit-notes.md#update-check-read-in-source-seen-in-livesplit) has the details and how they were checked.
 
 ## Steps
 

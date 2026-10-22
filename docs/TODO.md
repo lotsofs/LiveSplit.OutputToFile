@@ -28,7 +28,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [UPD](Project.md#upd--update-prompt-not-yet-seen-in-livesplit) | Updates | LiveSplit's startup update prompt was only checked headless; after release 8 is published, see it in LiveSplit: the prompt, the install from GitHub and the restart | Medium |
 
 ## Won't fix — [WontFix.md](WontFix.md)
 
