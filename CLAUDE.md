@@ -64,7 +64,7 @@ The code is in `UI/Components/`:
 | `SplitFiles.cs` | Writes `CurrentSplit\` and `PreviousSplit\`, including `Sign.txt` |
 | `SplitListFiles.cs` | Writes `SplitList\` and `CompletedSplits\` |
 | `Signs.cs` | The `Sign.txt` values |
-| `TimeFormatter.cs` | Time and delta strings |
+| `TimeFormatter.cs` | Time and delta strings, from LiveSplit's formatters, and the `FormatAccuracy` choices. Writers call `OutputWriter.DurationString` and `DeltaString`, which pass the Time Format settings. |
 | `OutputToFileSettings.cs` | The settings control and its XML save/load |
 
 - **Levels.** A split's depth is its number of leading `-`. Level `lvl` contains the splits with depth ≤ `lvl`.

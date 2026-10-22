@@ -19,6 +19,9 @@ namespace LiveSplit.UI.Components.OutputToFile
 		public bool OutputCompletedSplits { get; set; }
 		// A folder for every custom comparison of the open splits, ticked or not
 		public bool AllCustomComparisons { get; set; }
+		// How times and differences are written. Each drop-down list's index is the value, so the lists follow the enum's order.
+		public FormatAccuracy TimeAccuracy { get; set; }
+		public FormatAccuracy DeltaAccuracy { get; set; }
 
 		// The comparisons ticked in the list, each written to a folder of its own. Changed through SetComparisonTicked,
 		// which counts the changes in TickedComparisonsVersion, a cache key.
@@ -45,6 +48,9 @@ namespace LiveSplit.UI.Components.OutputToFile
 			OutputSubsplits = true;
 			OutputCompletedSplits = false;
 			AllCustomComparisons = false;
+			TimeAccuracy = FormatAccuracy.Seconds;
+			DeltaAccuracy = FormatAccuracy.Flex;
+			ShowAccuracies();
 
 			// Applied when the textbox loses focus, not per keystroke: FolderPath is a cache key, so every partial path would get a full set of files
 			this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnValidation);
@@ -67,6 +73,8 @@ namespace LiveSplit.UI.Components.OutputToFile
 				SettingsHelper.CreateSetting(document, parent, "OutputSubsplits", OutputSubsplits) ^
 				SettingsHelper.CreateSetting(document, parent, "OutputCompletedSplits", OutputCompletedSplits) ^
 				SettingsHelper.CreateSetting(document, parent, "AllCustomComparisons", AllCustomComparisons) ^
+				SettingsHelper.CreateSetting(document, parent, "TimeAccuracy", TimeAccuracy) ^
+				SettingsHelper.CreateSetting(document, parent, "DeltaAccuracy", DeltaAccuracy) ^
 				CreateTickedComparisonsNode(document, parent)
 				;
 		}
@@ -120,6 +128,9 @@ namespace LiveSplit.UI.Components.OutputToFile
 			OutputSubsplits = SettingsHelper.ParseBool(element["OutputSubsplits"], true);
 			OutputCompletedSplits = SettingsHelper.ParseBool(element["OutputCompletedSplits"], false);
 			AllCustomComparisons = SettingsHelper.ParseBool(element["AllCustomComparisons"], false);
+			TimeAccuracy = ParseAccuracy(element["TimeAccuracy"], FormatAccuracy.Seconds);
+			DeltaAccuracy = ParseAccuracy(element["DeltaAccuracy"], FormatAccuracy.Flex);
+			ShowAccuracies();
 			// Layouts saved before the list have no Comparisons: nothing ticked
 			_tickedComparisons.Clear();
 			XmlElement list = element["Comparisons"];
@@ -164,6 +175,34 @@ namespace LiveSplit.UI.Components.OutputToFile
 		{
 			if (_fillingComparisons) return;
 			SetComparisonTicked((string)checkedListBoxComparisons.Items[e.Index], e.NewValue == CheckState.Checked);
+		}
+
+		// The default when the layout has no such setting (saved before it existed) or a value that isn't one of the choices
+		private static FormatAccuracy ParseAccuracy(XmlElement element, FormatAccuracy defaultAccuracy)
+		{
+			if (SettingsHelper.TryParseEnum(element, out FormatAccuracy accuracy) && Enum.IsDefined(typeof(FormatAccuracy), accuracy))
+			{
+				return accuracy;
+			}
+			return defaultAccuracy;
+		}
+
+		// Select the accuracies in their drop-down lists
+		private void ShowAccuracies()
+		{
+			comboBoxTimeAccuracy.SelectedIndex = (int)TimeAccuracy;
+			comboBoxDeltaAccuracy.SelectedIndex = (int)DeltaAccuracy;
+		}
+
+		// A ComboBox has no event a binding could use for every change of the selected item, so these set the properties
+		private void comboBoxTimeAccuracy_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			TimeAccuracy = (FormatAccuracy)comboBoxTimeAccuracy.SelectedIndex;
+		}
+
+		private void comboBoxDeltaAccuracy_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			DeltaAccuracy = (FormatAccuracy)comboBoxDeltaAccuracy.SelectedIndex;
 		}
 
 		private void checkBoxAllCustomComparisons_CheckedChanged(object sender, EventArgs e)

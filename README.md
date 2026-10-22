@@ -22,6 +22,8 @@ After is the number of splits after the current one. It's `-` before the timer s
 
 Highlights are a shaded bar to layer behind splits.
 
+Times and differences are written the way LiveSplit writes them: `0:05`, `+5.2`, `+1:05`, with the minus sign `−` for negatives. Under **Time Format** in the settings, choose their decimals: Seconds, Tenths, Hundredths, Milliseconds, or Flex, which adds decimals only where a value would otherwise read as zero (a time under a second, a difference under a tenth). The defaults are Seconds for times and Flex for differences. The timers always show whole seconds.
+
 The files of an output you turn off in the settings, of a comparison you untick, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits` and `Timers`) as its own, so don't keep other files there.
 
 ## Comparisons

@@ -22,7 +22,11 @@ What changed in Output to File between releases: the files it writes, what they 
 ### Changed
 
 - Differences, `Sign.txt`, the ahead and behind highlights, and the times of the current and upcoming splits compare against the comparison selected in LiveSplit, in the `Current Comparison` folders. They used to compare against Personal Best, whatever was selected.
-- Negative differences under a minute have one decimal, like positive ones: `-0.5`, `-1.0`, `-5.2` (release 7: `-.50`, `-1.00`, `-5.23`). Under a tenth of a second they stay as they were: `-.05`.
+- Differences are written the way LiveSplit writes them:
+  - **Negatives get the minus sign `−`, not `-`**, as do negative times.
+  - With the default Flex setting (see Added), negative differences have one decimal under a minute, like positive ones: `−0.5`, `−5.2` (release 7: `-.50`, `-5.23`). From a minute on they have none: `−1:05` (release 7: `-1:05.23`).
+  - Under a tenth of a second there are two decimals: `+0.05`, `−0.05` (release 7: `+.05`, `-.05`).
+  - No difference at all is `0.00` (release 7: `+.00`).
 - **Splitting no longer waits for the files to be written.** They are written in the background, so LiveSplit stays responsive. A file whose contents haven't changed isn't rewritten.
 - Split names leave out one space after their leading dashes: a subsplit named `- -40` shows as `-40` (release 7: ` -40`). So to show a name that starts with a dash, put a space before it. With the **Subsplits** setting off, names in `AllSplits` are the same as with it on; release 7 kept their dashes.
 - When the layout loads, files left over from outputs that are now turned off, or from subsplit levels your splits no longer have, are emptied. So are files left by older releases, such as release 7's `Index.txt` and `SansSubsplits_Level1` folders, and release 5's `TotalSplits.txt` and `CurrentSplit\Name.txt`, so text sources still pointing at them show nothing.
@@ -43,6 +47,7 @@ What changed in Output to File between releases: the files it writes, what they 
 - Golds in the `SansSubsplits` folders: `GoldTime.txt`, `GoldDifference.txt`, `Delta_Gold.txt`, `Highlight_Gold.txt` and `Time_Gold_Upcoming.txt`, and gold values in `Sign.txt`. A section that groups several splits has its own gold: the fastest you have done the whole section within one attempt, from your splits' history, not its subsplits' golds added up. A section you have never finished in one attempt has no gold yet, so finishing it counts as one.
 - A **Comparisons** setting: tick a comparison to get a folder of its own next to `Current Comparison`, with the same files, named after it, such as `Personal Best\` or `Average Segments\`. **All custom comparisons** gives every comparison you added in Edit Splits a folder, in whatever splits you open. Unticking empties the folder.
 - `CurrentComparison.txt`: the name of the comparison selected in LiveSplit.
+- **Time Format** settings: choose the decimals of times and of differences: Seconds, Tenths, Hundredths, Milliseconds, or Flex, which adds decimals only where a value would otherwise read as zero (a time under a second, a difference under a tenth). Times default to Seconds and differences to Flex, as before. The timers always show whole seconds.
 - **Updates from LiveSplit.** When a newer release of Output to File is out, LiveSplit offers it at startup: it shows what changed and asks whether to update. Choosing Yes closes LiveSplit, installs the new release and opens LiveSplit again. This release itself still has to be installed by hand.
 
 ### Fixed

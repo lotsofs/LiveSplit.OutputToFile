@@ -19,14 +19,13 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [SCR](Cleanup.md#scr--settings-tab-scrolls-for-no-reason) | Settings | The Output to File settings tab has a scrollbar with nothing below the Comparisons group: the control keeps its Designer height of 619 px | Low |
+| [SCR](Cleanup.md#scr--settings-tab-scrolls-for-no-reason) | Settings | The Output to File settings tab has a scrollbar with nothing below the Time Format group: the control keeps its Designer height of 619 px | Low |
 
 ## Features and limitations — [Features.md](Features.md)
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
 | [TST](Features.md#tst--no-automated-tests) | Tests | No test project; turn the headless harness and regression checks in testing.md into one | Medium |
-| [FMT](Features.md#fmt--time-format-is-fixed) | Time format | Time and delta formats are hard-coded, with no setting; replaces the `// TODO` in `TimeFormatter.cs` | Low |
 
 ## Project and README — [Project.md](Project.md)
 

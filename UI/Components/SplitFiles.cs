@@ -117,14 +117,14 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			TimeSpan? goldDelta = GoldDelta(method, lvl, previousSplitIndex);
 			bool isGold = IsGold(method, lvl, previousSplitIndex);
 
-			MakeFile(FILE_PREVIOUS_SEGMENT_TIME, TimeFormatter.DurationString(segmentTime), method, lvl);
-			MakeFile(FILE_PREVIOUS_RUN_TIME, TimeFormatter.DurationString(runTime), method, lvl);
-			MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, TimeFormatter.DeltaString(goldDelta), method, lvl);
+			MakeFile(FILE_PREVIOUS_SEGMENT_TIME, DurationString(segmentTime), method, lvl);
+			MakeFile(FILE_PREVIOUS_RUN_TIME, DurationString(runTime), method, lvl);
+			MakeFile(FILE_PREVIOUS_GOLD_DIFFERENCE, DeltaString(goldDelta), method, lvl);
 			foreach (var comparison in Levels.Comparisons) {
 				TimeSpan? segmentDelta = SegmentDelta(method, comparison.Name, lvl, previousSplitIndex);
 				TimeSpan? runDelta = RunDelta(method, comparison.Name, lvl, previousSplitIndex);
-				MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, TimeFormatter.DeltaString(segmentDelta), method, lvl, comparison.Folder);
-				MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, TimeFormatter.DeltaString(runDelta), method, lvl, comparison.Folder);
+				MakeFile(FILE_PREVIOUS_SEGMENT_DIFFERENCE, DeltaString(segmentDelta), method, lvl, comparison.Folder);
+				MakeFile(FILE_PREVIOUS_RUN_DIFFERENCE, DeltaString(runDelta), method, lvl, comparison.Folder);
 				MakeFile(FILE_PREVIOUS_SIGN, PreviousSign(isGold, runDelta, segmentDelta).ToString(), method, lvl, comparison.Folder);
 			}
 		}
@@ -167,12 +167,12 @@ namespace LiveSplit.UI.Components.OutputToFile {
 
 			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
 			TimeSpan? curGoldTime = level.BestSegmentTimes[method][currentSubsplitIndex];
-			MakeFile(FILE_CURRENT_GOLD_TIME, TimeFormatter.DurationString(curGoldTime), method, lvl);
+			MakeFile(FILE_CURRENT_GOLD_TIME, DurationString(curGoldTime), method, lvl);
 			foreach (var comparison in Levels.Comparisons) {
 				TimeSpan? curSegTime = level.ComparisonSegmentTimes[comparison.Name][method][currentSubsplitIndex];
 				TimeSpan? curRunTime = ComparisonTime(method, comparison.Name, lvl, currentSubsplitIndex);
-				MakeFile(FILE_CURRENT_SEGMENT_TIME, TimeFormatter.DurationString(curSegTime), method, lvl, comparison.Folder);
-				MakeFile(FILE_CURRENT_RUN_TIME, TimeFormatter.DurationString(curRunTime), method, lvl, comparison.Folder);
+				MakeFile(FILE_CURRENT_SEGMENT_TIME, DurationString(curSegTime), method, lvl, comparison.Folder);
+				MakeFile(FILE_CURRENT_RUN_TIME, DurationString(curRunTime), method, lvl, comparison.Folder);
 			}
 		}
 	}

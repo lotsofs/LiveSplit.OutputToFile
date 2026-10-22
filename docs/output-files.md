@@ -131,11 +131,24 @@ The files stay, with no contents, and are filled again when the output or level 
 
 ## Formatting
 
-From `TimeFormatter.cs`. Values are truncated, not rounded.
+From `TimeFormatter.cs`, which uses LiveSplit's own formatters (`RegularTimeFormatter` for times, `DeltaTimeFormatter` for differences), so the files read like LiveSplit's components. Values are truncated, not rounded.
 
-| Function | Used for | Output |
+- **Times** show minutes: `0:05`, `1:05`, `1:02:05`.
+- **Differences** always have a sign, except zero, and have no decimals from a minute on: `+5.2`, `+1:05`.
+- **Negatives** get the minus sign `−` (U+2212), not `-`: `−5.2`, `−0:05`. The files are UTF-8.
+
+The **Times** and **Differences** settings (Time Format) set the decimals:
+
+| Choice | Times | Differences |
 |---|---|---|
-| `DurationString` | Times | `0:05`, `1:05`, `1:02:05`. Minutes are always shown, no decimals. Negatives get a `-` prefix. |
-| `DeltaString` | Differences | Always signed. Under 0.1 s: `+.05`. Under 60 s: `+5.2`. Otherwise `+1:05`. Negatives take the same forms: `-.05`, `-5.2`, `-1:05`. |
+| Flex | `0:05`; under a second `0:00.4`; under a tenth `0:00.05` | `+5.2`; under a tenth `+0.05` |
+| Seconds | `0:05` | `+5`, `+0` |
+| Tenths | `0:05.2` | `+5.2`, `+0.0` |
+| Hundredths | `0:05.23` | `+5.23`, `+0.05` |
+| Milliseconds | `0:05.234` | `+5.234`, `+0.052` |
+
+The defaults are Seconds for times and Flex for differences. Flex adds decimals only where a value would otherwise read as zero. A zero difference is `0.00` with Flex.
+
+`Timers\` always show whole seconds, whatever the settings: with decimals, each timer file would be rewritten many times a second.
 
 `null` is written as `-` everywhere.

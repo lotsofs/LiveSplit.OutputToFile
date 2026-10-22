@@ -120,8 +120,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		// A completed split: this attempt's time and deltas, and its highlight
 		void AppendCompletedLine(ListLines lines, TimingMethod method, int lvl, int spl) {
 			var split = State.Run[Levels[lvl].Indices[spl]];
-			lines.RunTimeCurrent.Append(TimeFormatter.DurationString(split.SplitTime[method]));
-			lines.GoldDelta.Append(TimeFormatter.DeltaString(GoldDelta(method, lvl, spl)));
+			lines.RunTimeCurrent.Append(DurationString(split.SplitTime[method]));
+			lines.GoldDelta.Append(DeltaString(GoldDelta(method, lvl, spl)));
 			// A gold is filled in Highlight_Gold, and in none of a comparison's highlights. A skipped split has no time, and no highlight.
 			bool isGold = IsGold(method, lvl, spl);
 			bool highlighted = !isGold && LiveRunTime(method, lvl, spl) != null;
@@ -129,18 +129,18 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			foreach (var comparison in lines.Comparisons) {
 				TimeSpan? runDelta = RunDelta(method, comparison.Name, lvl, spl);
 				TimeSpan? segmentDelta = SegmentDelta(method, comparison.Name, lvl, spl);
-				comparison.RunDelta.Append(TimeFormatter.DeltaString(runDelta));
-				comparison.SegmentDelta.Append(TimeFormatter.DeltaString(segmentDelta));
+				comparison.RunDelta.Append(DeltaString(runDelta));
+				comparison.SegmentDelta.Append(DeltaString(segmentDelta));
 				if (highlighted) HighlightFile(comparison, method, lvl, spl, runDelta, segmentDelta)?.Append(HIGHLIGHT_FILL);
 			}
 		}
 
 		// The current split and those after it: their best segments, and each comparison's times
 		void AppendUpcomingLine(ListLines lines, TimingMethod method, int lvl, int spl) {
-			lines.GoldTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].BestSegmentTimes[method][spl]));
+			lines.GoldTimeUpcoming.Append(DurationString(Levels[lvl].BestSegmentTimes[method][spl]));
 			foreach (var comparison in lines.Comparisons) {
-				comparison.RunTimeUpcoming.Append(TimeFormatter.DurationString(ComparisonTime(method, comparison.Name, lvl, spl)));
-				comparison.SegmentTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].ComparisonSegmentTimes[comparison.Name][method][spl]));
+				comparison.RunTimeUpcoming.Append(DurationString(ComparisonTime(method, comparison.Name, lvl, spl)));
+				comparison.SegmentTimeUpcoming.Append(DurationString(Levels[lvl].ComparisonSegmentTimes[comparison.Name][method][spl]));
 			}
 		}
 

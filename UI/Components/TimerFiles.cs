@@ -36,10 +36,10 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			if (!HasTimerChanged(method, runTime)) { return; }
 
 			// Run Timer. "-" when there is none.
-			MakeFile(FILE_TIMER_RUN, TimeFormatter.DurationString(runTime), method);
+			MakeFile(FILE_TIMER_RUN, TimeFormatter.DurationString(runTime, FormatAccuracy.Seconds), method);
 
 			for (int lvl = 0; lvl < Levels.Count; lvl++) {
-				MakeFile(FILE_TIMER_SPLIT, TimeFormatter.DurationString(SegmentTime(method, lvl, runTime)), method, lvl);
+				MakeFile(FILE_TIMER_SPLIT, TimeFormatter.DurationString(SegmentTime(method, lvl, runTime), FormatAccuracy.Seconds), method, lvl);
 			}
 		}
 
@@ -63,7 +63,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			return true;
 		}
 
-		// A time as DurationString shows it: whole seconds truncated toward zero, and the sign, since -0.5 s shows as -0:00. Null shows as "-".
+		// A time as DurationString shows it in whole seconds: truncated toward zero, and the sign, since -0.5 s shows as −0:00. Null shows as "-".
 		static (long Seconds, bool Negative)? Shown(TimeSpan? time) {
 			if (time == null) return null;
 			return (time.Value.Ticks / TimeSpan.TicksPerSecond, time.Value < TimeSpan.Zero);

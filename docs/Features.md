@@ -15,15 +15,3 @@ There is no test project. Changes are checked by hand, in LiveSplit or with a he
 **Verify.** The tests pass, and a reintroduced bug makes one fail.
 
 **Docs.** CLAUDE.md "Build / deploy", which says there are no tests. [testing.md](testing.md).
-
-## FMT — Time format is fixed
-
-`TimeFormatter.DetermineTimeFormat` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)) picks the precision from hard-coded thresholds, and durations always use `MSS`. There's no setting. A `// TODO` comment above it says the same; this item replaces it.
-
-**Evidence.** Read.
-
-**Plan.** Delete the `// TODO` comment. Add settings for duration and delta formats, following "Adding a setting" in CLAUDE.md. Consider LiveSplit's own formatters in `LiveSplit.TimeFormatters`, which the component already imports.
-
-**Verify.** Change the format setting: every time file uses it after the next write.
-
-**Docs.** output-files.md "Formatting". README settings section.

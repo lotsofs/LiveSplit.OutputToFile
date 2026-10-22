@@ -116,6 +116,20 @@ namespace LiveSplit.UI.Components.OutputToFile {
 
 		#endregion
 
+		#region formatting
+
+		// A time or a difference, at the accuracy set for it. Timers\ use TimeFormatter directly, in whole seconds.
+
+		protected string DurationString(TimeSpan? t) {
+			return TimeFormatter.DurationString(t, Settings.TimeAccuracy);
+		}
+
+		protected string DeltaString(TimeSpan? t) {
+			return TimeFormatter.DeltaString(t, Settings.DeltaAccuracy);
+		}
+
+		#endregion
+
 		#region file writing
 
 		protected void MakeFile(string fileName, string contents, TimingMethod? method, int subsplitLevel) {

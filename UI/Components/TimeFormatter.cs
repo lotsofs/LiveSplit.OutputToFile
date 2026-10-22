@@ -1,100 +1,81 @@
-﻿using System;
+﻿using LiveSplit.TimeFormatters;
+using System;
 
 namespace LiveSplit.UI.Components.OutputToFile {
+	/// <summary>
+	/// The choices of the Times and Differences settings. Flex adds decimals only where a value would otherwise read as zero.
+	/// </summary>
+	public enum FormatAccuracy {
+		Flex,
+		Seconds,
+		Tenths,
+		Hundredths,
+		Milliseconds,
+	}
+
+	/// <summary>
+	/// Time and difference strings, made by LiveSplit's own formatters so they read as in LiveSplit's components.
+	/// Values are truncated, not rounded. Negatives get the minus sign '−' (U+2212), and null shows as "-".
+	/// </summary>
 	static class TimeFormatter {
 
-		public enum TimeFormats {
-			X = 0,			//          .0
-			XX = 1,			//          .05
-			S = 2,			//         0
-			SX = 3,			//         0.0
-			SXX = 4,		//         0.05
-			SS = 5,			//        00
-			SSX = 6,		//        00.0
-			SSXX = 7,		//        00.05
-			MSS = 8,		//      0:00
-			MSSX = 9,		//      0:00.0
-			MSSXX = 10,		//      0:00.05
-			MMSS = 11,		//     00:00
-			MMSSX = 12,		//     00:00.0
-			MMSSXX = 13,	//     00:00.05
-			HMMSS = 14,		//   0:00:00
-			HMMSSX = 15,    //   0:00:00.0
-			HMMSSXX = 16,   //   0:00:00.05
-			HHMMSS = 17,    //  00:00:00
-			HHMMSSX = 18,   //  00:00:00.0
-			HHMMSSXX = 19,  //  00:00:00.05
-		};
+		static readonly TimeSpan TENTH = TimeSpan.FromSeconds(0.1);
+		static readonly TimeSpan SECOND = TimeSpan.FromSeconds(1);
 
-		// TODO: Make this a configurable setting
-		public static TimeFormats DetermineTimeFormat(TimeSpan t) {
-			long ms = (long)t.TotalMilliseconds;
-			if (ms < 100) return TimeFormats.XX;
-			if (ms < 60000) return TimeFormats.SX;
-			return TimeFormats.MSS;
+		// One formatter per LiveSplit accuracy, indexed by it. Used on the UI thread only.
+		// Times show minutes, as 0:05. LiveSplit's own writes a null time as 0, so set it to "-".
+		static readonly GeneralTimeFormatter[] _durations = Formatters(accuracy => new RegularTimeFormatter(accuracy) { NullFormat = NullFormat.Dash });
+		// Differences have a sign, and no decimals from a minute on
+		static readonly GeneralTimeFormatter[] _deltas = Formatters(accuracy => new DeltaTimeFormatter { Accuracy = accuracy });
+
+		static GeneralTimeFormatter[] Formatters(Func<TimeAccuracy, GeneralTimeFormatter> create) {
+			var accuracies = (TimeAccuracy[])Enum.GetValues(typeof(TimeAccuracy));
+			var formatters = new GeneralTimeFormatter[accuracies.Length];
+			foreach (TimeAccuracy accuracy in accuracies) {
+				formatters[(int)accuracy] = create(accuracy);
+			}
+			return formatters;
 		}
 
-		public static string DurationString(TimeSpan? t) {
-			if (t == null) return "-";
-			if (t.Value < TimeSpan.Zero) {
-				return "-" + FormatTime(t.Value.Negate(), TimeFormats.MSS);
+		/// <summary>
+		/// A time: 0:05, 1:05, 1:02:05, with the accuracy's decimals. Flex: whole seconds, but tenths under a second and hundredths under a tenth.
+		/// </summary>
+		public static string DurationString(TimeSpan? t, FormatAccuracy accuracy) {
+			TimeAccuracy timeAccuracy;
+			if (accuracy == FormatAccuracy.Flex) {
+				TimeSpan size = t?.Duration() ?? TimeSpan.Zero;
+				timeAccuracy = size < TENTH ? TimeAccuracy.Hundredths : size < SECOND ? TimeAccuracy.Tenths : TimeAccuracy.Seconds;
 			}
 			else {
-				return FormatTime(t.Value, TimeFormats.MSS);
+				timeAccuracy = Fixed(accuracy);
 			}
+			return _durations[(int)timeAccuracy].Format(t);
 		}
-		
-		public static string DeltaString(TimeSpan? t) {
-			if (t == null) return "-";
-			if (t.Value < TimeSpan.Zero) {
-				return "-" + FormatTime(t.Value.Negate(), DetermineTimeFormat(t.Value.Negate()));
+
+		/// <summary>
+		/// A difference: +5.2, −5.2, +1:05, with the accuracy's decimals, and none from a minute on. No sign for zero.
+		/// Flex: tenths, but hundredths under a tenth.
+		/// </summary>
+		public static string DeltaString(TimeSpan? t, FormatAccuracy accuracy) {
+			TimeAccuracy timeAccuracy;
+			if (accuracy == FormatAccuracy.Flex) {
+				timeAccuracy = t?.Duration() < TENTH ? TimeAccuracy.Hundredths : TimeAccuracy.Tenths;
 			}
 			else {
-				return "+" + FormatTime(t.Value, DetermineTimeFormat(t.Value)); 
+				timeAccuracy = Fixed(accuracy);
 			}
+			return _deltas[(int)timeAccuracy].Format(t);
 		}
 
-		static string FormatTime(TimeSpan t, TimeFormats format) {
-			long ms = (long)t.TotalMilliseconds;
-			long hours = ms / 3600000;
-			ms -= hours * 3600000;
-			long minutes = ms / 60000;
-			ms -= minutes * 60000;
-			long seconds = ms / 1000;
-			ms -= seconds * 1000;
-
-			string stamp = "";
-			// hours
-			if (hours > 9 || (int)format >= 17) {
-				stamp += hours.ToString("D2") + ":";
+		// LiveSplit's accuracy for a choice other than Flex
+		static TimeAccuracy Fixed(FormatAccuracy accuracy) {
+			switch (accuracy) {
+				case FormatAccuracy.Seconds: return TimeAccuracy.Seconds;
+				case FormatAccuracy.Tenths: return TimeAccuracy.Tenths;
+				case FormatAccuracy.Hundredths: return TimeAccuracy.Hundredths;
+				case FormatAccuracy.Milliseconds: return TimeAccuracy.Milliseconds;
+				default: throw new ArgumentOutOfRangeException(nameof(accuracy), accuracy, null);
 			}
-			else if (hours > 0 || (int)format >= 14) {
-				stamp += hours.ToString("D1") + ":";
-			}
-			// minutes
-			if (minutes > 9 || (int)format >= 11 || hours > 0) {
-				stamp += minutes.ToString("D2") + ":";
-			}
-			else if (minutes > 0 || (int)format >= 8) {
-				stamp += minutes.ToString("D1") + ":";
-			}
-			// seconds
-			if (seconds > 9 || (int)format >= 5 || minutes > 0 || hours > 0) {
-				stamp += seconds.ToString("D2");
-			}
-			else if (seconds > 0 || (int)format >= 2) {
-				stamp += seconds.ToString("D1");
-			}
-			// deciseconds
-			if ((int)format % 3 != 2) {
-				stamp += "." + (ms / 100).ToString("D1");
-			}
-			// centiseconds
-			if ((int)format % 3 == 1) {
-				stamp += ((ms % 100) / 10).ToString("D1");
-			}
-			return stamp;
 		}
-
 	}
 }

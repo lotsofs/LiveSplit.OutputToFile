@@ -48,6 +48,12 @@
 			this.checkBoxAllCustomComparisons = new System.Windows.Forms.CheckBox();
 			this.checkedListBoxComparisons = new System.Windows.Forms.CheckedListBox();
 			this.labelComparisons = new System.Windows.Forms.Label();
+			this.groupBoxTimeFormat = new System.Windows.Forms.GroupBox();
+			this.labelTimeAccuracy = new System.Windows.Forms.Label();
+			this.comboBoxTimeAccuracy = new System.Windows.Forms.ComboBox();
+			this.labelDeltaAccuracy = new System.Windows.Forms.Label();
+			this.comboBoxDeltaAccuracy = new System.Windows.Forms.ComboBox();
+			this.labelTimers = new System.Windows.Forms.Label();
 			this.labelWriteError = new System.Windows.Forms.Label();
 			this.tableLayoutPanelTop.SuspendLayout();
 			this.groupBoxFolderPath.SuspendLayout();
@@ -55,6 +61,7 @@
 			this.groupBoxOutputSelection.SuspendLayout();
 			this.groupBoxSplitList.SuspendLayout();
 			this.groupBoxComparisons.SuspendLayout();
+			this.groupBoxTimeFormat.SuspendLayout();
 			this.tableLayoutPanelSplitList.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListAfter)).BeginInit();
@@ -69,14 +76,16 @@
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxOutputSelection, 0, 1);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxSplitList, 0, 2);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxComparisons, 0, 3);
-			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 4);
+			this.tableLayoutPanelTop.Controls.Add(this.groupBoxTimeFormat, 0, 4);
+			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 5);
 			this.tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanelTop.Name = "tableLayoutPanelTop";
-			this.tableLayoutPanelTop.RowCount = 5;
+			this.tableLayoutPanelTop.RowCount = 6;
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 51F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 74F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 77F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 166F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 549);
 			this.tableLayoutPanelTop.TabIndex = 0;
@@ -321,16 +330,96 @@
 			this.labelComparisons.TabIndex = 2;
 			this.labelComparisons.Text = "Current Comparison is always written. Each ticked comparison gets a folder too.";
 			//
+			// groupBoxTimeFormat
+			//
+			this.groupBoxTimeFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBoxTimeFormat.Controls.Add(this.labelTimeAccuracy);
+			this.groupBoxTimeFormat.Controls.Add(this.comboBoxTimeAccuracy);
+			this.groupBoxTimeFormat.Controls.Add(this.labelDeltaAccuracy);
+			this.groupBoxTimeFormat.Controls.Add(this.comboBoxDeltaAccuracy);
+			this.groupBoxTimeFormat.Controls.Add(this.labelTimers);
+			this.groupBoxTimeFormat.Location = new System.Drawing.Point(3, 371);
+			this.groupBoxTimeFormat.Name = "groupBoxTimeFormat";
+			this.groupBoxTimeFormat.Size = new System.Drawing.Size(448, 94);
+			this.groupBoxTimeFormat.TabIndex = 4;
+			this.groupBoxTimeFormat.TabStop = false;
+			this.groupBoxTimeFormat.Text = "Time Format";
+			//
+			// labelTimeAccuracy
+			//
+			this.labelTimeAccuracy.AutoSize = true;
+			this.labelTimeAccuracy.Location = new System.Drawing.Point(6, 22);
+			this.labelTimeAccuracy.Name = "labelTimeAccuracy";
+			this.labelTimeAccuracy.Size = new System.Drawing.Size(35, 13);
+			this.labelTimeAccuracy.TabIndex = 0;
+			this.labelTimeAccuracy.Text = "Times";
+			//
+			// comboBoxTimeAccuracy
+			//
+			this.comboBoxTimeAccuracy.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboBoxTimeAccuracy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxTimeAccuracy.FormattingEnabled = true;
+			this.comboBoxTimeAccuracy.Items.AddRange(new object[] {
+            "Flex (0:05, 0:00.4, 0:00.05)",
+            "Seconds (0:05)",
+            "Tenths (0:05.2)",
+            "Hundredths (0:05.23)",
+            "Milliseconds (0:05.234)"});
+			this.comboBoxTimeAccuracy.Location = new System.Drawing.Point(100, 19);
+			this.comboBoxTimeAccuracy.Name = "comboBoxTimeAccuracy";
+			this.comboBoxTimeAccuracy.Size = new System.Drawing.Size(342, 21);
+			this.comboBoxTimeAccuracy.TabIndex = 1;
+			this.comboBoxTimeAccuracy.SelectedIndexChanged += new System.EventHandler(this.comboBoxTimeAccuracy_SelectedIndexChanged);
+			//
+			// labelDeltaAccuracy
+			//
+			this.labelDeltaAccuracy.AutoSize = true;
+			this.labelDeltaAccuracy.Location = new System.Drawing.Point(6, 49);
+			this.labelDeltaAccuracy.Name = "labelDeltaAccuracy";
+			this.labelDeltaAccuracy.Size = new System.Drawing.Size(61, 13);
+			this.labelDeltaAccuracy.TabIndex = 2;
+			this.labelDeltaAccuracy.Text = "Differences";
+			//
+			// comboBoxDeltaAccuracy
+			//
+			this.comboBoxDeltaAccuracy.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboBoxDeltaAccuracy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxDeltaAccuracy.FormattingEnabled = true;
+			this.comboBoxDeltaAccuracy.Items.AddRange(new object[] {
+            "Flex (+5.2, +0.05)",
+            "Seconds (+5, +0)",
+            "Tenths (+5.2, +0.0)",
+            "Hundredths (+5.23, +0.05)",
+            "Milliseconds (+5.234, +0.052)"});
+			this.comboBoxDeltaAccuracy.Location = new System.Drawing.Point(100, 46);
+			this.comboBoxDeltaAccuracy.Name = "comboBoxDeltaAccuracy";
+			this.comboBoxDeltaAccuracy.Size = new System.Drawing.Size(342, 21);
+			this.comboBoxDeltaAccuracy.TabIndex = 3;
+			this.comboBoxDeltaAccuracy.SelectedIndexChanged += new System.EventHandler(this.comboBoxDeltaAccuracy_SelectedIndexChanged);
+			//
+			// labelTimers
+			//
+			this.labelTimers.AutoSize = true;
+			this.labelTimers.Location = new System.Drawing.Point(6, 73);
+			this.labelTimers.Name = "labelTimers";
+			this.labelTimers.Size = new System.Drawing.Size(175, 13);
+			this.labelTimers.TabIndex = 4;
+			this.labelTimers.Text = "Timers always show whole seconds.";
+			//
 			// labelWriteError
 			//
 			this.labelWriteError.AutoSize = true;
 			this.labelWriteError.ForeColor = System.Drawing.Color.Firebrick;
-			this.labelWriteError.Location = new System.Drawing.Point(3, 371);
+			this.labelWriteError.Location = new System.Drawing.Point(3, 471);
 			this.labelWriteError.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
 			this.labelWriteError.MaximumSize = new System.Drawing.Size(448, 0);
 			this.labelWriteError.Name = "labelWriteError";
 			this.labelWriteError.Size = new System.Drawing.Size(0, 13);
-			this.labelWriteError.TabIndex = 4;
+			this.labelWriteError.TabIndex = 5;
 			this.labelWriteError.Visible = false;
 			// 
 			// OutputToFileSettings
@@ -352,6 +441,8 @@
 			this.groupBoxSplitList.ResumeLayout(false);
 			this.groupBoxComparisons.ResumeLayout(false);
 			this.groupBoxComparisons.PerformLayout();
+			this.groupBoxTimeFormat.ResumeLayout(false);
+			this.groupBoxTimeFormat.PerformLayout();
 			this.tableLayoutPanelSplitList.ResumeLayout(false);
 			this.tableLayoutPanelSplitList.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).EndInit();
@@ -383,6 +474,12 @@
 		private System.Windows.Forms.CheckBox checkBoxAllCustomComparisons;
 		private System.Windows.Forms.CheckedListBox checkedListBoxComparisons;
 		private System.Windows.Forms.Label labelComparisons;
+		private System.Windows.Forms.GroupBox groupBoxTimeFormat;
+		private System.Windows.Forms.Label labelTimeAccuracy;
+		private System.Windows.Forms.ComboBox comboBoxTimeAccuracy;
+		private System.Windows.Forms.Label labelDeltaAccuracy;
+		private System.Windows.Forms.ComboBox comboBoxDeltaAccuracy;
+		private System.Windows.Forms.Label labelTimers;
 		private System.Windows.Forms.Label labelWriteError;
 	}
 }

@@ -182,6 +182,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Cache["OutputSplitList"] = Settings.OutputSplitList;
 			Cache["OutputSubsplits"] = Settings.OutputSubsplits;
 			Cache["OutputCompletedSplits"] = Settings.OutputCompletedSplits;
+			Cache["TimeAccuracy"] = Settings.TimeAccuracy;
+			Cache["DeltaAccuracy"] = Settings.DeltaAccuracy;
 			Cache["TimerPhase"] = state.CurrentPhase;
 			// Selecting a comparison raises no event
 			string comparison = state.CurrentComparison;

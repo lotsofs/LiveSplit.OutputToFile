@@ -92,6 +92,16 @@ Read in source only:
   - When it comes through the server, TimerForm regenerates on the server's thread while `Update()` may already be rewriting.
   - A layout loaded later subscribes after TimerForm.
 
+## Time formatters (verified)
+
+The component formats times and differences with `LiveSplit.TimeFormatters` in `LiveSplit.Core.dll` ([architecture.md](architecture.md#files)). Read in the source at `683cd60` (1.8.37), [GeneralTimeFormatter.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/TimeFormatters/GeneralTimeFormatter.cs). Each fact below was also checked headless on 2026-10-22, by formatting a table of values with the installed DLL.
+
+- `GeneralTimeFormatter.Format` truncates, through `TimeSpan.ToString` with `f`, `ff` or `fff`.
+- Negatives get `TimeFormatConstants.MINUS`, the Unicode minus `−` (U+2212), not `-`. Zero gets no sign, even with `ShowPlus`.
+- `TimeAccuracy` has Seconds, Tenths, Hundredths and Milliseconds.
+- `RegularTimeFormatter(accuracy)` shows minutes (`DigitsFormat.SingleDigitMinutes`): `0:05`, `1:02:05`. It writes a null as `0`, or `0.0` and so on (`NullFormat.ZeroWithAccuracy`), so the component sets `NullFormat.Dash` to get `-`.
+- `DeltaTimeFormatter` is Tenths, with `ShowPlus` and `DropDecimals`: no decimals from a minute on, whatever the accuracy (`+1:05`). Its nulls are `-`.
+
 ## `GraphicsCache` (verified)
 
 - The indexer setter sets `HasChanged` when the key is new or the value differs (by `Equals`, so boxed enums compare by value).

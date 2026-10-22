@@ -4,7 +4,7 @@ Settings UI and code tidying. None of these change output unless noted. The inde
 
 ## SCR — Settings tab scrolls for no reason
 
-The Output to File tab in Layout Settings has a vertical scrollbar, with nothing to scroll to below the Comparisons group. The settings control is 619 px tall, though its content ends at 365 px (measured headless 2026-10-22).
+The Output to File tab in Layout Settings has a vertical scrollbar, with nothing to scroll to below the Time Format group. The settings control is 619 px tall, though its content ends at 465 px (measured headless 2026-10-22).
 - The Designer gives the control `Size` 457 × 619, and `tableLayoutPanelTop` 454 × 549 ([OutputToFileSettings.Designer.cs](../UI/Components/OutputToFileSettings.Designer.cs)).
 - Both are `AutoSize` in the default `GrowOnly` mode, so they never shrink below that.
 - Release 6's control was 329 × 330, with no scrollbar. Release 7's is already 457 × 619 (measured headless 2026-10-21), so its users have the scrollbar too.

@@ -21,7 +21,7 @@ Code is referred to by member name. The table below says which file each class i
 | `UI/Components/SplitListFiles.cs` | Writer for `SplitList\` and `CompletedSplits\`. |
 | `UI/Components/Signs.cs` | The `Signs` enum, whose names are the `Sign.txt` values. |
 | `UI/Components/OutputToFileSettings.cs` (+ `.Designer.cs`, `.resx`) | The settings `UserControl` and its XML save/load. |
-| `UI/Components/TimeFormatter.cs` | Converts `TimeSpan?` to display strings. |
+| `UI/Components/TimeFormatter.cs` | Converts `TimeSpan?` to display strings with LiveSplit's formatters, at a `FormatAccuracy` (the enum is there too). The writers call it through `OutputWriter.DurationString` and `DeltaString`, which pass the Time Format settings; `TimerFiles` asks for whole seconds. |
 
 ## Lifecycle
 
@@ -49,7 +49,7 @@ Code is referred to by member name. The table below says which file each class i
 The cache keys in `Update()` are:
 - attempt count, game name, category name, platform name;
 - the `RunManuallyModified` count, the timer event count, the `Run` object (by reference);
-- `FolderPath`, `SplitsBefore`, `SplitsAfter`, the four `Output*` settings, `AllCustomComparisons` and `TickedComparisonsVersion`;
+- `FolderPath`, `SplitsBefore`, `SplitsAfter`, the four `Output*` settings, `AllCustomComparisons`, `TickedComparisonsVersion`, `TimeAccuracy` and `DeltaAccuracy`;
 - `CurrentPhase`, and `state.CurrentComparison`, since selecting a comparison raises no event;
 - for each comparison written, its time at the last split (`_comparisonChecks`). LiveSplit regenerates its generated comparisons without a timer event after a reset through the server and from its Settings dialog ([livesplit-notes.md](livesplit-notes.md#comparisons-read-in-source-partly-checked-headless)). Their cumulative times then change at the last split, so this key catches it.
 
