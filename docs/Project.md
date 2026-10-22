@@ -22,18 +22,6 @@ Not documented:
 
 **Docs.** README. output-files.md's opening note that the README is incomplete.
 
-## GTT — README's GameTime timer list is incomplete
-
-Under `Timers\GameTime`, the tree lists only `SegmentTimer_AllSplits.txt`, but the code writes every level for both timing methods.
-
-**Evidence.** Read.
-
-**Plan.** List the same files under `GameTime` as under `RealTime`.
-
-**Verify.** The tree matches a run with subsplits.
-
-**Docs.** README.
-
 ## UPD — Update prompt not yet seen in LiveSplit
 
 LiveSplit's startup update check is wired up, but it has only been checked headless. The feed parsing, the version comparison and the install were tested against the installed `UpdateManager.dll`, with local feeds and `file://` downloads. The prompt, the restart and a download from a real GitHub release haven't been seen in LiveSplit. `update.xml` stays empty until release 8 is published, so this can't be checked before then.

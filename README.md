@@ -333,6 +333,9 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
     +---GameTime
     |       RunTimer.txt
     |       SegmentTimer_AllSplits.txt
+    |       SegmentTimer_SansSubsplits.txt
+    |       SegmentTimer_SansSubsplits_Level2.txt
+    |       SegmentTimer_SansSubsplits_Level3.txt
     |       
     \---RealTime
             RunTimer.txt

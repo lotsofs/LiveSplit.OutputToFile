@@ -1,6 +1,6 @@
 # Output files
 
-Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 166 files with every output on and no comparison ticked. The README's tree is incomplete ([DOC](Project.md#doc--readme-is-missing-outputs-and-settings), [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete)).
+Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 166 files with every output on and no comparison ticked. The README's tree is incomplete ([DOC](Project.md#doc--readme-is-missing-outputs-and-settings)).
 
 How to read the paths:
 
