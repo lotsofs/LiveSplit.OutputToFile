@@ -1,0 +1,1561 @@
+=== Before the start
+AttemptCount.txt
+  |0
+CategoryName.txt
+  |Any%
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |(empty)
+CompletedSplits\AllSplits\Names.txt
+  |(empty)
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |(empty)
+CompletedSplits\AllSplits\Names_Raw.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Delta_Run.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Delta_Segment.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_AheadGained.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_AheadLost.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_BehindGained.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_BehindLost.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Delta_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Highlight_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Time_Run_Current.txt
+  |(empty)
+CurrentComparison.txt
+  |Personal Best
+CurrentSplit\AllSplits\After.txt
+  |-
+CurrentSplit\AllSplits\Completed.txt
+  |0
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |-
+CurrentSplit\AllSplits\GameTime\Current Comparison\SegmentTime.txt
+  |-
+CurrentSplit\AllSplits\GameTime\GoldTime.txt
+  |-
+CurrentSplit\AllSplits\Name.txt
+  |-
+CurrentSplit\AllSplits\Name_Raw.txt
+  |-
+CurrentSplit\AllSplits\Number.txt
+  |-
+CurrentSplit\AllSplits\RealTime\Current Comparison\RunTime.txt
+  |(real time)
+CurrentSplit\AllSplits\RealTime\Current Comparison\SegmentTime.txt
+  |(real time)
+CurrentSplit\AllSplits\RealTime\GoldTime.txt
+  |(real time)
+CurrentSplit\AllSplits\Remaining.txt
+  |5
+FinishedRunsCount.txt
+  |0
+GameName.txt
+  |(empty)
+PlatformName.txt
+  |(empty)
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |NotApplicable
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |-
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |-
+PreviousSplit\AllSplits\Name.txt
+  |-
+PreviousSplit\AllSplits\Name_Raw.txt
+  |-
+PreviousSplit\AllSplits\RealTime\Current Comparison\RunDifference.txt
+  |(real time)
+PreviousSplit\AllSplits\RealTime\Current Comparison\SegmentDifference.txt
+  |(real time)
+PreviousSplit\AllSplits\RealTime\Current Comparison\Sign.txt
+  |(real time)
+PreviousSplit\AllSplits\RealTime\GoldDifference.txt
+  |(real time)
+PreviousSplit\AllSplits\RealTime\RunTime.txt
+  |(real time)
+PreviousSplit\AllSplits\RealTime\SegmentTime.txt
+  |(real time)
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |0:10
+  |0:20
+  |0:30
+  |0:40
+  |0:50
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |0:10
+  |0:10
+  |0:10
+  |0:10
+  |0:10
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |0:09
+  |0:09
+  |0:09
+  |0:09
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\Names.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |B2
+  |
+SplitList\AllSplits\Names_Indent_0.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |B2
+  |
+SplitList\AllSplits\Names_Raw.txt
+  |-A1
+  |-A2
+  |{Area A}A3
+  |-B1
+  |{Area B}B2
+  |
+SplitList\AllSplits\RealTime\Current Comparison\Delta_Run.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Current Comparison\Delta_Segment.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Current Comparison\Highlight_AheadGained.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Current Comparison\Highlight_AheadLost.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Current Comparison\Highlight_BehindGained.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Current Comparison\Highlight_BehindLost.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Current Comparison\Time_Run_Upcoming.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Current Comparison\Time_Segment_Upcoming.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Delta_Gold.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Highlight_Gold.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Time_Gold_Upcoming.txt
+  |(real time)
+SplitList\AllSplits\RealTime\Time_Run_Current.txt
+  |(real time)
+Timers\GameTime\RunTimer.txt
+  |-
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |-
+Timers\RealTime\RunTimer.txt
+  |(real time)
+Timers\RealTime\SegmentTimer_AllSplits.txt
+  |(real time)
+TotalSplits_AllSplits.txt
+  |5
+=== Start
+AttemptCount.txt
+  |1
+CurrentSplit\AllSplits\After.txt
+  |4
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |0:10
+CurrentSplit\AllSplits\GameTime\Current Comparison\SegmentTime.txt
+  |0:10
+CurrentSplit\AllSplits\GameTime\GoldTime.txt
+  |0:09
+CurrentSplit\AllSplits\Name.txt
+  |A1
+CurrentSplit\AllSplits\Name_Raw.txt
+  |-A1
+CurrentSplit\AllSplits\Number.txt
+  |1
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |
+  |
+Timers\GameTime\RunTimer.txt
+  |0:00
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:00
+=== At 5
+Timers\GameTime\RunTimer.txt
+  |0:05
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:05
+=== A1 at 9.5, gaining time
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |
+CompletedSplits\AllSplits\Names.txt
+  |A1
+  |
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |A1
+  |
+CompletedSplits\AllSplits\Names_Raw.txt
+  |-A1
+  |
+CompletedSplits\AllSplits\RealTime\Current Comparison\Delta_Run.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Delta_Segment.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_AheadGained.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_AheadLost.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_BehindGained.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_BehindLost.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Delta_Gold.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Highlight_Gold.txt
+  |(real time)
+CompletedSplits\AllSplits\RealTime\Time_Run_Current.txt
+  |(real time)
+CurrentSplit\AllSplits\After.txt
+  |3
+CurrentSplit\AllSplits\Completed.txt
+  |1
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |0:20
+CurrentSplit\AllSplits\Name.txt
+  |A2
+CurrentSplit\AllSplits\Name_Raw.txt
+  |-A2
+CurrentSplit\AllSplits\Number.txt
+  |2
+CurrentSplit\AllSplits\Remaining.txt
+  |4
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |−0.5
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |−0.5
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |GainedAhead
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |+0.5
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |0:09
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |0:09
+PreviousSplit\AllSplits\Name.txt
+  |A1
+PreviousSplit\AllSplits\Name_Raw.txt
+  |-A1
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |
+  |0:20
+  |0:30
+  |0:40
+  |0:50
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |
+  |0:10
+  |0:10
+  |0:10
+  |0:10
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |
+  |0:09
+  |0:09
+  |0:09
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |
+Timers\GameTime\RunTimer.txt
+  |0:09
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:00
+=== A2 at 21, losing time
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |███████████████████████████████████████████
+  |
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |
+CompletedSplits\AllSplits\Names.txt
+  |A1
+  |A2
+  |
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |A1
+  |A2
+  |
+CompletedSplits\AllSplits\Names_Raw.txt
+  |-A1
+  |-A2
+  |
+CurrentSplit\AllSplits\After.txt
+  |2
+CurrentSplit\AllSplits\Completed.txt
+  |2
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |0:30
+CurrentSplit\AllSplits\Name.txt
+  |A3
+CurrentSplit\AllSplits\Name_Raw.txt
+  |{Area A}A3
+CurrentSplit\AllSplits\Number.txt
+  |3
+CurrentSplit\AllSplits\Remaining.txt
+  |3
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |+1.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |+1.5
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |LostBehind
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |+2.5
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |0:21
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |0:11
+PreviousSplit\AllSplits\Name.txt
+  |A2
+PreviousSplit\AllSplits\Name_Raw.txt
+  |-A2
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |
+  |
+  |0:30
+  |0:40
+  |0:50
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |
+  |
+  |0:10
+  |0:10
+  |0:10
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |
+  |
+  |0:09
+  |0:09
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |
+  |
+  |
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+Timers\GameTime\RunTimer.txt
+  |0:21
+=== A3 at 28, a gold
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |███████████████████████████████████████████
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |███████████████████████████████████████████
+  |
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |
+CompletedSplits\AllSplits\Names.txt
+  |A1
+  |A2
+  |A3
+  |
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |A1
+  |A2
+  |A3
+  |
+CompletedSplits\AllSplits\Names_Raw.txt
+  |-A1
+  |-A2
+  |{Area A}A3
+  |
+CurrentSplit\AllSplits\After.txt
+  |1
+CurrentSplit\AllSplits\Completed.txt
+  |3
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |0:40
+CurrentSplit\AllSplits\Name.txt
+  |B1
+CurrentSplit\AllSplits\Name_Raw.txt
+  |-B1
+CurrentSplit\AllSplits\Number.txt
+  |4
+CurrentSplit\AllSplits\Remaining.txt
+  |2
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |−2.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |−3.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |GoldAhead
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |−2.0
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |0:28
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |0:07
+PreviousSplit\AllSplits\Name.txt
+  |A3
+PreviousSplit\AllSplits\Name_Raw.txt
+  |{Area A}A3
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |
+  |
+  |
+  |0:40
+  |0:50
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |
+  |
+  |
+  |0:10
+  |0:10
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |
+  |
+  |
+  |0:09
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |
+  |
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+Timers\GameTime\RunTimer.txt
+  |0:28
+=== At 33.2
+Timers\GameTime\RunTimer.txt
+  |0:33
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:05
+=== Skip B1
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |-
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |-
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |-
+  |
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |-
+  |
+CompletedSplits\AllSplits\Names.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |
+CompletedSplits\AllSplits\Names_Raw.txt
+  |-A1
+  |-A2
+  |{Area A}A3
+  |-B1
+  |
+CurrentSplit\AllSplits\After.txt
+  |0
+CurrentSplit\AllSplits\Completed.txt
+  |4
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |0:50
+CurrentSplit\AllSplits\Name.txt
+  |B2
+CurrentSplit\AllSplits\Name_Raw.txt
+  |{Area B}B2
+CurrentSplit\AllSplits\Number.txt
+  |5
+CurrentSplit\AllSplits\Remaining.txt
+  |1
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |NotApplicable
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |-
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |-
+PreviousSplit\AllSplits\Name.txt
+  |B1
+PreviousSplit\AllSplits\Name_Raw.txt
+  |-B1
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |-
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |-
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |
+  |
+  |
+  |
+  |0:50
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |
+  |
+  |
+  |
+  |0:10
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |-
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |
+  |
+  |
+  |
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |-
+  |
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |-
+=== Undo the skip
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |███████████████████████████████████████████
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |███████████████████████████████████████████
+  |
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |
+CompletedSplits\AllSplits\Names.txt
+  |A1
+  |A2
+  |A3
+  |
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |A1
+  |A2
+  |A3
+  |
+CompletedSplits\AllSplits\Names_Raw.txt
+  |-A1
+  |-A2
+  |{Area A}A3
+  |
+CurrentSplit\AllSplits\After.txt
+  |1
+CurrentSplit\AllSplits\Completed.txt
+  |3
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |0:40
+CurrentSplit\AllSplits\Name.txt
+  |B1
+CurrentSplit\AllSplits\Name_Raw.txt
+  |-B1
+CurrentSplit\AllSplits\Number.txt
+  |4
+CurrentSplit\AllSplits\Remaining.txt
+  |2
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |−2.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |−3.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |GoldAhead
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |−2.0
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |0:28
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |0:07
+PreviousSplit\AllSplits\Name.txt
+  |A3
+PreviousSplit\AllSplits\Name_Raw.txt
+  |{Area A}A3
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |
+  |
+  |
+  |0:40
+  |0:50
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |
+  |
+  |
+  |0:10
+  |0:10
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |
+  |
+  |
+  |0:09
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |
+  |
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:05
+=== B1 at 39
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |−1.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |+1.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |+2.0
+  |
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |0:39
+  |
+CompletedSplits\AllSplits\Names.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |
+CompletedSplits\AllSplits\Names_Raw.txt
+  |-A1
+  |-A2
+  |{Area A}A3
+  |-B1
+  |
+CurrentSplit\AllSplits\After.txt
+  |0
+CurrentSplit\AllSplits\Completed.txt
+  |4
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |0:50
+CurrentSplit\AllSplits\Name.txt
+  |B2
+CurrentSplit\AllSplits\Name_Raw.txt
+  |{Area B}B2
+CurrentSplit\AllSplits\Number.txt
+  |5
+CurrentSplit\AllSplits\Remaining.txt
+  |1
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |−1.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |+1.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |LostAhead
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |+2.0
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |0:39
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |0:11
+PreviousSplit\AllSplits\Name.txt
+  |B1
+PreviousSplit\AllSplits\Name_Raw.txt
+  |-B1
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |−1.0
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |+1.0
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |
+  |
+  |
+  |
+  |0:50
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |
+  |
+  |
+  |
+  |0:10
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |+2.0
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |
+  |
+  |
+  |
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |0:39
+  |
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+Timers\GameTime\RunTimer.txt
+  |0:39
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:00
+=== Pause at 42
+Timers\GameTime\RunTimer.txt
+  |0:42
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:03
+=== Resume
+=== B2 at 48, the finish
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |−1.0
+  |−2.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |+1.0
+  |−1.0
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |
+  |
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |+2.0
+  |0.00
+  |
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |███████████████████████████████████████████
+  |
+  |
+  |
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |0:39
+  |0:48
+  |
+CompletedSplits\AllSplits\Names.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |B2
+  |
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |A1
+  |A2
+  |A3
+  |B1
+  |B2
+  |
+CompletedSplits\AllSplits\Names_Raw.txt
+  |-A1
+  |-A2
+  |{Area A}A3
+  |-B1
+  |{Area B}B2
+  |
+CurrentSplit\AllSplits\After.txt
+  |-
+CurrentSplit\AllSplits\Completed.txt
+  |5
+CurrentSplit\AllSplits\GameTime\Current Comparison\RunTime.txt
+  |-
+CurrentSplit\AllSplits\GameTime\Current Comparison\SegmentTime.txt
+  |-
+CurrentSplit\AllSplits\GameTime\GoldTime.txt
+  |-
+CurrentSplit\AllSplits\Name.txt
+  |-
+CurrentSplit\AllSplits\Name_Raw.txt
+  |-
+CurrentSplit\AllSplits\Number.txt
+  |-
+CurrentSplit\AllSplits\Remaining.txt
+  |0
+FinishedRunsCount.txt
+  |1
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |−2.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |−1.0
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |FinishedGainedAhead
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |0.00
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |0:48
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |0:09
+PreviousSplit\AllSplits\Name.txt
+  |B2
+PreviousSplit\AllSplits\Name_Raw.txt
+  |{Area B}B2
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |−0.5
+  |+1.0
+  |−2.0
+  |−1.0
+  |−2.0
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |−0.5
+  |+1.5
+  |−3.0
+  |+1.0
+  |−1.0
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |███████████████████████████████████████████
+  |
+  |
+  |
+  |███████████████████████████████████████████
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |+0.5
+  |+2.5
+  |−2.0
+  |+2.0
+  |0.00
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |0:09
+  |0:21
+  |0:28
+  |0:39
+  |0:48
+  |
+SplitList\AllSplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |
+  |
+  |
+  |
+Timers\GameTime\RunTimer.txt
+  |0:48
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:09
+=== Reset
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindGained.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Delta_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Highlight_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\GameTime\Time_Run_Current.txt
+  |(empty)
+CompletedSplits\AllSplits\Names.txt
+  |(empty)
+CompletedSplits\AllSplits\Names_Indent_0.txt
+  |(empty)
+CompletedSplits\AllSplits\Names_Raw.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Delta_Run.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Delta_Segment.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_AheadGained.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_AheadLost.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_BehindGained.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Current Comparison\Highlight_BehindLost.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Delta_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Highlight_Gold.txt
+  |(empty)
+CompletedSplits\AllSplits\RealTime\Time_Run_Current.txt
+  |(empty)
+CurrentSplit\AllSplits\Completed.txt
+  |0
+CurrentSplit\AllSplits\Remaining.txt
+  |5
+PreviousSplit\AllSplits\GameTime\Current Comparison\RunDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\Current Comparison\SegmentDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt
+  |NotApplicable
+PreviousSplit\AllSplits\GameTime\GoldDifference.txt
+  |-
+PreviousSplit\AllSplits\GameTime\RunTime.txt
+  |-
+PreviousSplit\AllSplits\GameTime\SegmentTime.txt
+  |-
+PreviousSplit\AllSplits\Name.txt
+  |-
+PreviousSplit\AllSplits\Name_Raw.txt
+  |-
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Delta_Segment.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_AheadGained.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_AheadLost.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Highlight_BehindLost.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt
+  |0:09
+  |0:21
+  |0:28
+  |0:39
+  |0:48
+  |
+SplitList\AllSplits\GameTime\Current Comparison\Time_Segment_Upcoming.txt
+  |0:09
+  |0:11
+  |0:07
+  |0:11
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Delta_Gold.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Highlight_Gold.txt
+  |
+  |
+  |
+  |
+  |
+  |
+SplitList\AllSplits\GameTime\Time_Gold_Upcoming.txt
+  |0:09
+  |0:09
+  |0:07
+  |0:09
+  |0:09
+  |
+SplitList\AllSplits\GameTime\Time_Run_Current.txt
+  |
+  |
+  |
+  |
+  |
+  |
+Timers\GameTime\RunTimer.txt
+  |0:00
+Timers\GameTime\SegmentTimer_AllSplits.txt
+  |0:00

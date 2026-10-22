@@ -5,6 +5,9 @@
 
 *.lnk
 
+# Output of a test whose snapshot differs, next to the snapshot in Tests\Snapshots
+*.received.txt
+
 # User-specific files
 *.rsuser
 *.suo

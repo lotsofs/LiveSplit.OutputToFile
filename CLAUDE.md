@@ -17,7 +17,7 @@ Read the doc that matches the task before editing:
 | [docs/architecture.md](docs/architecture.md) | How it works: event flow, subsplit levels (with a worked example), the per-level arrays, phase-dependent indexes, how each value is calculated, file writing, settings |
 | [docs/output-files.md](docs/output-files.md) | Every output file, its contents in each timer phase, and the `Sign.txt` values and time formats. More complete and accurate than the README tree. |
 | [docs/livesplit-notes.md](docs/livesplit-notes.md) | LiveSplit behavior the code relies on: event order, when PB and best segments update, `GraphicsCache`. Each fact is marked verified or not. |
-| [docs/testing.md](docs/testing.md) | Testing in LiveSplit by hand, or headless with a copy-paste test program, plus regression checks for the known bugs |
+| [docs/testing.md](docs/testing.md) | The tests in `Tests\`: running them, their snapshots, adding one. Testing in LiveSplit by hand, or headless from code, and the checks too long to be tests |
 | [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
 | [docs/DONE.md](docs/DONE.md) | Log of finished TODO items: what was done and when, newest first |
 | [docs/releasing.md](docs/releasing.md) | Cutting a release, and the rules of `update.xml`, the feed through which LiveSplit offers it to users |
@@ -30,24 +30,25 @@ The docs refer to code by member name and file, not by line number. When a chang
 ## Build / deploy
 
 ```sh
-dotnet build LiveSplit.OutputToFile.sln -c Debug      # or -c Release; add -p:LiveSplitDir=<folder> for another LiveSplit
-deploy.cmd                                            # build, then copy into LiveSplit's Components folder; deploy.cmd Release for Release
+dotnet build LiveSplit.OutputToFile.sln -c Debug      # the component and the tests; or -c Release; add -p:LiveSplitDir=<folder> for another LiveSplit
+dotnet test LiveSplit.OutputToFile.sln                # build, then run the tests in Tests\
+deploy.cmd                                            # build the component, then copy it into LiveSplit's Components folder; deploy.cmd Release for Release
 ```
 
-- `deploy.cmd` refuses to run while LiveSplit is running, builds, and copies `bin\<config>\LiveSplit.OutputToFile.dll` only if the build succeeded. It copies into `Components\` in the `LiveSplitDir` folder (below), and builds against the same folder.
+- `deploy.cmd` refuses to run while LiveSplit is running, builds the component (not the tests), and copies `bin\<config>\LiveSplit.OutputToFile.dll` only if the build succeeded. It copies into `Components\` in the `LiveSplitDir` folder (below), and builds against the same folder.
   - It's a batch file because PowerShell scripts are disabled on this machine. It runs from PowerShell (`.\deploy`), cmd or Git Bash (`cmd //c deploy.cmd`).
   - It calls Windows' `findstr.exe` by full path, because Git's `find` can shadow Windows' and would make the LiveSplit check pass silently.
 
 - This is an old-style (non-SDK) csproj. `dotnet build` works without Visual Studio as long as the .NET Framework 4.8.1 targeting pack (the 4.8.1 Developer Pack) is installed. The build has no warnings, so any warning is new.
 - It targets 4.8.1 because LiveSplit does from 1.8.30. With a lower target, MSBuild won't resolve the LiveSplit DLLs (MSB3274), and the build fails with missing `LiveSplit.Model` types.
-- Without the Developer Pack, the build can use the NuGet reference assemblies instead. Any SDK-style net481 build, such as the testing.md harness, puts them in the NuGet cache. Then pass `-p:TargetFrameworkRootPath=<NuGet cache>/microsoft.netframework.referenceassemblies.net481/<version>/build/`.
-- Old-style also means the csproj lists every source file. A new `.cs` file needs its own `<Compile Include>` line, or it isn't built. Put it in `namespace LiveSplit.UI.Components.OutputToFile`, like every other file. That namespace sees LiveSplit's `LiveSplit.UI.Components` and `LiveSplit.UI` without a `using`.
+- Without the Developer Pack, the build can use the NuGet reference assemblies instead. Any SDK-style net481 build, such as the test project's, puts them in the NuGet cache. Then pass `-p:TargetFrameworkRootPath=<NuGet cache>/microsoft.netframework.referenceassemblies.net481/<version>/build/`.
+- Old-style also means the csproj lists every source file. A new `.cs` file needs its own `<Compile Include>` line, or it isn't built. The test project, `Tests\LiveSplit.OutputToFile.Tests.csproj`, is SDK-style and builds every file in `Tests\`. Put it in `namespace LiveSplit.UI.Components.OutputToFile`, like every other file. That namespace sees LiveSplit's `LiveSplit.UI.Components` and `LiveSplit.UI` without a `using`.
 - `LiveSplit.Core.dll` and `UpdateManager.dll` are referenced from the folder in the `LiveSplitDir` property. It defaults to `..\..\Programs\Streaming\LiveSplit` from the repo, which is `D:\Programs\Streaming\LiveSplit`. The build fails if LiveSplit isn't there.
   - For another folder, pass `-p:LiveSplitDir=<folder>`, or set a `LiveSplitDir` environment variable, which MSBuild reads as the property. `deploy.cmd` reads only the environment variable.
   - Give a full path without a trailing backslash: in `-p:LiveSplitDir="C:\x\"`, the backslash escapes the closing quote.
-  - Both references are `<Private>False</Private>`, so the build doesn't copy LiveSplit's DLLs into `bin\`, and `bin\<config>` holds only the component's DLL and PDB. Give any new reference to a LiveSplit DLL the same.
+  - Both references are `<Private>False</Private>`, so the build doesn't copy LiveSplit's DLLs into `bin\`, and `bin\<config>` holds only the component's DLL and PDB. Give any new reference to a LiveSplit DLL the same. The test project references both itself, copied into its own `bin\`, because the tests run outside LiveSplit.
 - Deploying overwrites the DLL that LiveSplit actually loads. LiveSplit must be closed first, because it locks that DLL. `LiveSplitComponents.lnk` in the repo root is a gitignored shortcut to the `Components` folder. That folder also holds the user's `.backup` copies of older builds; leave them alone.
-- There are no tests and no linter. Verify changes headless (see docs/testing.md), or in LiveSplit.
+- Run the tests after every change: `dotnet test LiveSplit.OutputToFile.sln`. A change that alters the output updates the snapshots in `Tests\Snapshots\` in the same change, and a fixed bug gets a test (see docs/testing.md). Check what the tests can't in LiveSplit, or headless. There is no linter.
 
 ## Must-know before editing
 
@@ -83,7 +84,7 @@ The code is in `UI/Components/`:
   - A handler that throws on the server's thread closes LiveSplit.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own check, `HasTimerChanged`, on what each timer file shows and the timer phase. It caches each level's segment start; anything new that moves a split time or rebuilds the levels must call `SegmentStartsChanged()`.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag, `{3}` comparison folder). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
-  - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. A reset clears that record, in the next `Update()`. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
+  - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. A reset clears that record, in the next `Update()`. Anything that reads the files must call `WaitForFileWrites()` first; the tests' `TestRun.Tick()` does.
   - A full rewrite in `Update()` must queue every file the settings and levels call for, whatever the phase. `FileQueue.EndSweep` empties any file in the component's folders (`OUTPUT_FOLDERS`, plus root files matching `OUTPUT_ROOT_FILES`) that wasn't queued, so a file written in only some phases would be emptied in the others.
   - The drain catches every exception per file, and `Update()` shows the latest in the settings panel (`ShowWriteError`). Only touch the settings control from the UI thread. Don't add file access that bypasses `FileQueue`: an exception would escape into LiveSplit's `Update()`.
 - **One list writer.** `SplitList\` and `CompletedSplits\` are both written by `WriteSplitListLevel` in `SplitListFiles`. They differ in the range of splits that `WriteSplitLists` passes in, and in `upcoming`: `CompletedSplits\` has no current or upcoming lines, so it leaves out the files only those fill. Their `FILE_LIST_*` templates are relative to the list folder, so prefix `FOLDER_SPLITLIST` or `FOLDER_COMPLETEDSPLITS`. A `ListLines` builds every file of one list a line at a time, so each file gets one line per split, blank where it has nothing.
@@ -96,6 +97,7 @@ The code is in `UI/Components/`:
 3. If it's a list column, make it a `FILE_LIST_*` template and give it a `StringBuilder` field: in `ListLines`, created with `Add` in its constructor, or in `ComparisonLines` with `add` if it depends on the comparison. Append its line in `AppendNames`, `AppendCompletedLine` or `AppendUpcomingLine`. Both lists then get it, except a file that only `AppendUpcomingLine` fills: `Add` that one inside `if (upcoming)`, so only `SplitList\` gets it.
 4. Write it once per timing method only if its path contains `{0}`.
 5. Document it in `docs/output-files.md`, `README.md` and `CHANGELOG.md`.
+6. Update the test snapshots (docs/testing.md), and check in their diff that the file shows up with the contents you expect.
 
 A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels` and `_files`, and call it from `WriteSplits()` or `Update()`. Add the folder to `OUTPUT_FOLDERS`, so its files are emptied when they're no longer written.
 

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using LiveSplit.UI.Components;
 using LiveSplit.UI.Components.OutputToFile;
@@ -27,3 +28,5 @@ using LiveSplit.UI.Components.OutputToFile;
 [assembly: AssemblyVersion("8.0")]
 [assembly: AssemblyFileVersion("8.0")]
 [assembly: ComponentFactory(typeof(OutputToFileFactory))]
+// The tests in Tests\ use the internal classes directly
+[assembly: InternalsVisibleTo("LiveSplit.OutputToFile.Tests")]

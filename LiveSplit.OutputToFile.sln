@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveSplit.OutputToFile", "LiveSplit.OutputToFile.csproj", "{BF2E08E6-8BED-4773-B03A-23214D25144F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveSplit.OutputToFile.Tests", "Tests\LiveSplit.OutputToFile.Tests.csproj", "{6A43366F-53AC-489D-B043-EE5E4D74FE26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BF2E08E6-8BED-4773-B03A-23214D25144F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF2E08E6-8BED-4773-B03A-23214D25144F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF2E08E6-8BED-4773-B03A-23214D25144F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A43366F-53AC-489D-B043-EE5E4D74FE26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A43366F-53AC-489D-B043-EE5E4D74FE26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A43366F-53AC-489D-B043-EE5E4D74FE26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A43366F-53AC-489D-B043-EE5E4D74FE26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

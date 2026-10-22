@@ -20,7 +20,8 @@ if not exist "%COMPONENTS%\" (
 	exit /b 1
 )
 
-dotnet build "%~dp0LiveSplit.OutputToFile.sln" -c %CONFIG%
+rem The project, not the solution: the tests in Tests\ aren't needed to deploy
+dotnet build "%~dp0LiveSplit.OutputToFile.csproj" -c %CONFIG%
 if errorlevel 1 exit /b 1
 
 copy /Y "%~dp0bin\%CONFIG%\LiveSplit.OutputToFile.dll" "%COMPONENTS%\" >nul

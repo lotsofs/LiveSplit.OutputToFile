@@ -1,14 +1,57 @@
 # Testing changes
 
-There is no test project. A change can be checked in two ways: in LiveSplit by hand, or headless by driving the built DLL from a small console program. The headless way is faster, gives exact times, and is how every bug in [TODO.md](TODO.md) marked "reproduced" was found.
+The tests in `Tests\` drive the built component headless, the way LiveSplit does, and read back the files it writes. Run them after every change. What they can't check is checked by hand: in LiveSplit, or headless with a temporary test or program. Driving the DLL headless is also how every bug in [TODO.md](TODO.md) marked "reproduced" was found.
 
-## Build
+## Build and run the tests
 
 ```sh
-dotnet build LiveSplit.OutputToFile.sln -c Debug
+dotnet build LiveSplit.OutputToFile.sln -c Debug   # the component and the tests
+dotnet test LiveSplit.OutputToFile.sln             # builds first, then runs every test, in about 10 s
 ```
 
-The build has no warnings, so any warning is new. It needs the .NET Framework 4.8.1 targeting pack (see CLAUDE.md).
+- The build has no warnings, so any warning is new. The component needs the .NET Framework 4.8.1 targeting pack (see CLAUDE.md). The test project is SDK-style and gets the reference assemblies from NuGet.
+- The test project builds the component through a project reference, so `dotnet test` always tests the current code. With `--no-build`, it tests whatever was built last.
+- Like the component, it takes LiveSplit's folder from `LiveSplitDir`. It references `LiveSplit.Core.dll` and `UpdateManager.dll` itself, copied into its `bin\`, because the component's build doesn't copy them.
+- Its packages (xunit, the test SDK) restore from the NuGet cache, so the build works offline once they're there.
+- `deploy.cmd` builds only the component, not the tests.
+
+## The tests
+
+Each test plays a run through LiveSplit's `TimerModel`, lets the component write its files into a new folder in `%TEMP%`, and checks them. Tests don't run in parallel: LiveSplit calls the component from one thread.
+
+| File | Holds |
+|---|---|
+| `TestRun.cs` | `TestRun`, which every test uses: it builds a run, the timer and the component with every output on, and plays it (`Start`, `Split(s)`, `Skip`, `Undo`, `Pause`, `Reset`, `PlayAttempt`, `Edit`, `SelectComparison`). Each action is followed by `Tick()`, one LiveSplit frame that waits for the writes. `Read`, `Lines` and `Exists` read the files. |
+| `Snapshot.cs` | Records a run's whole output, step by step, and compares it with `Snapshots\{name}.txt` |
+| `SnapshotTests.cs` | Whole runs through every phase: [the base run](#the-base-run), the same without subsplits, and a run with a segment history and a second comparison |
+| `*Tests.cs` | Tests of one value or behaviour each, named after what they check, grouped by output folder or class |
+
+The tests use the internal classes directly (`TimeFormatter`, `FileQueue`, `SplitLevels`): `AssemblyInfo.cs` makes them visible to the test project. The test project is SDK-style, so a new file is built without being added to the csproj.
+
+### Snapshots
+
+A snapshot lists, for each step of a run, every file whose contents changed since the step before; the first step lists every file. Each line of a file's contents is shown after `  |`, so a list file's final `\n` shows as a last empty line. `RealTime` files show only `(real time)` or `(empty)`, since real time drifts.
+
+When the output differs, the test fails with the first differing line, its step and file, and writes the whole output to `Snapshots\{name}.received.txt` (gitignored). If the change is intended:
+
+```sh
+UPDATE_SNAPSHOTS=1 dotnet test LiveSplit.OutputToFile.sln   # PowerShell: $env:UPDATE_SNAPSHOTS=1; dotnet test …; Remove-Item Env:UPDATE_SNAPSHOTS
+```
+
+This writes the snapshots instead of comparing them. Then read the snapshots' git diff: it shows exactly which files changed, at which step. A change that alters the output updates the snapshots in the same change.
+
+### Adding a test
+
+- A fixed bug gets a test that fails without the fix. Check that it does, by undoing the fix once.
+- Work out the expected values from [output-files.md](output-files.md) first, then run. When a test fails, find out why; don't copy in what the code writes.
+- A test for an open item in [Defects.md](Defects.md) asserts the correct output and is skipped until the item is fixed: `[Fact(Skip = "CODE: what's wrong")]`. Fixing the item removes the `Skip`.
+- Expected strings use LiveSplit's minus sign `−` (U+2212) for negatives.
+
+### The base run
+
+`TestRun.Base()`: `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. `PlayBaseRun()` splits at 9.5, 21, 28, 39 and 48 s of game time. With every output on and no comparison ticked, it produces 166 files.
+
+The base run has no segment history. So in `SansSubsplits`, `Area A` and `Area B`, which span several splits, have no best segment: their gold files show `-`, and completing them counts as a gold.
 
 ## In LiveSplit
 
@@ -42,103 +85,18 @@ A small UI Automation program (references `UIAutomationClient`, `UIAutomationTyp
 
 ## Headless
 
-A .NET Framework 4.8.1 console app that references `LiveSplit.Core.dll` and the built component. It builds a `Run`, drives it through `TimerModel`, calls `Update()` to stand in for LiveSplit's frames, and reads the files back. Keep it outside the repo, for example in a scratch folder.
+Driving the built component from code, as the tests do: build a `Run`, drive it through `TimerModel`, call `Update()` to stand in for LiveSplit's frames, and read the files back. `TestRun` in `Tests\TestRun.cs` does all of this, and shows how to set up `LiveSplitState` outside LiveSplit.
 
-`Harness.csproj`:
-
-```xml
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net481</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <LiveSplitDir Condition=" '$(LiveSplitDir)' == '' ">D:\Programs\Streaming\LiveSplit</LiveSplitDir>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="LiveSplit.Core"><HintPath>$(LiveSplitDir)\LiveSplit.Core.dll</HintPath></Reference>
-    <Reference Include="UpdateManager"><HintPath>$(LiveSplitDir)\UpdateManager.dll</HintPath></Reference>
-    <Reference Include="LiveSplit.OutputToFile"><HintPath>D:\Repositories\LiveSplit.OutputToFile\bin\Debug\LiveSplit.OutputToFile.dll</HintPath></Reference>
-  </ItemGroup>
-</Project>
-```
-
-It takes LiveSplit's folder from `LiveSplitDir`, like the component (see CLAUDE.md). The component's HintPath points at this clone's `bin\Debug`.
-
-`Program.cs`:
-
-```csharp
-using System;
-using System.IO;
-using LiveSplit.Model;
-using LiveSplit.Model.Comparisons;
-using LiveSplit.Options.SettingsFactories;
-using LiveSplit.UI;
-using LiveSplit.UI.Components.OutputToFile;
-
-static class Program
-{
-    static LiveSplitState state;
-    static TimerModel model;
-    static OutputToFileComponent comp;
-    static string outDir;
-
-    [STAThread]
-    static void Main(string[] args)
-    {
-        outDir = args[0]; // use a fresh folder each run; old files linger otherwise
-
-        // (name, PB split time, best segment), in seconds
-        var run = new Run(new StandardComparisonGeneratorsFactory()) { GameName = "Game", CategoryName = "Any%" };
-        foreach (var (name, pb, best) in new[] { ("-A1", 10.0, 9.0), ("-A2", 20.0, 9.0), ("{Area A}A3", 30.0, 9.0) })
-            run.Add(new Segment(name, T(pb), T(best), null, new Time()));
-
-        // StandardSettingsFactory throws outside LiveSplit; construct Settings directly.
-        state = new LiveSplitState(run, null, new Layout(), new StandardLayoutSettingsFactory().Create(), new LiveSplit.Options.Settings());
-        model = new TimerModel { CurrentState = state };
-        state.CurrentComparison = Run.PersonalBestComparisonName;
-
-        comp = new OutputToFileComponent(state);
-        comp.Settings.FolderPath = outDir;
-        comp.Settings.OutputTimer = true;
-        comp.Settings.OutputCompletedSplits = true;
-        Tick();
-
-        model.Start();
-        model.InitializeGameTime();
-        state.IsGameTimePaused = true; // from here on, game time changes only through SetGameTime
-        At(9.5); model.Split(); Tick();
-        Console.WriteLine(Read(@"PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt"));
-    }
-
-    static Time T(double s) => new Time(TimeSpan.FromSeconds(s), TimeSpan.FromSeconds(s));
-
-    // One LiveSplit frame, then wait for the files it queued. Call it after every event: the events only count, and Update() writes.
-    static void Tick()
-    {
-        comp.Update(null, state, 0, 0, LayoutMode.Vertical);
-        comp.WaitForFileWrites();
-    }
-
-    // Set both clocks. Game time is exact; real time is only close.
-    static void At(double s)
-    {
-        state.AdjustedStartTime = TimeStamp.Now - TimeSpan.FromSeconds(s);
-        state.SetGameTime(TimeSpan.FromSeconds(s));
-    }
-
-    static string Read(string rel) => File.ReadAllText(Path.Combine(outDir, rel)).Replace("\n", " | ");
-}
-```
-
-Build it with `dotnet build`, then run `bin\Debug\net481\Harness.exe <output folder>`. As an SDK-style project, it gets the 4.8.1 reference assemblies from NuGet, so it builds even without the targeting pack.
+For a one-off check that doesn't belong in the tests, such as a timing, a long stress run or a comparison of two builds:
+- write a temporary test with `TestRun`, and delete it before committing;
+- or write a console app outside the repo. It targets `net481`, and references `LiveSplit.Core.dll`, `UpdateManager.dll` and the built component, as the test project does.
 
 Things to know:
 
 - **Check `GameTime` outputs.** Game time is exact, while real time drifts. Usually that is a few milliseconds, but two runs of the same build through a long multi-scenario harness differed by up to 0.3 s in `RealTime` deltas (seen 2026-10-15). When comparing two builds, compare `RealTime` files only by which ones exist.
-- **Call `Tick()` after every event.** The timer events only count, and nothing is written until the next `Update()`.
+- **Call `Tick()` after every event.** The timer events only count, and nothing is written until the next `Update()`. `TestRun`'s actions do.
 - **Files are written in the background.**
-  - `Update()` only queues them, so call `comp.WaitForFileWrites()` before reading files; the sample's `Tick()` does.
+  - `Update()` only queues them, so call `comp.WaitForFileWrites()` before reading files; `TestRun.Tick()` does.
   - A failed write shows up in `comp.Settings.WriteError` on the next `Update()` after it fails.
   - When timing a split, time `Split()` and the next `Update()` together, since that `Update()` does the split's work. Time `WaitForFileWrites()` separately for the writes.
 - **Real time.** Setting `AdjustedStartTime` only affects real time while the timer is `Running`; while paused, real time stays frozen. `model.Pause()` toggles between pause and resume.
@@ -148,18 +106,18 @@ Things to know:
   - Then `state.Run = run`, `state.CallRunManuallyModified()` and `Tick()`.
   - Reach the bests through the component's private `_levels` field by reflection: `SplitLevels.Count`, its indexer, and each `SplitLevel`'s `BestSegmentTimes`.
 - **Comparisons.**
-  - `LiveSplitState.CurrentComparison` is null until set; the sample sets it to Personal Best.
+  - `LiveSplitState.CurrentComparison` is null until set; `TestRun` sets it to Personal Best.
   - To switch, as the right-click menu or the server does, set `state.CurrentComparison`, then `Tick()`.
   - Generated comparisons (Best Segments, Average Segments) stay empty until something calls each generator's `Generate(state.Settings)`. LiveSplit's UI does that after every reset and edit, so do it after `model.Reset()`, before the `Tick()`.
   - A custom comparison is `run.CustomComparisons.Add(name)`, plus `run[i].Comparisons[name] = time` for each split.
   - Tick one in the settings with `comp.Settings.SetComparisonTicked(name, true)`, or set `AllCustomComparisons`.
-- **Loading a splits file.** `new StandardFormatsRunFactory(stream, path).Create(new StandardComparisonGeneratorsFactory())`, with `livesplit_core.dll` from LiveSplit's `x64\` folder next to the harness ([livesplit-notes.md](livesplit-notes.md#running-livesplit-code-outside-livesplit-verified)).
+- **Loading a splits file.** `new StandardFormatsRunFactory(stream, path).Create(new StandardComparisonGeneratorsFactory())`, with `livesplit_core.dll` from LiveSplit's `x64\` folder next to the program or the tests' DLL ([livesplit-notes.md](livesplit-notes.md#running-livesplit-code-outside-livesplit-verified)).
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
 - **Don't delete output files mid-run.** `FileQueue` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
 - **Changing a setting.** Set the property, such as `comp.Settings.OutputSplitList = false`, then `Tick()`. The `Output*` settings are cache keys, so the next `Update()` rewrites everything and empties the files that are no longer written.
 - **Reusing a folder.** The first `Update()` of a new component empties every file in the component's folders (and every root `TotalSplits*.txt`) that it doesn't write now, such as another level's from an earlier run. Other files in the output folder are left alone.
-- **Rebuild the component first.** The harness references `bin\Debug`, so it tests whatever was last built.
-- **Don't run it from the repo.** LiveSplit.Core saves speedrun.com's game list (about 2 MB) as `speedruncom_game_names.json` in the current directory once a run has a game name. Seen 2026-10-15.
+- **Test the current build.** `dotnet test` builds the component first. With `--no-build`, or in a program that references `bin\Debug`, whatever was built last is tested.
+- **A game name downloads speedrun.com's game list.** Once a run has a game name, LiveSplit.Core downloads speedrun.com's game list (about 2 MB) and saves it as `speedruncom_game_names.json` in the current directory (seen 2026-10-15). Without that file, the tests took about a minute longer (seen 2026-10-22). So `TestRun`'s runs have no game name, and it sets the current directory to the tests' `bin\`. Don't run a program that sets a game name from the repo.
 - **Timer events from another thread.** LiveSplit's server raises the timer events off the UI thread. So did an Auto Splitting Runtime script activated in Edit Splits, before LiveSplit 1.8.36 ([livesplit-notes.md](livesplit-notes.md#which-thread-raises-the-timer-events-mostly-read-in-source)).
   - To do the same, call `TimerModel` from a second thread, such as a `System.Timers.Timer` like ASR's. Meanwhile the main thread calls `Update()` at LiveSplit's pace: sleep `1000 / RefreshRate` ms (25 at 40), then update.
   - To go through the real server, call `new LiveSplit.Server.CommandServer(state).StartNamedPipe()`. Then write lines such as `starttimer`, `split` and `reset` to a `NamedPipeClientStream(".", "LiveSplit")`, and call `StopAll()` at the end.
@@ -220,13 +178,9 @@ To measure torn reads:
 
 The share of bad reads is then the chance that an OBS read lands on a write. Divided by the writes per second, it gives how long each write leaves the file unreadable.
 
-## Regression checks
+## Manual regression checks
 
-These checks reproduce bugs tracked in [TODO.md](TODO.md); the Code column names the item. Each one shows today's output and the correct output, so a fix can be confirmed.
-
-The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. The splits happen at 9.5, 21, 28, 39 and 48 s of game time, with a `Tick()` after each. With every output on and no comparison ticked, it produces 166 files.
-
-The base run has no segment history. So in `SansSubsplits`, `Area A` and `Area B`, which span several splits, have no best segment: their gold files show `-`, and completing them counts as a gold.
+Checks of tracked items that are too long or too uncertain to be tests; the Code column names the item in [TODO.md](TODO.md). Each one shows today's output and the correct output, so a fix can be confirmed. Bugs that a test can show are tests instead (see [Adding a test](#adding-a-test)).
 
 | Code | Check | File | Today | Correct |
 |---|---|---|---|---|

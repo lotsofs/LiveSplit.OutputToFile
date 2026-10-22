@@ -25,7 +25,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [TST](Features.md#tst--no-automated-tests) | Tests | No test project; turn the headless harness and regression checks in testing.md into one | Medium |
 
 ## Project and README — [Project.md](Project.md)
 
