@@ -15,7 +15,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.Edit(r => r[0].Name = "-X1");
 				Assert.Equal("X1", run.Lines(NAMES)[0]);
 				run.Edit(r => r[0].PersonalBestSplitTime = TestRun.T(11));
-				Assert.Equal("0:11", run.Lines(@"SplitList\AllSplits\GameTime\Current Comparison\Time_Run_Upcoming.txt")[0]);
+				Assert.Equal("0:11", run.Lines(@"SplitList\AllSplits\GameTime\CurrentComparison\Time_Run_Upcoming.txt")[0]);
 			}
 		}
 

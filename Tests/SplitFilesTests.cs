@@ -14,7 +14,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 			using (var run = TestRun.Base()) {
 				run.Start();
 				run.Split(9.5);
-				Assert.Equal("GainedAhead", run.Read(PREVIOUS + @"Current Comparison\Sign.txt"));
+				Assert.Equal("GainedAhead", run.Read(PREVIOUS + @"CurrentComparison\Sign.txt"));
 			}
 		}
 
@@ -24,8 +24,8 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.Start();
 				run.Skip();
 				run.Split(19);
-				Assert.Equal("-", run.Read(PREVIOUS + @"Current Comparison\SegmentDifference.txt"));
-				Assert.Equal("Ahead", run.Read(PREVIOUS + @"Current Comparison\Sign.txt"));
+				Assert.Equal("-", run.Read(PREVIOUS + @"CurrentComparison\SegmentDifference.txt"));
+				Assert.Equal("Ahead", run.Read(PREVIOUS + @"CurrentComparison\Sign.txt"));
 			}
 		}
 
@@ -37,10 +37,10 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.Equal("Area B", run.Read(@"PreviousSplit\SansSubsplits\Name.txt"));
 				Assert.Equal("0:09", run.Read(PREVIOUS + "SegmentTime.txt"));
 				Assert.Equal("0:48", run.Read(PREVIOUS + "RunTime.txt"));
-				Assert.Equal("−1.0", run.Read(PREVIOUS + @"Current Comparison\SegmentDifference.txt"));
-				Assert.Equal("−2.0", run.Read(PREVIOUS + @"Current Comparison\RunDifference.txt"));
+				Assert.Equal("−1.0", run.Read(PREVIOUS + @"CurrentComparison\SegmentDifference.txt"));
+				Assert.Equal("−2.0", run.Read(PREVIOUS + @"CurrentComparison\RunDifference.txt"));
 				Assert.Equal("0.00", run.Read(PREVIOUS + "GoldDifference.txt"));
-				Assert.Equal("FinishedGainedAhead", run.Read(PREVIOUS + @"Current Comparison\Sign.txt"));
+				Assert.Equal("FinishedGainedAhead", run.Read(PREVIOUS + @"CurrentComparison\Sign.txt"));
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.Undo();
 				Assert.Equal("-", run.Read(@"PreviousSplit\AllSplits\Name.txt"));
 				Assert.Equal("-", run.Read(PREVIOUS + "GoldDifference.txt"));
-				Assert.Equal("NotApplicable", run.Read(PREVIOUS + @"Current Comparison\Sign.txt"));
+				Assert.Equal("NotApplicable", run.Read(PREVIOUS + @"CurrentComparison\Sign.txt"));
 			}
 		}
 

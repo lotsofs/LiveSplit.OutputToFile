@@ -191,15 +191,15 @@ The comparison helpers take the name of one of `Levels.Comparisons`. Computing t
 
 The files that compare with a comparison are written once per entry of `SplitLevels.Comparisons`, each time into that comparison's folder inside the method folder (`{3}` in their templates). [output-files.md](output-files.md) lists which files these are. `CalculateSegments()` chooses the comparisons on every rewrite (`ChooseComparisons`):
 
-1. `Current Comparison`: the comparison selected in LiveSplit, `state.CurrentComparison`.
+1. `CurrentComparison`: the comparison selected in LiveSplit, `state.CurrentComparison`.
    - `Update()` reads it once, as a cache key, and passes it in, so every file of a rewrite uses the same one.
    - Null, as outside LiveSplit, counts as Personal Best.
    - A name the run doesn't have gives `-` everywhere, because LiveSplit returns an empty `Time` for it.
 2. Then, in the run's order (`Run.Comparisons`), each comparison ticked in the settings. With **All custom comparisons** on, also every custom one (`IsCustomComparison`: in `CustomComparisons`, and not Personal Best, which LiveSplit keeps there too).
 
-The folder is the name with `_` for each character a folder name can't have, and for trailing dots and spaces, which Windows drops (`ComparisonFolder`). Folder names are compared ignoring case, as Windows does. A comparison whose folder is taken is skipped, so a custom comparison named `Current Comparison` gets no folder.
+The folder is the name without its spaces, like the other output folders, and with `_` for each character a folder name can't have and for trailing dots, which Windows drops (`ComparisonFolder`). Folder names are compared ignoring case, as Windows does. A comparison whose folder is taken is skipped, so a custom comparison named `Current Comparison` gets no folder.
 
-A comparison can be written twice, as `Current Comparison` and in its own folder. Its segment times are computed once.
+A comparison can be written twice, as `CurrentComparison` and in its own folder. Its segment times are computed once.
 
 The writers loop over `Levels.Comparisons` for those files, passing `comparison.Folder` to `MakeFile` and `comparison.Name` to `ComparisonTime`, `RunDelta` and `SegmentDelta`. `RunInfoFiles` writes `Levels.CurrentComparison` to `CurrentComparison.txt`.
 
@@ -208,7 +208,7 @@ The writers loop over `Levels.Comparisons` for those files, passing `comparison.
 - `GetSettingsControl` passes `State.Run` to `ShowRunComparisons`. The list then shows the run's comparisons, without the custom ones while All custom comparisons is on (they're all written then), plus any ticked names the run doesn't have, so they can be unticked.
 - The checkbox's `CheckedChanged` fills the list again from the checkbox, because it runs before the binding updates `AllCustomComparisons`.
 
-**Cost.** Each comparison written adds its files at every level and timing method. On the 1,317-split GTA SA file, a split's `Update()` takes about 12 ms with only `Current Comparison`, and 18 ms with three more ticked (Debug build, every output on, measured 2026-10-22).
+**Cost.** Each comparison written adds its files at every level and timing method. On the 1,317-split GTA SA file, a split's `Update()` takes about 12 ms with only `CurrentComparison`, and 18 ms with three more ticked (Debug build, every output on, measured 2026-10-22).
 
 ## Phase-dependent indexes
 

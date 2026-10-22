@@ -6,77 +6,59 @@ What changed in Output to File between releases: the files it writes, what they 
 
 ### Action required
 
-- **If your LiveSplit is older than 1.8.37, update it before installing this release.** This release is built and tested with LiveSplit 1.8.37, which needs .NET Framework 4.8.1. It hasn't been tried with older versions of LiveSplit.
-- **Some subsplit folders are renamed back to release 6's names, so their OBS text sources need new paths.** With three or more subsplit levels, the folders between `SansSubsplits` and `AllSplits` are numbered after the dashes they leave out: release 7's `SansSubsplits_Level1` is now `SansSubsplits_Level2`, its `SansSubsplits_Level2` is now `SansSubsplits_Level3`, and so on. That goes for the folders in `CurrentSplit\`, `PreviousSplit\` and `SplitList\`, and for the `TotalSplits_SansSubsplits_Level…` and `Timers\…\SegmentTimer_SansSubsplits_Level…` files.
-- **`Index.txt` and `ReverseIndex.txt` in `CurrentSplit\` are gone. Point their text sources at `Completed.txt` and `After.txt` instead** (see Added).
-  - `Completed.txt` shows what `Index.txt` did, except `0` instead of `-1` before the timer starts.
-  - `After.txt` shows what `ReverseIndex.txt` did while the timer runs. Before the start and after the finish it shows `-`, where `ReverseIndex.txt` showed the number of splits and `-1`.
-- **The files that compare against your PB moved into a `Current Comparison` folder, so their OBS text sources need new paths.** In every `GameTime` and `RealTime` folder, these moved into `Current Comparison\`:
-  - `RunTime.txt` and `SegmentTime.txt` in `CurrentSplit\`;
-  - `RunDifference.txt`, `SegmentDifference.txt` and `Sign.txt` in `PreviousSplit\`;
-  - `Delta_Run.txt`, `Delta_Segment.txt`, the four `Highlight_Ahead…` and `Highlight_Behind…` files, `Time_Run_Upcoming.txt` and `Time_Segment_Upcoming.txt` in `SplitList\` and `CompletedSplits\`.
-
-  For example, `PreviousSplit\AllSplits\GameTime\Sign.txt` is now `PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt`. The files at the old paths are emptied.
-- **`Sign.txt`'s values at the finish are renamed. Update anything that looks for them.** At the finish it says `Finished` followed by what it would say during the run: `PBGold` → `FinishedGoldAhead`, `NoPBGold` → `FinishedGoldBehind`, `PB` → `FinishedAhead`, `NoPB` → `FinishedBehind`, `PBGained` → `FinishedGainedAhead`, `NoPBGained` → `FinishedGainedBehind`, `PBLost` → `FinishedLostAhead`, `NoPBLost` → `FinishedLostBehind`. A finish with nothing to compare against, such as the first finish before there is a PB, says `FinishedNotApplicable`, where it used to say `NoPB` or `NoPBGold`.
+- **If your LiveSplit is older than 1.8.37, update it first.** This release is built and tested with 1.8.37, and hasn't been tried with older versions.
+- **Some files moved or were renamed. Point their OBS text sources at the new paths.** The files at the old paths are emptied.
+  - The files that compare against your PB are now in a `CurrentComparison` folder in each `GameTime` and `RealTime` folder: `RunTime.txt` and `SegmentTime.txt` in `CurrentSplit\`; `RunDifference.txt`, `SegmentDifference.txt` and `Sign.txt` in `PreviousSplit\`; `Delta_Run.txt`, `Delta_Segment.txt`, the `Highlight_Ahead…` and `Highlight_Behind…` files, `Time_Run_Upcoming.txt` and `Time_Segment_Upcoming.txt` in `SplitList\`. For example, `PreviousSplit\AllSplits\GameTime\Sign.txt` is now `PreviousSplit\AllSplits\GameTime\CurrentComparison\Sign.txt`.
+  - With three or more subsplit levels, the folders between `SansSubsplits` and `AllSplits` are numbered one higher, as in release 6: release 7's `SansSubsplits_Level1` is now `SansSubsplits_Level2`, and so on. So are the `TotalSplits_SansSubsplits_Level…` and `SegmentTimer_SansSubsplits_Level…` files.
+  - `Index.txt` and `ReverseIndex.txt` in `CurrentSplit\` are gone. Use `Completed.txt` and `After.txt` (see Added). They show the same numbers, except that `Completed.txt` shows `0` before the start (was `-1`), and `After.txt` shows `-` before the start and after the finish.
+- **`Sign.txt`'s values at the finish are renamed. Update anything that looks for them.** At the finish it says `Finished` followed by what it would say during the run: `PB…` became `Finished…Ahead` and `NoPB…` became `Finished…Behind`, so `PBGold` is now `FinishedGoldAhead`, `NoPBLost` is `FinishedLostBehind` and `PB` is `FinishedAhead`. A finish with nothing to compare against, such as before you have a PB, says `FinishedNotApplicable`.
 
 ### Changed
 
-- Differences, `Sign.txt`, the ahead and behind highlights, and the times of the current and upcoming splits compare against the comparison selected in LiveSplit, in the `Current Comparison` folders. They used to compare against Personal Best, whatever was selected.
-- Differences are written the way LiveSplit writes them:
-  - **Negatives get the minus sign `−`, not `-`**, as do negative times.
-  - With the default Flex setting (see Added), negative differences have one decimal under a minute, like positive ones: `−0.5`, `−5.2` (release 7: `-.50`, `-5.23`). From a minute on they have none: `−1:05` (release 7: `-1:05.23`).
-  - Under a tenth of a second there are two decimals: `+0.05`, `−0.05` (release 7: `+.05`, `-.05`).
+- Differences, `Sign.txt`, the ahead and behind highlights, and the times of the current and upcoming splits compare against the comparison selected in LiveSplit. They used to compare against Personal Best, whatever was selected.
+- Differences are written the way LiveSplit writes them. With the default Flex setting (see Added):
+  - Negatives get the minus sign `−`, not `-`, as do negative times.
+  - Negatives have one decimal under a minute and none from a minute on, like positives: `−0.5`, `−5.2`, `−1:05` (release 7: `-.50`, `-5.23`, `-1:05.23`).
+  - Under a tenth of a second there are two decimals: `+0.05` (release 7: `+.05`).
   - No difference at all is `0.00` (release 7: `+.00`).
-- **Splitting no longer waits for the files to be written.** They are written in the background, so LiveSplit stays responsive. A file whose contents haven't changed isn't rewritten.
-- Split names leave out one space after their leading dashes: a subsplit named `- -40` shows as `-40` (release 7: ` -40`). So to show a name that starts with a dash, put a space before it. With the **Subsplits** setting off, names in `AllSplits` are the same as with it on; release 7 kept their dashes.
-- When the layout loads, files left over from outputs that are now turned off, or from subsplit levels your splits no longer have, are emptied. So are files left by older releases, such as release 7's `Index.txt` and `SansSubsplits_Level1` folders, and release 5's `TotalSplits.txt` and `CurrentSplit\Name.txt`, so text sources still pointing at them show nothing.
-  - Files are emptied, never deleted.
-  - Only `TotalSplits*.txt` and the files in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\` are touched. **Don't keep files of your own in those folders:** the component treats everything in them as its own.
-- The DLL's version, shown in its file properties, is now the release number, `8.0`. It used to be `1.0.0.0`.
+- **Splitting no longer waits for the files to be written.** They are written in the background, and a file whose contents haven't changed isn't rewritten.
+- Split names leave out one space after their leading dashes: `- -40` shows as `-40` (release 7: ` -40`). So to show a name that starts with a dash, put a space before it. With **Subsplits** off, names in `AllSplits` no longer keep their dashes.
+- When the layout loads, files that are no longer written are emptied, never deleted: those of outputs turned off, of subsplit levels your splits no longer have, and of older releases, such as release 7's `Index.txt`. **Don't keep files of your own in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` or `Timers\`, or name them `TotalSplits*.txt`:** the component treats those as its own.
+- The DLL's version in its file properties is now the release number, `8.0` (release 7: `1.0.0.0`).
 
 ### Added
 
-- Split counts in `CurrentSplit\`, counted the way people count:
-  - `Number.txt`: the current split's number, starting at 1.
-  - `Completed.txt`: the number of splits done, skipped ones included.
-  - `Remaining.txt`: the number of splits not done yet, the current one included.
-  - `After.txt`: the number of splits after the current one.
-
-  `Number.txt` and `After.txt` show `-` before the timer starts and after the finish, when no split is current.
-- `CompletedSplits\`: every split completed so far, as a list with the same files as `SplitList\`, except `Highlight_CurrentSplit.txt` and the `Time_…_Upcoming.txt` files. Turn it on with the new **Completed splits** setting. Turning it off empties its files.
-- Golds in the `SansSubsplits` folders: `GoldTime.txt`, `GoldDifference.txt`, `Delta_Gold.txt`, `Highlight_Gold.txt` and `Time_Gold_Upcoming.txt`, and gold values in `Sign.txt`. A section that groups several splits has its own gold: the fastest you have done the whole section within one attempt, from your splits' history, not its subsplits' golds added up. A section you have never finished in one attempt has no gold yet, so finishing it counts as one.
-- A **Comparisons** setting: tick a comparison to get a folder of its own next to `Current Comparison`, with the same files, named after it, such as `Personal Best\` or `Average Segments\`. **All custom comparisons** gives every comparison you added in Edit Splits a folder, in whatever splits you open. Unticking empties the folder.
+- Split counts in `CurrentSplit\`: `Number.txt` (the current split's number, from 1), `Completed.txt` (splits done, skipped ones included), `Remaining.txt` (splits not done yet, the current one included) and `After.txt` (splits after the current one). `Number.txt` and `After.txt` show `-` when no split is current.
+- `CompletedSplits\`, turned on with the new **Completed splits** setting: every split completed so far, with the same files as `SplitList\` except `Highlight_CurrentSplit.txt` and the `Time_…_Upcoming.txt` files.
+- Golds in the `SansSubsplits` folders: `GoldTime.txt`, `GoldDifference.txt`, `Delta_Gold.txt`, `Highlight_Gold.txt`, `Time_Gold_Upcoming.txt`, and gold values in `Sign.txt`. A section's gold is the fastest you have done the whole section within one attempt, not its splits' golds added up. Until you have, finishing it counts as a gold.
+- A **Comparisons** setting: each ticked comparison gets a folder of its own next to `CurrentComparison`, with the same files, named after it without its spaces, such as `AverageSegments\`. **All custom comparisons** does this for every comparison added in Edit Splits. Unticking empties the folder.
 - `CurrentComparison.txt`: the name of the comparison selected in LiveSplit.
-- **Time Format** settings: choose the decimals of times and of differences: Seconds, Tenths, Hundredths, Milliseconds, or Flex, which adds decimals only where a value would otherwise read as zero (a time under a second, a difference under a tenth). Times default to Seconds and differences to Flex, as before. The timers always show whole seconds.
-- **Updates from LiveSplit.** When a newer release of Output to File is out, LiveSplit offers it at startup: it shows what changed and asks whether to update. Choosing Yes closes LiveSplit, installs the new release and opens LiveSplit again. This release itself still has to be installed by hand.
+- **Time Format** settings, in what was the empty **Time Formats** group: the decimals of times and of differences. Choose Seconds, Tenths, Hundredths, Milliseconds, or Flex, which adds decimals only where a value would otherwise read as zero. Times default to Seconds and differences to Flex. The timers always show whole seconds.
+- **Updates from LiveSplit.** When a newer release is out, LiveSplit offers it at startup and shows what changed. Choosing Yes closes LiveSplit, installs the release and opens LiveSplit again. This release itself still has to be installed by hand.
 
 ### Fixed
 
-- `PreviousSplit\…\Sign.txt` says `GainedAhead` or `GainedBehind` when a split beat the comparison's segment without being a gold. It used to say `LostAhead` or `LostBehind`.
-- `Sign.txt` in the `SansSubsplits` folders reports a gold only when the section beat its gold (see Added). Release 7 reported a gold there for every split.
+- `Sign.txt` says `GainedAhead` or `GainedBehind` when a split beat the comparison's segment without being a gold (release 7: `LostAhead`, `LostBehind`).
+- In the `SansSubsplits` folders, `Sign.txt` reports a gold only when a section beats its gold (see Added). Release 7 reported one for every section.
 - `Sign.txt` no longer reports a gold for the split after a skipped split.
-- A split that has no best segment yet is now filled in `Highlight_Gold.txt`, matching `Sign.txt`, which already called it a gold.
-- A skipped split is no longer filled in `Highlight_BehindLost.txt` in the split list. Its line is now blank in every highlight file.
+- A split with no best segment yet is filled in `Highlight_Gold.txt`, matching `Sign.txt`, which already called it a gold.
+- A skipped split's line is blank in every highlight file. Release 7 filled it in `Highlight_BehindLost.txt`.
 - Pausing, resuming or finishing no longer blanks the differences of earlier splits in the split list, and with them their highlights.
-- After the finish, `PreviousSplit\` shows the last split, with its segment time, its differences and its `Sign.txt`, and `CurrentSplit\…\Name.txt` shows `-`. Release 7 showed the name of the split before the last in `PreviousSplit\AllSplits\`, `-` as the segment time and the segment and gold differences, and `PBGold` as the sign, and kept the last split's name in `CurrentSplit\AllSplits\Name.txt`.
-- Before the timer starts and after a reset, every `Name.txt` and `Name_Raw.txt` in `CurrentSplit\` and `PreviousSplit\` shows `-`. Release 7 left the last attempt's names in some of them.
-- The `Timers\` files now update whenever what they show changes. They used to wait for the seconds digits to change: resetting at 1:00.5 left `RunTimer.txt` at `1:00` until the next start, and game time that started within its first second showed `-` until a second had passed.
-- The segment timers in `Timers\` restart at `0:00` as soon as you split, and count whole seconds from the split. They used to keep the previous segment's time until the run timer's next second, and then tick over together with the run timer, up to a second late. After the finish they show the last segment's time (release 7: `0:00`). In the `SansSubsplits` timers they count from the end of that level's previous split; release 7 counted from an earlier one.
-- Changing an **Output** setting takes effect straight away. Turning off **Timer**, **Split List** or **Subsplits** empties the files it wrote, and turning one on writes them. Release 7 waited for the next split, and left the files of an output that was turned off as they were.
-- A file that can't be written, because it's locked or read-only or its drive is gone, no longer stops the other files from being written. The error is shown in red in the component's settings.
-- Changes made in Edit Splits now show in the files straight away: renamed, added or removed splits, and changed times. So does opening another splits file. They used to wait until the timer was next started, paused or reset.
+- After the finish, `PreviousSplit\` shows the last split, with its segment time, differences and `Sign.txt`, and `CurrentSplit\…\Name.txt` shows `-`. Release 7 showed the name of the split before the last, `-` for most values and `PBGold` as the sign, and kept the last split's name in `CurrentSplit\`.
+- Before the timer starts and after a reset, every `Name.txt` and `Name_Raw.txt` in `CurrentSplit\` and `PreviousSplit\` shows `-`. Release 7 left some of them blank or showing the last attempt's names.
+- The `Timers\` files update as soon as what they show changes. Release 7 waited for the seconds to change: a reset at 1:00.5 left `RunTimer.txt` at `1:00`, and game time that started within its first second showed `-` until a second had passed.
+- The segment timers restart at `0:00` the moment you split, and count whole seconds from the split. Release 7 kept the previous segment's time until the run timer's next second, then ticked with the run timer. After the finish they show the last segment's time (release 7: `0:00`). In `SansSubsplits` they count from that level's previous split; release 7 counted from the wrong one.
+- Changing an **Output** setting takes effect straight away: turning off **Timer**, **Split List** or **Subsplits** empties its files, and turning one on writes them. Release 7 waited for the next split, and left the files of an output that was turned off as they were.
+- A file that can't be written, because it's locked or read-only or its drive is gone, no longer stops the other files from being written. The error shows in red in the component's settings.
+- Changes made in Edit Splits (renamed, added or removed splits, changed times) and opening another splits file show in the files straight away, not when the timer is next started, paused or reset.
 - Typing a folder path in the settings no longer creates a folder full of output files for every letter typed. A typed path is used once you leave the box, press Enter or click OK; closing the settings with the X button drops it. Browse still uses the chosen folder at once.
-- **Browse** opens on the output folder that's set. It used to open on the folder containing it.
-- Tab moves through the settings in the order they're shown. It used to go from the folder to **Split List Writing** and then to **Output**.
-- The **Output to File** tab in Layout Settings no longer has a scrollbar. Release 7 showed one, with only empty space below the settings to scroll to.
-- A split with no name, or with only dashes such as `-`, no longer stops the component from loading. Release 7 failed to load it, and starting or splitting the timer then ran into errors.
-- A first split with more dashes than there are subsplit levels, such as `---A` when no other split has more than one dash, now shows in `AllSplits`. Release 7 left it out of every folder.
-- The last split always counts as a top-level split. Its dashes no longer add a subsplit level, and it shows without them in `SansSubsplits` (release 7: `--C` for a last split named `--C`).
-- When LiveSplit is controlled through its server, as some remote controls and stream tools do, a split could now and then make LiveSplit close.
-
-### Removed
-
-- The empty **Time Formats** group in the settings.
+- **Browse** opens on the output folder that's set, not the folder containing it.
+- Tab moves through the settings in the order they're shown.
+- The **Output to File** tab in Layout Settings no longer has a scrollbar.
+- A split with no name, or with only dashes such as `-`, no longer stops the component from loading.
+- A first split with more dashes than any other split, such as `---A`, now shows in `AllSplits`. Release 7 left it out of every folder.
+- The last split always counts as a top-level split. Its dashes no longer add a subsplit level, and it shows without them in `SansSubsplits` (release 7: `--C`).
+- When LiveSplit is controlled through its server, as some remote controls and stream tools do, a split no longer now and then closes LiveSplit.
 
 ## 7 (2024-10-09)
 

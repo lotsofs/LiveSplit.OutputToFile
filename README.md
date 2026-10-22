@@ -71,8 +71,8 @@ The files of an output you turn off in the settings, of a comparison you untick,
 
 Differences, `Sign.txt`, the ahead and behind highlights, and the split and segment times of the current and upcoming splits compare against a comparison, as LiveSplit's own splits do. Those files are in a comparison folder inside `GameTime` and `RealTime`:
 
-- `Current Comparison` follows the comparison selected in LiveSplit (right-click → Compare Against). `CurrentComparison.txt` holds its name.
-- Tick a comparison under **Comparisons** in the settings to also get a folder for it, named after it, such as `Personal Best` or `Average Segments`. **All custom comparisons** gives every comparison you added in Edit Splits a folder, in whatever splits you open.
+- `CurrentComparison` follows the comparison selected in LiveSplit (right-click → Compare Against). `CurrentComparison.txt` holds its name.
+- Tick a comparison under **Comparisons** in the settings to also get a folder for it, named after it without its spaces, such as `PersonalBest` or `AverageSegments`. **All custom comparisons** gives every comparison you added in Edit Splits a folder, in whatever splits you open.
 
 Golds don't depend on the comparison, so their files stay in `GameTime` and `RealTime`.
 
@@ -88,7 +88,7 @@ Golds don't depend on the comparison, so their files stay in `GameTime` and `Rea
 | `GainedAhead`, `GainedBehind` | The segment was faster than the comparison's |
 | `LostAhead`, `LostBehind` | The segment wasn't faster than the comparison's |
 
-At the finish, `Sign.txt` says `Finished` followed by what it would say during the run, such as `FinishedGainedAhead` or `FinishedNotApplicable`. In the `Personal Best` folder, the `FinishedAhead` values mean a new personal best.
+At the finish, `Sign.txt` says `Finished` followed by what it would say during the run, such as `FinishedGainedAhead` or `FinishedNotApplicable`. In the `PersonalBest` folder, the `FinishedAhead` values mean a new personal best.
 
 ## Subsplits
 In addition to the ``AllSplits`` folder, which takes into consideration every split regardless of whether it is a subsplit or not, if applicable there will also be a ``SansSubsplits`` folder. These will only include splits that do not start with a dash (``-``) (These appear to be referred to in the official subsplits module as 'Section Headers'). Furthermore, the component supports multi-level subsplits, which are subsplits of subsplits, and are created by putting two (2) or more dashes in front of your splitname. Each of these levels gets a folder named after the dashes it leaves out: ``SansSubsplits_Level2`` has every split except those with two or more dashes, ``SansSubsplits_Level3`` every split except those with three or more, and so on. There is no limit to how many levels deep you can go. The **Subsplits** setting turns these folders off.
@@ -105,7 +105,7 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 
 ## Output Directory Tree
 
-This is the tree for splits with three levels of subsplits, with every output on and Personal Best ticked under **Comparisons**. To keep it short, the `Personal Best` folder is shown once per output, though every `GameTime` and `RealTime` folder has one, and `etc.` marks a folder that holds the same kind of files as the ones above it.
+This is the tree for splits with three levels of subsplits, with every output on and Personal Best ticked under **Comparisons**. To keep it short, the `PersonalBest` folder is shown once per output, though every `GameTime` and `RealTime` folder has one, and `etc.` marks a folder that holds the same kind of files as the ones above it.
 
 ```
 |   AttemptCount.txt
@@ -133,7 +133,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |   Highlight_Gold.txt
 |   |   |   |   Time_Run_Current.txt
 |   |   |   |   
-|   |   |   +---Current Comparison
+|   |   |   +---CurrentComparison
 |   |   |   |       Delta_Run.txt
 |   |   |   |       Delta_Segment.txt
 |   |   |   |       Highlight_AheadGained.txt
@@ -141,7 +141,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |       Highlight_BehindGained.txt
 |   |   |   |       Highlight_BehindLost.txt
 |   |   |   |       
-|   |   |   \---Personal Best
+|   |   |   \---PersonalBest
 |   |   |           Delta_Run.txt
 |   |   |           Delta_Segment.txt
 |   |   |           Highlight_AheadGained.txt
@@ -154,7 +154,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |       |   Highlight_Gold.txt
 |   |       |   Time_Run_Current.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               Delta_Run.txt
 |   |               Delta_Segment.txt
 |   |               Highlight_AheadGained.txt
@@ -186,18 +186,18 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   +---GameTime
 |   |   |   |   GoldTime.txt
 |   |   |   |   
-|   |   |   +---Current Comparison
+|   |   |   +---CurrentComparison
 |   |   |   |       RunTime.txt
 |   |   |   |       SegmentTime.txt
 |   |   |   |       
-|   |   |   \---Personal Best
+|   |   |   \---PersonalBest
 |   |   |           RunTime.txt
 |   |   |           SegmentTime.txt
 |   |   |           
 |   |   \---RealTime
 |   |       |   GoldTime.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               RunTime.txt
 |   |               SegmentTime.txt
 |   |               
@@ -212,14 +212,14 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   +---GameTime
 |   |   |   |   GoldTime.txt
 |   |   |   |   
-|   |   |   \---Current Comparison
+|   |   |   \---CurrentComparison
 |   |   |           RunTime.txt
 |   |   |           SegmentTime.txt
 |   |   |           
 |   |   \---RealTime
 |   |       |   GoldTime.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               RunTime.txt
 |   |               SegmentTime.txt
 |   |               
@@ -234,14 +234,14 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   +---GameTime
 |   |   |   |   GoldTime.txt
 |   |   |   |   
-|   |   |   \---Current Comparison
+|   |   |   \---CurrentComparison
 |   |   |           RunTime.txt
 |   |   |           SegmentTime.txt
 |   |   |           
 |   |   \---RealTime
 |   |       |   GoldTime.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               RunTime.txt
 |   |               SegmentTime.txt
 |   |               
@@ -259,12 +259,12 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |   RunTime.txt
 |   |   |   |   SegmentTime.txt
 |   |   |   |   
-|   |   |   +---Current Comparison
+|   |   |   +---CurrentComparison
 |   |   |   |       RunDifference.txt
 |   |   |   |       SegmentDifference.txt
 |   |   |   |       Sign.txt
 |   |   |   |       
-|   |   |   \---Personal Best
+|   |   |   \---PersonalBest
 |   |   |           RunDifference.txt
 |   |   |           SegmentDifference.txt
 |   |   |           Sign.txt
@@ -274,7 +274,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |       |   RunTime.txt
 |   |       |   SegmentTime.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               RunDifference.txt
 |   |               SegmentDifference.txt
 |   |               Sign.txt
@@ -288,7 +288,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |   RunTime.txt
 |   |   |   |   SegmentTime.txt
 |   |   |   |   
-|   |   |   \---Current Comparison
+|   |   |   \---CurrentComparison
 |   |   |           RunDifference.txt
 |   |   |           SegmentDifference.txt
 |   |   |           Sign.txt
@@ -298,7 +298,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |       |   RunTime.txt
 |   |       |   SegmentTime.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               RunDifference.txt
 |   |               SegmentDifference.txt
 |   |               Sign.txt
@@ -312,7 +312,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |   RunTime.txt
 |   |   |   |   SegmentTime.txt
 |   |   |   |   
-|   |   |   \---Current Comparison
+|   |   |   \---CurrentComparison
 |   |   |           RunDifference.txt
 |   |   |           SegmentDifference.txt
 |   |   |           Sign.txt
@@ -322,7 +322,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |       |   RunTime.txt
 |   |       |   SegmentTime.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               RunDifference.txt
 |   |               SegmentDifference.txt
 |   |               Sign.txt
@@ -347,7 +347,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |   Time_Gold_Upcoming.txt
 |   |   |   |   Time_Run_Current.txt
 |   |   |   |   
-|   |   |   +---Current Comparison
+|   |   |   +---CurrentComparison
 |   |   |   |       Delta_Run.txt
 |   |   |   |       Delta_Segment.txt
 |   |   |   |       Highlight_AheadGained.txt
@@ -357,7 +357,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |       Time_Run_Upcoming.txt
 |   |   |   |       Time_Segment_Upcoming.txt
 |   |   |   |       
-|   |   |   \---Personal Best
+|   |   |   \---PersonalBest
 |   |   |           Delta_Run.txt
 |   |   |           Delta_Segment.txt
 |   |   |           Highlight_AheadGained.txt
@@ -373,7 +373,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |       |   Time_Gold_Upcoming.txt
 |   |       |   Time_Run_Current.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               Delta_Run.txt
 |   |               Delta_Segment.txt
 |   |               Highlight_AheadGained.txt
@@ -395,7 +395,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |   Time_Gold_Upcoming.txt
 |   |   |   |   Time_Run_Current.txt
 |   |   |   |   
-|   |   |   \---Current Comparison
+|   |   |   \---CurrentComparison
 |   |   |           Delta_Run.txt
 |   |   |           Delta_Segment.txt
 |   |   |           Highlight_AheadGained.txt
@@ -411,7 +411,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |       |   Time_Gold_Upcoming.txt
 |   |       |   Time_Run_Current.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               Delta_Run.txt
 |   |               Delta_Segment.txt
 |   |               Highlight_AheadGained.txt
@@ -434,7 +434,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |   |   |   Time_Gold_Upcoming.txt
 |   |   |   |   Time_Run_Current.txt
 |   |   |   |   
-|   |   |   \---Current Comparison
+|   |   |   \---CurrentComparison
 |   |   |           Delta_Run.txt
 |   |   |           Delta_Segment.txt
 |   |   |           Highlight_AheadGained.txt
@@ -450,7 +450,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   |       |   Time_Gold_Upcoming.txt
 |   |       |   Time_Run_Current.txt
 |   |       |   
-|   |       \---Current Comparison
+|   |       \---CurrentComparison
 |   |               Delta_Run.txt
 |   |               Delta_Segment.txt
 |   |               Highlight_AheadGained.txt

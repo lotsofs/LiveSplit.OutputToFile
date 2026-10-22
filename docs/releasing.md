@@ -10,13 +10,37 @@ If the user clicks Yes, LiveSplit downloads its updater and closes itself. The u
 
 ## Steps
 
-1. Set `AssemblyVersion` and `AssemblyFileVersion` in `Properties/AssemblyInfo.cs` to `N.0`, for release `N`.
-2. In [CHANGELOG.md](../CHANGELOG.md), turn "Unreleased" into `## N (date)`, and add an empty "Unreleased" above it.
-3. Build: `dotnet build LiveSplit.OutputToFile.sln -c Release`, with no warnings.
-4. Commit, tag the commit `N`, and push the commit and the tag.
-5. Create GitHub release `N` from that tag, with `bin\Release\LiveSplit.OutputToFile.dll` attached under that name. A prerelease works. A draft doesn't, because its assets can't be downloaded.
-6. Check the download: `curl -sIL https://github.com/lotsofs/LiveSplit.OutputToFile/releases/download/N/LiveSplit.OutputToFile.dll` should end in `200`, with the DLL's size.
-7. Only now add the release to [update.xml](../update.xml) (see below), and push it to `main`. Users are offered the release from their next LiveSplit start. `raw.githubusercontent.com` can serve the old feed for a few minutes.
+For release `N`. Take one step at a time, and check its result before starting the next. Each step is marked with what it changes:
+- **Files** steps change only the working tree.
+- **git** steps change the local repository.
+- **GitHub** steps publish.
+- **Check** steps change nothing.
+
+Get `main` ready:
+
+1. **git.** Commit everything that goes into the release on `main`. The tests pass.
+
+Cut the release locally:
+
+2. **Files.** Set `AssemblyVersion` and `AssemblyFileVersion` in `Properties/AssemblyInfo.cs` to `N.0`. In [CHANGELOG.md](../CHANGELOG.md), turn "Unreleased" into `## N (date)`, and add an empty "Unreleased" above it. Build with `dotnet build LiveSplit.OutputToFile.sln -c Release`, with no warnings, and run the tests.
+3. **git.** Commit "Release N".
+4. **git.** Tag that commit `N`.
+
+Publish the code:
+
+5. **GitHub.** Push `main` and the tag.
+6. **Files.** Build Release again from the tagged commit, with nothing uncommitted. Note the size and SHA-256 of `bin\Release\LiveSplit.OutputToFile.dll`.
+
+Make the GitHub release:
+
+7. **GitHub.** Create release `N` from tag `N`, with that DLL attached under its own name. A prerelease works. A draft doesn't, because its assets can't be downloaded.
+8. **Check.** `curl -sIL https://github.com/lotsofs/LiveSplit.OutputToFile/releases/download/N/LiveSplit.OutputToFile.dll` ends in `200` with the DLL's size, and the downloaded file's SHA-256 matches the build's.
+
+Offer it through LiveSplit:
+
+9. **Files.** Add the release to [update.xml](../update.xml) (see [The feed](#the-feed)) and to [Past releases](#past-releases), and log it in [DONE.md](DONE.md).
+10. **git.** Commit.
+11. **GitHub.** Push `main`. Users are offered the release from their next LiveSplit start. `raw.githubusercontent.com` can serve the old feed for a few minutes. Then check that the live feed still loads (see [The feed](#the-feed)).
 
 Keep that order. Once the feed names a version, users are offered it. If its DLL can't be downloaded yet, the updater shows an error after LiveSplit has already closed.
 

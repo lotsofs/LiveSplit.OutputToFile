@@ -8,10 +8,10 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 
 		static readonly string[] HIGHLIGHTS = {
 			@"GameTime\Highlight_Gold.txt",
-			@"GameTime\Current Comparison\Highlight_AheadGained.txt",
-			@"GameTime\Current Comparison\Highlight_AheadLost.txt",
-			@"GameTime\Current Comparison\Highlight_BehindGained.txt",
-			@"GameTime\Current Comparison\Highlight_BehindLost.txt",
+			@"GameTime\CurrentComparison\Highlight_AheadGained.txt",
+			@"GameTime\CurrentComparison\Highlight_AheadLost.txt",
+			@"GameTime\CurrentComparison\Highlight_BehindGained.txt",
+			@"GameTime\CurrentComparison\Highlight_BehindLost.txt",
 		};
 
 		[Fact]
@@ -22,8 +22,8 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.Split(21);
 				run.Split(28);
 				run.Pause();
-				Assert.Equal(new[] { "−0.5", "+1.0", "−2.0", "", "" }, run.Lines(@"SplitList\AllSplits\GameTime\Current Comparison\Delta_Run.txt"));
-				Assert.Equal(new[] { "−0.5", "+1.0", "−2.0" }, run.Lines(@"CompletedSplits\AllSplits\GameTime\Current Comparison\Delta_Run.txt"));
+				Assert.Equal(new[] { "−0.5", "+1.0", "−2.0", "", "" }, run.Lines(@"SplitList\AllSplits\GameTime\CurrentComparison\Delta_Run.txt"));
+				Assert.Equal(new[] { "−0.5", "+1.0", "−2.0" }, run.Lines(@"CompletedSplits\AllSplits\GameTime\CurrentComparison\Delta_Run.txt"));
 			}
 		}
 
@@ -49,8 +49,8 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				foreach (string file in new[] {
 					@"Highlight_CurrentSplit.txt",
 					@"GameTime\Time_Gold_Upcoming.txt",
-					@"GameTime\Current Comparison\Time_Run_Upcoming.txt",
-					@"GameTime\Current Comparison\Time_Segment_Upcoming.txt",
+					@"GameTime\CurrentComparison\Time_Run_Upcoming.txt",
+					@"GameTime\CurrentComparison\Time_Segment_Upcoming.txt",
 				}) {
 					Assert.True(run.Exists(@"SplitList\AllSplits\" + file), file);
 					Assert.False(run.Exists(@"CompletedSplits\AllSplits\" + file), file);

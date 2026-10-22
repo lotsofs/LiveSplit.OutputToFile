@@ -12,7 +12,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 	class SplitLevels {
 
 		// The folder of the comparison selected in LiveSplit
-		public const string CURRENT_COMPARISON_FOLDER = "Current Comparison";
+		public const string CURRENT_COMPARISON_FOLDER = "CurrentComparison";
 
 		SplitLevel[] _levels = new SplitLevel[1];
 
@@ -156,16 +156,16 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		}
 
 		/// <summary>
-		/// A comparison's name as a folder name: characters a folder name can't have, and the trailing dots and spaces
-		/// that Windows drops, become '_'
+		/// A comparison's name as a folder name: without its spaces, like the other output folders, so "Personal Best" is
+		/// "PersonalBest". Characters a folder name can't have, and the trailing dots that Windows drops, become '_'.
 		/// </summary>
 		public static string ComparisonFolder(string name) {
-			char[] folder = name.ToCharArray();
+			char[] folder = name.Replace(" ", "").ToCharArray();
 			char[] invalid = Path.GetInvalidFileNameChars();
 			for (int i = 0; i < folder.Length; i++) {
 				if (Array.IndexOf(invalid, folder[i]) >= 0) folder[i] = '_';
 			}
-			for (int i = folder.Length - 1; i >= 0 && (folder[i] == '.' || folder[i] == ' '); i--) {
+			for (int i = folder.Length - 1; i >= 0 && folder[i] == '.'; i--) {
 				folder[i] = '_';
 			}
 			return folder.Length == 0 ? "_" : new string(folder);

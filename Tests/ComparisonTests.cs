@@ -4,7 +4,7 @@ using Xunit;
 
 namespace LiveSplit.UI.Components.OutputToFile.Tests {
 	/// <summary>
-	/// The Current Comparison folder, and a folder per ticked or custom comparison
+	/// The CurrentComparison folder, and a folder per ticked or custom comparison
 	/// </summary>
 	public class ComparisonTests {
 
@@ -24,10 +24,10 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.Equal(Run.PersonalBestComparisonName, run.Read("CurrentComparison.txt"));
 				run.Start();
 				run.Split(9.5);
-				Assert.Equal("−0.5", run.Read(PREVIOUS + @"Current Comparison\RunDifference.txt"));
+				Assert.Equal("−0.5", run.Read(PREVIOUS + @"CurrentComparison\RunDifference.txt"));
 				run.SelectComparison("Target");
 				Assert.Equal("Target", run.Read("CurrentComparison.txt"));
-				Assert.Equal("+0.5", run.Read(PREVIOUS + @"Current Comparison\RunDifference.txt"));
+				Assert.Equal("+0.5", run.Read(PREVIOUS + @"CurrentComparison\RunDifference.txt"));
 			}
 		}
 
@@ -39,8 +39,8 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				// The server can select any name
 				run.SelectComparison("Nothing");
 				Assert.Equal("Nothing", run.Read("CurrentComparison.txt"));
-				Assert.Equal("-", run.Read(PREVIOUS + @"Current Comparison\RunDifference.txt"));
-				Assert.Equal("NotApplicable", run.Read(PREVIOUS + @"Current Comparison\Sign.txt"));
+				Assert.Equal("-", run.Read(PREVIOUS + @"CurrentComparison\RunDifference.txt"));
+				Assert.Equal("NotApplicable", run.Read(PREVIOUS + @"CurrentComparison\Sign.txt"));
 			}
 		}
 
@@ -50,10 +50,20 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.Start();
 				run.Split(9.5);
 				Assert.Equal("+0.5", run.Read(PREVIOUS + @"Target\RunDifference.txt"));
-				Assert.Equal("−0.5", run.Read(PREVIOUS + @"Current Comparison\RunDifference.txt"));
+				Assert.Equal("−0.5", run.Read(PREVIOUS + @"CurrentComparison\RunDifference.txt"));
 				run.Settings.SetComparisonTicked("Target", false);
 				run.Tick();
 				Assert.Equal("", run.Read(PREVIOUS + @"Target\RunDifference.txt"));
+			}
+		}
+
+		[Fact]
+		public void TickedComparisonsFolderHasNoSpaces() {
+			using (var run = TestRun.Base(r => r.Settings.SetComparisonTicked(Run.PersonalBestComparisonName, true))) {
+				run.Start();
+				run.Split(9.5);
+				Assert.Equal("−0.5", run.Read(PREVIOUS + @"PersonalBest\RunDifference.txt"));
+				Assert.False(run.Exists(PREVIOUS + @"Personal Best\RunDifference.txt"));
 			}
 		}
 
@@ -68,18 +78,20 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.Equal("+0.5", run.Read(PREVIOUS + @"Target\RunDifference.txt"));
 				Assert.Equal("−1.5", run.Read(PREVIOUS + @"Other\RunDifference.txt"));
 				// Personal Best isn't a custom comparison
-				Assert.False(run.Exists(PREVIOUS + @"Personal Best\RunDifference.txt"));
+				Assert.False(run.Exists(PREVIOUS + @"PersonalBest\RunDifference.txt"));
 			}
 		}
 
 		[Theory]
-		[InlineData("Personal Best", "Personal Best")]
+		[InlineData("Personal Best", "PersonalBest")]
+		[InlineData(" My  Rival ", "MyRival")]
 		[InlineData("A/B", "A_B")]
 		[InlineData("a:b*c?", "a_b_c_")]
 		[InlineData("Run.", "Run_")]
-		[InlineData("a. ", "a__")]
+		[InlineData("a. ", "a_")]
 		[InlineData("", "_")]
-		public void ComparisonFolderReplacesWhatAFolderNameCantHave(string comparison, string folder) {
+		[InlineData(" ", "_")]
+		public void ComparisonFolderDropsSpacesAndReplacesWhatAFolderNameCantHave(string comparison, string folder) {
 			Assert.Equal(folder, SplitLevels.ComparisonFolder(comparison));
 		}
 	}

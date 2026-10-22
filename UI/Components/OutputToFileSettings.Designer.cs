@@ -329,7 +329,7 @@
 			this.labelComparisons.Name = "labelComparisons";
 			this.labelComparisons.Size = new System.Drawing.Size(380, 13);
 			this.labelComparisons.TabIndex = 2;
-			this.labelComparisons.Text = "Current Comparison is always written. Each ticked comparison gets a folder too.";
+			this.labelComparisons.Text = "CurrentComparison is always written. Each ticked comparison gets a folder too.";
 			//
 			// groupBoxTimeFormat
 			//

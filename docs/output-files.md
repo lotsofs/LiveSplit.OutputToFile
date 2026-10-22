@@ -7,8 +7,8 @@ How to read the paths:
 - `{level}` is `AllSplits`, `SansSubsplits` or `SansSubsplits_Level{n}`, where `{n}` (2 or more) is the shallowest depth that level leaves out; see [architecture.md](architecture.md#levels). Without subsplits, only `AllSplits` exists.
 - `{method}` is `RealTime` or `GameTime`. Every timed file exists once per method.
 - `{comparison}` is a comparison's folder. The files with it in their path compare with a comparison, and exist once per comparison written:
-  - `Current Comparison`, the comparison selected in LiveSplit, always;
-  - each comparison ticked in the Comparisons setting, and with **All custom comparisons** on, every comparison added in Edit Splits. Each folder is named after its comparison, with `_` in place of characters a folder name can't have (`A/B` → `A_B`). A comparison whose folder name is taken, such as a custom one named `Current Comparison`, is left out. See [architecture.md](architecture.md#comparisons).
+  - `CurrentComparison`, the comparison selected in LiveSplit, always;
+  - each comparison ticked in the Comparisons setting, and with **All custom comparisons** on, every comparison added in Edit Splits. Each folder is named after its comparison without its spaces (`Personal Best` → `PersonalBest`), and with `_` in place of characters a folder name can't have (`A/B` → `A_B`). A comparison whose folder name is taken, such as a custom one named `Current Comparison`, is left out. See [architecture.md](architecture.md#comparisons).
   
   "The comparison" below means that folder's comparison. A name LiveSplit doesn't have, as the server can select, shows `-` in every comparison file.
 - "Gold" files compare with a member's best segment at that level. A member that is a single split has that split's best segment, so the gold files in `AllSplits` show LiveSplit's own golds. A section of several splits has the fastest time it took within one attempt, from the splits' history ([architecture.md](architecture.md#best-segments)). It isn't the sum of its splits' golds. A section that no attempt has completed has no best segment, so its first completion is a gold.
@@ -29,7 +29,7 @@ Rewritten whenever one of `Update()`'s cache keys changes (run loaded or edited,
 | `AttemptCount.txt` | `Run.AttemptCount`. LiveSplit increments it when a run starts. |
 | `FinishedRunsCount.txt` | Number of attempts in history that have a final time, plus 1 while the timer shows a finished run |
 | `TotalSplits_{level}.txt` | Number of members in that level |
-| `CurrentComparison.txt` | The name of the comparison selected in LiveSplit, the one in the `Current Comparison` folders |
+| `CurrentComparison.txt` | The name of the comparison selected in LiveSplit, the one in the `CurrentComparison` folders |
 
 ## `Timers\{method}\` (Timer setting)
 

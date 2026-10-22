@@ -135,7 +135,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				int contents = timeFormat.Bottom + timeFormat.Margin.Bottom + table.Margin.Bottom;
 				Assert.Equal(contents, settings.Height);
 
-				settings.ShowWriteError(@"Couldn't write SplitList\AllSplits\RealTime\Current Comparison\Time_Run_Upcoming.txt (12:00:00): " + new string('x', 300));
+				settings.ShowWriteError(@"Couldn't write SplitList\AllSplits\RealTime\CurrentComparison\Time_Run_Upcoming.txt (12:00:00): " + new string('x', 300));
 				Assert.True(error.Height > 3 * error.Font.Height, "the error wraps onto several lines");
 				Assert.Equal(error.Bottom + error.Margin.Bottom + table.Margin.Bottom, settings.Height);
 
