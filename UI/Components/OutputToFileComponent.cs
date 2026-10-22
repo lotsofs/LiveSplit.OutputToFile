@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -46,6 +47,10 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		int _resetsSeen;
 		// Counts RunManuallyModified, which LiveSplit raises after each edit in Edit Splits and when splits are opened. A cache key in Update().
 		int _runEdits;
+		// A cache key for each comparison written, with its name: the comparison's time at the last split. LiveSplit regenerates
+		// its generated comparisons (Average Segments, …) on reset, after edits and from its Settings dialog. A reset sent through
+		// the server, or the Settings dialog, can change them after the rewrite, with no event; their last split time changes then.
+		List<(string Key, string Name)> _comparisonChecks = new List<(string, string)>();
 
 		RunInfoFiles _runInfoFiles;
 		TimerFiles _timerFiles;
@@ -78,7 +83,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			_timerFiles = new TimerFiles(State, Settings, _levels, _files);
 			_splitFiles = new SplitFiles(State, Settings, _levels, _files);
 			_splitListFiles = new SplitListFiles(State, Settings, _levels, _files);
-			CalculateSegments();
+			CalculateSegments(State.CurrentComparison);
 		}
 
 		// Draws nothing: the component only writes files
@@ -87,6 +92,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion) { }
 
 		public Control GetSettingsControl(LayoutMode mode) {
+			// LiveSplit asks for the control each time it opens the settings, on the UI thread
+			Settings.ShowRunComparisons(State.Run);
 			return Settings;
 		}
 
@@ -120,12 +127,16 @@ namespace LiveSplit.UI.Components.OutputToFile {
 
 		#endregion
 
-		void CalculateSegments() {
-			_levels.GenerateSubsplitLevels(State.Run, Settings.OutputSubsplits);
-			_levels.CalculatePBSegments(State.Run, TimingMethod.RealTime);
-			_levels.CalculatePBSegments(State.Run, TimingMethod.GameTime);
-			_levels.CalculateBestSegments(State.Run, TimingMethod.RealTime);
-			_levels.CalculateBestSegments(State.Run, TimingMethod.GameTime);
+		// comparison: the one selected in LiveSplit, read once per rewrite, so that every file uses the same one
+		void CalculateSegments(string comparison) {
+			IRun run = State.Run;
+			_levels.GenerateSubsplitLevels(run, Settings.OutputSubsplits);
+			// Outside LiveSplit, no comparison may be selected
+			_levels.ChooseComparisons(run, comparison ?? Run.PersonalBestComparisonName, Settings.IsComparisonTicked, Settings.AllCustomComparisons);
+			_levels.CalculateComparisonSegments(run);
+			_levels.CalculateBestSegments(run, TimingMethod.RealTime);
+			_levels.CalculateBestSegments(run, TimingMethod.GameTime);
+			_comparisonChecks = _levels.Comparisons.Select(c => c.Name).Distinct().Select(name => ("LastSplit " + name, name)).ToList();
 			// The levels, or the phase, may have changed what the segment timers count from
 			_timerFiles.SegmentStartsChanged();
 		}
@@ -172,11 +183,20 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Cache["OutputSubsplits"] = Settings.OutputSubsplits;
 			Cache["OutputCompletedSplits"] = Settings.OutputCompletedSplits;
 			Cache["TimerPhase"] = state.CurrentPhase;
+			// Selecting a comparison raises no event
+			string comparison = state.CurrentComparison;
+			Cache["CurrentComparison"] = comparison;
+			Cache["AllCustomComparisons"] = Settings.AllCustomComparisons;
+			Cache["TickedComparisons"] = Settings.TickedComparisonsVersion;
+			ISegment lastSplit = state.Run[state.Run.Count - 1];
+			foreach (var check in _comparisonChecks) {
+				Cache[check.Key] = lastSplit.Comparisons[check.Name];
+			}
 			// A full rewrite queues every file the settings and levels call for. Those it doesn't are emptied.
 			bool rewrite = Cache.HasChanged;
 			if (rewrite) {
 				_files.BeginSweep();
-				CalculateSegments();
+				CalculateSegments(comparison);
 				_runInfoFiles.Write();
 				WriteSplits();
 			}

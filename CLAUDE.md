@@ -56,7 +56,7 @@ The code is in `UI/Components/`:
 | File | Holds |
 |---|---|
 | `OutputToFileComponent.cs` | The LiveSplit side: counting timer events, change detection in `Update()`, and when each writer runs (`WriteSplits()`) |
-| `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, each level's members, PB segment times and best segments |
+| `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, the comparisons to write, each level's members, comparison segment times and best segments |
 | `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex`, and this attempt's times and deltas (`LiveSegmentTime`, `RunDelta`, `IsGold`, …) |
 | `FileQueue.cs` | Writes the files on a background thread, skipping unchanged contents; keeps the latest write error |
 | `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …) |
@@ -72,13 +72,17 @@ The code is in `UI/Components/`:
   - `Levels[lvl].Indices` maps **local** index → **global** index, i.e. into `State.Run`. Mixing the two up is a recurring bug source. Only at the last level are they the same.
   - Golds exist at every level. Each member's best is in `SplitLevel.BestSegmentTimes`: a single split's best segment, or for a section of several splits, the fastest it was done within one attempt, from the segment history. `IsGold` decides what counts as a gold. Don't test the gold delta instead: a member with no best yet has a null delta, but its first completion is a gold.
 - **Timer phases.** `GetCurrentSubsplitIndex` returns −1 unless the timer is Running or Paused. `GetPreviousSubsplitIndex` returns −1 when there is no completed member (before the start, or on the level's first member) and the last member after the finish. The live-time helpers (`LiveRunTime`, …) need a member's index, so handle −1 first. Every write path needs correct output for NotRunning, Running/Paused and Ended. Otherwise files keep stale values.
-- **Nothing per attempt is stored.** This attempt's times and deltas are computed from the run on every write, by `OutputWriter`'s `LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta` and `IsGold`. `CalculateSegments()` rebuilds the shared `SplitLevels` in place on every cache-key change, including every timer phase change, so don't keep per-attempt state in it: a pause would wipe it. It recomputes the PB segments and best segments each time; both change only on reset or when splits are edited.
+- **Comparisons.** Files that compare with a comparison (differences, `Sign.txt`, the ahead and behind highlights, the comparison's times) are written once per entry of `Levels.Comparisons`, into `{method}\{comparison folder}\`.
+  - The first entry is `Current Comparison`: LiveSplit's selection, read once per rewrite in `Update()`. The rest are the ticked comparisons, or every custom one with All custom comparisons on.
+  - Loop over `Levels.Comparisons`. Pass `comparison.Folder` to `MakeFile`, and `comparison.Name` to `ComparisonTime`, `RunDelta` and `SegmentDelta`.
+  - Don't read `State.CurrentComparison` or `PersonalBestSplitTime` in a writer: a file could then use another comparison than the rest of the rewrite.
+- **Nothing per attempt is stored.** This attempt's times and deltas are computed from the run on every write, by `OutputWriter`'s `LiveRunTime`, `LiveSegmentTime`, `RunDelta`, `SegmentDelta`, `GoldDelta` and `IsGold`. `CalculateSegments()` rebuilds the shared `SplitLevels` in place on every cache-key change, including every timer phase change, so don't keep per-attempt state in it: a pause would wipe it. It recomputes the comparisons' segments and the best segments each time; both change only on reset or when splits are edited.
 - **Threads.** The timer event handlers can run on another thread: LiveSplit's server raises the events on its connection's thread.
   - So the handlers only count events with `Interlocked.Increment`, and `Update()`, on the UI thread, does all the work on the next frame.
   - Keep it that way. Don't touch the levels, the writers or the settings control from a handler; give `Update()` a count or a cache key instead.
   - A handler that throws on the server's thread closes LiveSplit.
 - **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite. The timer files are the exception: `TimerFiles` has its own check, `HasTimerChanged`, on what each timer file shows and the timer phase. It caches each level's segment start; anything new that moves a split time or rebuilds the levels must call `SegmentStartsChanged()`.
-- **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
+- **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag, `{3}` comparison folder). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
   - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. A reset clears that record, in the next `Update()`. Anything that reads the files (tests, the headless harness) must call `WaitForFileWrites()` first.
   - A full rewrite in `Update()` must queue every file the settings and levels call for, whatever the phase. `FileQueue.EndSweep` empties any file in the component's folders (`OUTPUT_FOLDERS`, plus root files matching `OUTPUT_ROOT_FILES`) that wasn't queued, so a file written in only some phases would be emptied in the others.
   - The drain catches every exception per file, and `Update()` shows the latest in the settings panel (`ShowWriteError`). Only touch the settings control from the UI thread. Don't add file access that bypasses `FileQueue`: an exception would escape into LiveSplit's `Update()`.
@@ -88,8 +92,8 @@ The code is in `UI/Components/`:
 
 **Adding an output file:**
 1. Add a `FILE_*` template to the writer for its folder (see the file table above). Root files go in `RunInfoFiles`; a root file that isn't always written must also match `OUTPUT_ROOT_FILES` in the component, or it won't be emptied when it's no longer written.
-2. Write it from that writer's `Write*` function, in every phase branch.
-3. If it's a list column, make it a `FILE_LIST_*` template, give it a `StringBuilder` field in `ListLines` (created with `Add` in its constructor), and append its line in `AppendNames`, `AppendCompletedLine` or `AppendUpcomingLine`. Both lists then get it, except a file that only `AppendUpcomingLine` fills: `Add` that one inside `if (upcoming)`, so only `SplitList\` gets it.
+2. Write it from that writer's `Write*` function, in every phase branch. If its contents depend on the comparison, put `{3}` right after `{0}` in its template, and write it inside the loop over `Levels.Comparisons` (see "Comparisons" above).
+3. If it's a list column, make it a `FILE_LIST_*` template and give it a `StringBuilder` field: in `ListLines`, created with `Add` in its constructor, or in `ComparisonLines` with `add` if it depends on the comparison. Append its line in `AppendNames`, `AppendCompletedLine` or `AppendUpcomingLine`. Both lists then get it, except a file that only `AppendUpcomingLine` fills: `Add` that one inside `if (upcoming)`, so only `SplitList\` gets it.
 4. Write it once per timing method only if its path contains `{0}`.
 5. Document it in `docs/output-files.md`, `README.md` and `CHANGELOG.md`.
 

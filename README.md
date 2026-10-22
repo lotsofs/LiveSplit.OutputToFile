@@ -22,7 +22,18 @@ After is the number of splits after the current one. It's `-` before the timer s
 
 Highlights are a shaded bar to layer behind splits.
 
-The files of an output you turn off in the settings, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits` and `Timers`) as its own, so don't keep other files there.
+The files of an output you turn off in the settings, of a comparison you untick, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits` and `Timers`) as its own, so don't keep other files there.
+
+## Comparisons
+
+Differences, `Sign.txt`, the ahead and behind highlights, and the split and segment times of the current and upcoming splits compare against a comparison, as LiveSplit's own splits do. Those files are in a comparison folder inside `GameTime` and `RealTime`:
+
+- `Current Comparison` follows the comparison selected in LiveSplit (right-click → Compare Against). `CurrentComparison.txt` holds its name.
+- Tick a comparison under **Comparisons** in the settings to also get a folder for it, named after it, such as `Personal Best` or `Average Segments`. **All custom comparisons** gives every comparison you added in Edit Splits a folder, in whatever splits you open.
+
+Golds don't depend on the comparison, so their files stay in `GameTime` and `RealTime`.
+
+At the finish, `Sign.txt` says `Finished` followed by what it would say during the run, such as `FinishedGainedAhead`. In the `Personal Best` folder, the `FinishedAhead` values mean a new personal best.
 
 ## Subsplits
 In addition to the ``AllSplits`` folder, which takes into consideration every split regardless of whether it is a subsplit or not, if applicable there will also be a ``SansSubsplits`` folder. These will only include splits that do not start with a dash (``-``) (These appear to be referred to in the official subsplits module as 'Section Headers'). Furthermore, the component supports multi-level subsplits, which are subsplits of subsplits, and are created by putting two (2) or more dashes in front of your splitname. Each of these levels gets a folder named after the dashes it leaves out: ``SansSubsplits_Level2`` has every split except those with two or more dashes, ``SansSubsplits_Level3`` every split except those with three or more, and so on. There is no limit to how many levels deep you can go.
@@ -34,6 +45,7 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 ```
 |   AttemptCount.txt
 |   CategoryName.txt
+|   CurrentComparison.txt
 |   FinishedRunsCount.txt
 |   GameName.txt
 |   TotalSplits_AllSplits.txt
@@ -50,15 +62,23 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 |   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       GoldTime.txt
-|   |   |       RunTime.txt
-|   |   |       SegmentTime.txt
-|   |   |       
+|   |   |   |   GoldTime.txt
+|   |   |   |   
+|   |   |   +---Current Comparison
+|   |   |   |       RunTime.txt
+|   |   |   |       SegmentTime.txt
+|   |   |   |       
+|   |   |   \---Personal Best
+|   |   |           RunTime.txt
+|   |   |           SegmentTime.txt
+|   |   |           
 |   |   \---RealTime
-|   |           GoldTime.txt
-|   |           RunTime.txt
-|   |           SegmentTime.txt
-|   |           
+|   |       |   GoldTime.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               RunTime.txt
+|   |               SegmentTime.txt
+|   |               
 |   +---SansSubsplits
 |   |   |   After.txt
 |   |   |   Completed.txt
@@ -67,15 +87,19 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 |   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       GoldTime.txt
-|   |   |       RunTime.txt
-|   |   |       SegmentTime.txt
-|   |   |       
+|   |   |   |   GoldTime.txt
+|   |   |   |   
+|   |   |   \---Current Comparison
+|   |   |           RunTime.txt
+|   |   |           SegmentTime.txt
+|   |   |           
 |   |   \---RealTime
-|   |           GoldTime.txt
-|   |           RunTime.txt
-|   |           SegmentTime.txt
-|   |           
+|   |       |   GoldTime.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               RunTime.txt
+|   |               SegmentTime.txt
+|   |               
 |   +---SansSubsplits_Level2
 |   |   |   After.txt
 |   |   |   Completed.txt
@@ -84,15 +108,19 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 |   |   |   Remaining.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       GoldTime.txt
-|   |   |       RunTime.txt
-|   |   |       SegmentTime.txt
-|   |   |       
+|   |   |   |   GoldTime.txt
+|   |   |   |   
+|   |   |   \---Current Comparison
+|   |   |           RunTime.txt
+|   |   |           SegmentTime.txt
+|   |   |           
 |   |   \---RealTime
-|   |           GoldTime.txt
-|   |           RunTime.txt
-|   |           SegmentTime.txt
-|   |           
+|   |       |   GoldTime.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               RunTime.txt
+|   |               SegmentTime.txt
+|   |               
 |   \---SansSubsplits_Level3
 |       |   etc.
 |       …
@@ -102,59 +130,76 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 |   |   |   Name.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       GoldDifference.txt
-|   |   |       RunDifference.txt
-|   |   |       RunTime.txt
-|   |   |       SegmentDifference.txt
-|   |   |       SegmentTime.txt
-|   |   |       Sign.txt
-|   |   |       
+|   |   |   |   GoldDifference.txt
+|   |   |   |   RunTime.txt
+|   |   |   |   SegmentTime.txt
+|   |   |   |   
+|   |   |   +---Current Comparison
+|   |   |   |       RunDifference.txt
+|   |   |   |       SegmentDifference.txt
+|   |   |   |       Sign.txt
+|   |   |   |       
+|   |   |   \---Personal Best
+|   |   |           RunDifference.txt
+|   |   |           SegmentDifference.txt
+|   |   |           Sign.txt
+|   |   |           
 |   |   \---RealTime
-|   |           GoldDifference.txt
-|   |           RunDifference.txt
-|   |           RunTime.txt
-|   |           SegmentDifference.txt
-|   |           SegmentTime.txt
-|   |           Sign.txt
-|   |           
+|   |       |   GoldDifference.txt
+|   |       |   RunTime.txt
+|   |       |   SegmentTime.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               RunDifference.txt
+|   |               SegmentDifference.txt
+|   |               Sign.txt
+|   |               
 |   +---SansSubsplits
 |   |   |   Name.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       GoldDifference.txt
-|   |   |       RunDifference.txt
-|   |   |       RunTime.txt
-|   |   |       SegmentDifference.txt
-|   |   |       SegmentTime.txt
-|   |   |       Sign.txt
-|   |   |       
+|   |   |   |   GoldDifference.txt
+|   |   |   |   RunTime.txt
+|   |   |   |   SegmentTime.txt
+|   |   |   |   
+|   |   |   \---Current Comparison
+|   |   |           RunDifference.txt
+|   |   |           SegmentDifference.txt
+|   |   |           Sign.txt
+|   |   |           
 |   |   \---RealTime
-|   |           GoldDifference.txt
-|   |           RunDifference.txt
-|   |           RunTime.txt
-|   |           SegmentDifference.txt
-|   |           SegmentTime.txt
-|   |           Sign.txt
-|   |           
+|   |       |   GoldDifference.txt
+|   |       |   RunTime.txt
+|   |       |   SegmentTime.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               RunDifference.txt
+|   |               SegmentDifference.txt
+|   |               Sign.txt
+|   |               
 |   +---SansSubsplits_Level2
 |   |   |   Name.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       GoldDifference.txt
-|   |   |       RunDifference.txt
-|   |   |       RunTime.txt
-|   |   |       SegmentDifference.txt
-|   |   |       SegmentTime.txt
-|   |   |       Sign.txt
-|   |   |       
+|   |   |   |   GoldDifference.txt
+|   |   |   |   RunTime.txt
+|   |   |   |   SegmentTime.txt
+|   |   |   |   
+|   |   |   \---Current Comparison
+|   |   |           RunDifference.txt
+|   |   |           SegmentDifference.txt
+|   |   |           Sign.txt
+|   |   |           
 |   |   \---RealTime
-|   |           GoldDifference.txt
-|   |           RunDifference.txt
-|   |           RunTime.txt
-|   |           SegmentDifference.txt
-|   |           SegmentTime.txt
-|   |           Sign.txt
-|   |           
+|   |       |   GoldDifference.txt
+|   |       |   RunTime.txt
+|   |       |   SegmentTime.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               RunDifference.txt
+|   |               SegmentDifference.txt
+|   |               Sign.txt
+|   |               
 |   \---SansSubsplits_Level3
 |       |   etc.
 |       …
@@ -165,97 +210,119 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 |   |   |   Names.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       Delta_Gold.txt
-|   |   |       Delta_Run.txt
-|   |   |       Delta_Segment.txt
-|   |   |       Highlight_AheadGained.txt
-|   |   |       Highlight_AheadLost.txt
-|   |   |       Highlight_BehindGained.txt
-|   |   |       Highlight_BehindLost.txt
-|   |   |       Highlight_Gold.txt
-|   |   |       Time_Gold_Upcoming.txt
-|   |   |       Time_Run_Current.txt
-|   |   |       Time_Run_Upcoming.txt
-|   |   |       Time_Segment_Upcoming.txt
-|   |   |       
+|   |   |   |   Delta_Gold.txt
+|   |   |   |   Highlight_Gold.txt
+|   |   |   |   Time_Gold_Upcoming.txt
+|   |   |   |   Time_Run_Current.txt
+|   |   |   |   
+|   |   |   +---Current Comparison
+|   |   |   |       Delta_Run.txt
+|   |   |   |       Delta_Segment.txt
+|   |   |   |       Highlight_AheadGained.txt
+|   |   |   |       Highlight_AheadLost.txt
+|   |   |   |       Highlight_BehindGained.txt
+|   |   |   |       Highlight_BehindLost.txt
+|   |   |   |       Time_Run_Upcoming.txt
+|   |   |   |       Time_Segment_Upcoming.txt
+|   |   |   |       
+|   |   |   \---Personal Best
+|   |   |           Delta_Run.txt
+|   |   |           Delta_Segment.txt
+|   |   |           Highlight_AheadGained.txt
+|   |   |           Highlight_AheadLost.txt
+|   |   |           Highlight_BehindGained.txt
+|   |   |           Highlight_BehindLost.txt
+|   |   |           Time_Run_Upcoming.txt
+|   |   |           Time_Segment_Upcoming.txt
+|   |   |           
 |   |   \---RealTime
-|   |           Delta_Gold.txt
-|   |           Delta_Run.txt
-|   |           Delta_Segment.txt
-|   |           Highlight_AheadGained.txt
-|   |           Highlight_AheadLost.txt
-|   |           Highlight_BehindGained.txt
-|   |           Highlight_BehindLost.txt
-|   |           Highlight_Gold.txt
-|   |           Time_Gold_Upcoming.txt
-|   |           Time_Run_Current.txt
-|   |           Time_Run_Upcoming.txt
-|   |           Time_Segment_Upcoming.txt
-|   |           
+|   |       |   Delta_Gold.txt
+|   |       |   Highlight_Gold.txt
+|   |       |   Time_Gold_Upcoming.txt
+|   |       |   Time_Run_Current.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               Delta_Run.txt
+|   |               Delta_Segment.txt
+|   |               Highlight_AheadGained.txt
+|   |               Highlight_AheadLost.txt
+|   |               Highlight_BehindGained.txt
+|   |               Highlight_BehindLost.txt
+|   |               Time_Run_Upcoming.txt
+|   |               Time_Segment_Upcoming.txt
+|   |               
 |   +---SansSubsplits
 |   |   |   Highlight_CurrentSplit.txt
 |   |   |   Names.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       Delta_Gold.txt
-|   |   |       Delta_Run.txt
-|   |   |       Delta_Segment.txt
-|   |   |       Highlight_AheadGained.txt
-|   |   |       Highlight_AheadLost.txt
-|   |   |       Highlight_BehindGained.txt
-|   |   |       Highlight_BehindLost.txt
-|   |   |       Highlight_Gold.txt
-|   |   |       Time_Gold_Upcoming.txt
-|   |   |       Time_Run_Current.txt
-|   |   |       Time_Run_Upcoming.txt
-|   |   |       Time_Segment_Upcoming.txt
-|   |   |       
+|   |   |   |   Delta_Gold.txt
+|   |   |   |   Highlight_Gold.txt
+|   |   |   |   Time_Gold_Upcoming.txt
+|   |   |   |   Time_Run_Current.txt
+|   |   |   |   
+|   |   |   \---Current Comparison
+|   |   |           Delta_Run.txt
+|   |   |           Delta_Segment.txt
+|   |   |           Highlight_AheadGained.txt
+|   |   |           Highlight_AheadLost.txt
+|   |   |           Highlight_BehindGained.txt
+|   |   |           Highlight_BehindLost.txt
+|   |   |           Time_Run_Upcoming.txt
+|   |   |           Time_Segment_Upcoming.txt
+|   |   |           
 |   |   \---RealTime
-|   |           Delta_Gold.txt
-|   |           Delta_Run.txt
-|   |           Delta_Segment.txt
-|   |           Highlight_AheadGained.txt
-|   |           Highlight_AheadLost.txt
-|   |           Highlight_BehindGained.txt
-|   |           Highlight_BehindLost.txt
-|   |           Highlight_Gold.txt
-|   |           Time_Gold_Upcoming.txt
-|   |           Time_Run_Current.txt
-|   |           Time_Run_Upcoming.txt
-|   |           Time_Segment_Upcoming.txt
-|   |           
+|   |       |   Delta_Gold.txt
+|   |       |   Highlight_Gold.txt
+|   |       |   Time_Gold_Upcoming.txt
+|   |       |   Time_Run_Current.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               Delta_Run.txt
+|   |               Delta_Segment.txt
+|   |               Highlight_AheadGained.txt
+|   |               Highlight_AheadLost.txt
+|   |               Highlight_BehindGained.txt
+|   |               Highlight_BehindLost.txt
+|   |               Time_Run_Upcoming.txt
+|   |               Time_Segment_Upcoming.txt
+|   |               
 |   +---SansSubsplits_Level2
 |   |   |   Highlight_CurrentSplit.txt
 |   |   |   Names.txt
 |   |   |   
 |   |   +---GameTime
-|   |   |       Delta_Gold.txt
-|   |   |       Delta_Run.txt
-|   |   |       Delta_Segment.txt
-|   |   |       Highlight_AheadGained.txt
-|   |   |       Highlight_AheadLost.txt
-|   |   |       Highlight_BehindGained.txt
-|   |   |       Highlight_BehindLost.txt
-|   |   |       Highlight_Gold.txt
-|   |   |       Time_Gold_Upcoming.txt
-|   |   |       Time_Run_Current.txt
-|   |   |       Time_Run_Upcoming.txt
-|   |   |       Time_Segment_Upcoming.txt
-|   |   |       
+|   |   |   |   Delta_Gold.txt
+|   |   |   |   Highlight_Gold.txt
+|   |   |   |   Time_Gold_Upcoming.txt
+|   |   |   |   Time_Run_Current.txt
+|   |   |   |   
+|   |   |   \---Current Comparison
+|   |   |           Delta_Run.txt
+|   |   |           Delta_Segment.txt
+|   |   |           Highlight_AheadGained.txt
+|   |   |           Highlight_AheadLost.txt
+|   |   |           Highlight_BehindGained.txt
+|   |   |           Highlight_BehindLost.txt
+|   |   |           Time_Run_Upcoming.txt
+|   |   |           Time_Segment_Upcoming.txt
+|   |   |           
 |   |   \---RealTime
-|   |           Delta_Gold.txt
-|   |           Delta_Run.txt
-|   |           Delta_Segment.txt
-|   |           Highlight_AheadGained.txt
-|   |           Highlight_AheadLost.txt
-|   |           Highlight_BehindGained.txt
-|   |           Highlight_BehindLost.txt
-|   |           Highlight_Gold.txt
-|   |           Time_Gold_Upcoming.txt
-|   |           Time_Run_Current.txt
-|   |           Time_Run_Upcoming.txt
-|   |           Time_Segment_Upcoming.txt
-|   |           
+|   |       |   Delta_Gold.txt
+|   |       |   Highlight_Gold.txt
+|   |       |   Time_Gold_Upcoming.txt
+|   |       |   Time_Run_Current.txt
+|   |       |   
+|   |       \---Current Comparison
+|   |               Delta_Run.txt
+|   |               Delta_Segment.txt
+|   |               Highlight_AheadGained.txt
+|   |               Highlight_AheadLost.txt
+|   |               Highlight_BehindGained.txt
+|   |               Highlight_BehindLost.txt
+|   |               Time_Run_Upcoming.txt
+|   |               Time_Segment_Upcoming.txt
+|   |               
 |   \---SansSubsplits_Level3
 |       |   etc.
 |       …

@@ -1,11 +1,16 @@
 # Output files
 
-Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the regression base run in [testing.md](testing.md#regression-checks), which produces 165 files with every output on. The README's tree is incomplete ([DOC](Project.md#doc--readme-is-missing-outputs-and-settings), [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete)).
+Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the regression base run in [testing.md](testing.md#regression-checks), which produces 166 files with every output on and no comparison ticked. The README's tree is incomplete ([DOC](Project.md#doc--readme-is-missing-outputs-and-settings), [GTT](Project.md#gtt--readmes-gametime-timer-list-is-incomplete)).
 
 How to read the paths:
 
 - `{level}` is `AllSplits`, `SansSubsplits` or `SansSubsplits_Level{n}`, where `{n}` (2 or more) is the shallowest depth that level leaves out; see [architecture.md](architecture.md#levels). Without subsplits, only `AllSplits` exists.
 - `{method}` is `RealTime` or `GameTime`. Every timed file exists once per method.
+- `{comparison}` is a comparison's folder. The files with it in their path compare with a comparison, and exist once per comparison written:
+  - `Current Comparison`, the comparison selected in LiveSplit, always;
+  - each comparison ticked in the Comparisons setting, and with **All custom comparisons** on, every comparison added in Edit Splits. Each folder is named after its comparison, with `_` in place of characters a folder name can't have (`A/B` → `A_B`). A comparison whose folder name is taken, such as a custom one named `Current Comparison`, is left out. See [architecture.md](architecture.md#comparisons).
+  
+  "The comparison" below means that folder's comparison. A name LiveSplit doesn't have, as the server can select, shows `-` in every comparison file.
 - "Gold" files compare with a member's best segment at that level. A member that is a single split has that split's best segment, so the gold files in `AllSplits` show LiveSplit's own golds. A section of several splits has the fastest time it took within one attempt, from the splits' history ([architecture.md](architecture.md#best-segments)). It isn't the sum of its splits' golds. A section that no attempt has completed has no best segment, so its first completion is a gold.
 - `-` means no value. Times use the formats in [Formatting](#formatting).
 - "Member" means a split that belongs to the level. "Current" and "previous" are relative to that level. For example, the current `SansSubsplits` member while the runner is on a subsplit is the section that subsplit belongs to.
@@ -24,6 +29,7 @@ Rewritten whenever one of `Update()`'s cache keys changes (run loaded or edited,
 | `AttemptCount.txt` | `Run.AttemptCount`. LiveSplit increments it when a run starts. |
 | `FinishedRunsCount.txt` | Number of attempts in history that have a final time, plus 1 while the timer shows a finished run |
 | `TotalSplits_{level}.txt` | Number of members in that level |
+| `CurrentComparison.txt` | The name of the comparison selected in LiveSplit, the one in the `Current Comparison` folders |
 
 ## `Timers\{method}\` (Timer setting)
 
@@ -44,8 +50,8 @@ Written from `Update()`, but only when what one of them shows changes: the run t
 | `Completed.txt` | `0` | Number of members completed, skipped ones included | `Count` |
 | `Remaining.txt` | `Count` | Number of members not completed, the current one included: `Count − Completed` | `0` |
 | `After.txt` | `-` | Number of members after the current one: `Remaining − 1` | `-` |
-| `{method}\SegmentTime.txt` | `-` | PB segment time of the current member | `-` |
-| `{method}\RunTime.txt` | `-` | PB split time of the current member | `-` |
+| `{method}\{comparison}\SegmentTime.txt` | `-` | The comparison's segment time for the current member | `-` |
+| `{method}\{comparison}\RunTime.txt` | `-` | The comparison's split time for the current member | `-` |
 | `{method}\GoldTime.txt` (gold) | `-` | Best segment of the current member | `-` |
 
 ## `PreviousSplit\{level}\`
@@ -57,24 +63,26 @@ Written from `Update()`, but only when what one of them shows changes: the run t
 | `Name.txt`, `Name_Raw.txt` | `-` | Previous member's name | Last split's name |
 | `{method}\SegmentTime.txt` | `-` | This attempt's segment time for that member | The last member's segment time |
 | `{method}\RunTime.txt` | `-` | This attempt's split time | Final time |
-| `{method}\SegmentDifference.txt` | `-` | Segment time − PB segment | Last segment − PB segment |
-| `{method}\RunDifference.txt` | `-` | Split time − PB split time | Final time − PB |
+| `{method}\{comparison}\SegmentDifference.txt` | `-` | Segment time − the comparison's segment | Last segment − the comparison's |
+| `{method}\{comparison}\RunDifference.txt` | `-` | Split time − the comparison's split time | Final time − the comparison's |
 | `{method}\GoldDifference.txt` (gold) | `-` | Segment time − best segment | Last segment − best segment |
-| `{method}\Sign.txt` | `NotApplicable` | See below | See below |
+| `{method}\{comparison}\Sign.txt` | `NotApplicable` | See below | See below |
 
 When the timer isn't running, every file shows `-`, and `Sign.txt` shows `NotApplicable`.
 
 ### Sign values
 
-These are the names of the `Signs` enum. "Ahead" and "PB" mean the run delta is negative.
+These are the names of the `Signs` enum. "Ahead" means the run delta is negative: the split time beat the comparison's. At the finish, the value is the one it would be during the run, with `Finished` in front. The first row that applies wins.
 
 | During the run | At the finish | Meaning |
 |---|---|---|
-| `NotApplicable` | | No run delta: no PB time, a skipped split, or the timer isn't running |
-| `GoldAhead` / `GoldBehind` | `PBGold` / `NoPBGold` | The segment beat the member's best segment, or the member has none yet |
-| `Ahead` / `Behind` | `PB` / `NoPB` | No segment delta |
-| `GainedAhead` / `GainedBehind` | `PBGained` / `NoPBGained` | The segment beat the PB segment |
-| `LostAhead` / `LostBehind` | `PBLost` / `NoPBLost` | The segment was slower than the PB segment |
+| `NotApplicable` | `FinishedNotApplicable` | No run delta: the comparison has no time for the split, the split was skipped, or the timer isn't running |
+| `GoldAhead` / `GoldBehind` | `FinishedGoldAhead` / `FinishedGoldBehind` | The segment beat the member's best segment, or the member has none yet |
+| `Ahead` / `Behind` | `FinishedAhead` / `FinishedBehind` | No segment delta |
+| `GainedAhead` / `GainedBehind` | `FinishedGainedAhead` / `FinishedGainedBehind` | The segment beat the comparison's segment |
+| `LostAhead` / `LostBehind` | `FinishedLostAhead` / `FinishedLostBehind` | The segment wasn't faster than the comparison's segment |
+
+In the Personal Best folder, `FinishedAhead`, `FinishedGoldAhead` and so on mean the run beat the PB.
 
 ## `SplitList\{level}\` (Split List setting)
 
@@ -94,19 +102,19 @@ Every file has the same number of lines, so separate text sources line up. "Comp
 | `Names_Indent_{n}.txt` (n = 0 … level) | Display name only on lines whose split depth is `n`. One file per indent level. |
 | `Highlight_CurrentSplit.txt` | Fill on the current member's line |
 | `{method}\Time_Run_Current.txt` | Completed: this attempt's split time |
-| `{method}\Time_Run_Upcoming.txt` | Upcoming: PB split time |
-| `{method}\Time_Segment_Upcoming.txt` | Upcoming: PB segment time |
+| `{method}\{comparison}\Time_Run_Upcoming.txt` | Upcoming: the comparison's split time |
+| `{method}\{comparison}\Time_Segment_Upcoming.txt` | Upcoming: the comparison's segment time |
 | `{method}\Time_Gold_Upcoming.txt` (gold) | Upcoming: best segment |
-| `{method}\Delta_Run.txt` | Completed: run delta |
-| `{method}\Delta_Segment.txt` | Completed: segment delta |
+| `{method}\{comparison}\Delta_Run.txt` | Completed: run delta |
+| `{method}\{comparison}\Delta_Segment.txt` | Completed: segment delta |
 | `{method}\Delta_Gold.txt` (gold) | Completed: gold delta |
 | `{method}\Highlight_Gold.txt` (gold) | Fill on completed lines that are golds (see [Sign values](#sign-values)) |
-| `{method}\Highlight_AheadGained.txt` | Fill: run delta < 0 and segment delta < 0 |
-| `{method}\Highlight_AheadLost.txt` | Fill: run delta < 0, segment not gained |
-| `{method}\Highlight_BehindGained.txt` | Fill: segment delta < 0, run delta not < 0 |
-| `{method}\Highlight_BehindLost.txt` | Fill: every other completed line that has a PB time |
+| `{method}\{comparison}\Highlight_AheadGained.txt` | Fill: run delta < 0 and segment delta < 0 |
+| `{method}\{comparison}\Highlight_AheadLost.txt` | Fill: run delta < 0, segment not gained |
+| `{method}\{comparison}\Highlight_BehindGained.txt` | Fill: segment delta < 0, run delta not < 0 |
+| `{method}\{comparison}\Highlight_BehindLost.txt` | Fill: every other completed line for which the comparison has a time |
 
-Each completed line has a fill in at most one highlight file, checked in the table's order from top to bottom. A skipped split's line is blank in all of them, and so is the line of a split that has no PB time and isn't a gold. The fill is 43 × `█`.
+Each completed line has a fill in at most one of `Highlight_Gold.txt` and one comparison's four highlight files, checked in the table's order from top to bottom. A gold is filled only in `Highlight_Gold.txt`, so its line is blank in every comparison's files. A skipped split's line is blank in all of them, and so is the line of a split that the comparison has no time for and isn't a gold. The fill is 43 × `█`.
 
 ## `CompletedSplits\{level}\` (Completed splits setting)
 
@@ -116,7 +124,8 @@ The same files as `SplitList`, but the lines cover every completed member: none 
 
 Turning off the Timer, Split list or Completed splits setting empties that output's files straight away. The same happens to:
 - the files of a level that is gone, because Subsplits was turned off or the splits no longer have that many dashes;
-- `Names_Indent_{n}.txt` for a depth no longer present.
+- `Names_Indent_{n}.txt` for a depth no longer present;
+- a comparison's folder, when it's unticked, or when the open splits don't have that comparison.
 
 The files stay, with no contents, and are filled again when the output or level comes back. Leftovers like these from earlier sessions are emptied when the layout is loaded. Nothing is deleted. Only the component's own files are emptied, and only in the folder currently set. Its own files are everything in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\`, and the `TotalSplits*.txt` files. That includes any other file kept in those folders, and the files older releases wrote there.
 

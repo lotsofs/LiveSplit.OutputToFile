@@ -44,12 +44,17 @@
 			this.numericUpDownSplitListAfter = new System.Windows.Forms.NumericUpDown();
 			this.labelSplitListBefore = new System.Windows.Forms.Label();
 			this.labelSplitListAfter = new System.Windows.Forms.Label();
+			this.groupBoxComparisons = new System.Windows.Forms.GroupBox();
+			this.checkBoxAllCustomComparisons = new System.Windows.Forms.CheckBox();
+			this.checkedListBoxComparisons = new System.Windows.Forms.CheckedListBox();
+			this.labelComparisons = new System.Windows.Forms.Label();
 			this.labelWriteError = new System.Windows.Forms.Label();
 			this.tableLayoutPanelTop.SuspendLayout();
 			this.groupBoxFolderPath.SuspendLayout();
 			this.tableLayoutPanelFolderPath.SuspendLayout();
 			this.groupBoxOutputSelection.SuspendLayout();
 			this.groupBoxSplitList.SuspendLayout();
+			this.groupBoxComparisons.SuspendLayout();
 			this.tableLayoutPanelSplitList.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListAfter)).BeginInit();
@@ -63,13 +68,15 @@
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxFolderPath, 0, 0);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxOutputSelection, 0, 1);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxSplitList, 0, 2);
-			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 3);
+			this.tableLayoutPanelTop.Controls.Add(this.groupBoxComparisons, 0, 3);
+			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 4);
 			this.tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanelTop.Name = "tableLayoutPanelTop";
-			this.tableLayoutPanelTop.RowCount = 4;
+			this.tableLayoutPanelTop.RowCount = 5;
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 51F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 74F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 77F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 166F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 549);
 			this.tableLayoutPanelTop.TabIndex = 0;
@@ -266,17 +273,64 @@
 			this.labelSplitListAfter.Size = new System.Drawing.Size(257, 13);
 			this.labelSplitListAfter.TabIndex = 3;
 			this.labelSplitListAfter.Text = "Splits after current";
-			// 
+			//
+			// groupBoxComparisons
+			//
+			this.groupBoxComparisons.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBoxComparisons.Controls.Add(this.checkBoxAllCustomComparisons);
+			this.groupBoxComparisons.Controls.Add(this.checkedListBoxComparisons);
+			this.groupBoxComparisons.Controls.Add(this.labelComparisons);
+			this.groupBoxComparisons.Location = new System.Drawing.Point(3, 205);
+			this.groupBoxComparisons.Name = "groupBoxComparisons";
+			this.groupBoxComparisons.Size = new System.Drawing.Size(448, 160);
+			this.groupBoxComparisons.TabIndex = 3;
+			this.groupBoxComparisons.TabStop = false;
+			this.groupBoxComparisons.Text = "Comparisons";
+			//
+			// checkBoxAllCustomComparisons
+			//
+			this.checkBoxAllCustomComparisons.AutoSize = true;
+			this.checkBoxAllCustomComparisons.Location = new System.Drawing.Point(6, 19);
+			this.checkBoxAllCustomComparisons.Name = "checkBoxAllCustomComparisons";
+			this.checkBoxAllCustomComparisons.Size = new System.Drawing.Size(138, 17);
+			this.checkBoxAllCustomComparisons.TabIndex = 0;
+			this.checkBoxAllCustomComparisons.Text = "All custom comparisons";
+			this.checkBoxAllCustomComparisons.UseVisualStyleBackColor = true;
+			this.checkBoxAllCustomComparisons.CheckedChanged += new System.EventHandler(this.checkBoxAllCustomComparisons_CheckedChanged);
+			//
+			// checkedListBoxComparisons
+			//
+			this.checkedListBoxComparisons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.checkedListBoxComparisons.CheckOnClick = true;
+			this.checkedListBoxComparisons.IntegralHeight = false;
+			this.checkedListBoxComparisons.Location = new System.Drawing.Point(6, 42);
+			this.checkedListBoxComparisons.Name = "checkedListBoxComparisons";
+			this.checkedListBoxComparisons.Size = new System.Drawing.Size(436, 94);
+			this.checkedListBoxComparisons.TabIndex = 1;
+			this.checkedListBoxComparisons.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBoxComparisons_ItemCheck);
+			//
+			// labelComparisons
+			//
+			this.labelComparisons.AutoSize = true;
+			this.labelComparisons.Location = new System.Drawing.Point(6, 140);
+			this.labelComparisons.Name = "labelComparisons";
+			this.labelComparisons.Size = new System.Drawing.Size(380, 13);
+			this.labelComparisons.TabIndex = 2;
+			this.labelComparisons.Text = "Current Comparison is always written. Each ticked comparison gets a folder too.";
+			//
 			// labelWriteError
-			// 
+			//
 			this.labelWriteError.AutoSize = true;
 			this.labelWriteError.ForeColor = System.Drawing.Color.Firebrick;
-			this.labelWriteError.Location = new System.Drawing.Point(3, 205);
+			this.labelWriteError.Location = new System.Drawing.Point(3, 371);
 			this.labelWriteError.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
 			this.labelWriteError.MaximumSize = new System.Drawing.Size(448, 0);
 			this.labelWriteError.Name = "labelWriteError";
 			this.labelWriteError.Size = new System.Drawing.Size(0, 13);
-			this.labelWriteError.TabIndex = 3;
+			this.labelWriteError.TabIndex = 4;
 			this.labelWriteError.Visible = false;
 			// 
 			// OutputToFileSettings
@@ -296,6 +350,8 @@
 			this.groupBoxOutputSelection.ResumeLayout(false);
 			this.groupBoxOutputSelection.PerformLayout();
 			this.groupBoxSplitList.ResumeLayout(false);
+			this.groupBoxComparisons.ResumeLayout(false);
+			this.groupBoxComparisons.PerformLayout();
 			this.tableLayoutPanelSplitList.ResumeLayout(false);
 			this.tableLayoutPanelSplitList.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).EndInit();
@@ -323,6 +379,10 @@
 		private System.Windows.Forms.CheckBox checkBoxOutputSplitList;
 		private System.Windows.Forms.CheckBox checkBoxOutputSubsplits;
 		private System.Windows.Forms.CheckBox checkBoxOutputCompletedSplits;
+		private System.Windows.Forms.GroupBox groupBoxComparisons;
+		private System.Windows.Forms.CheckBox checkBoxAllCustomComparisons;
+		private System.Windows.Forms.CheckedListBox checkedListBoxComparisons;
+		private System.Windows.Forms.Label labelComparisons;
 		private System.Windows.Forms.Label labelWriteError;
 	}
 }

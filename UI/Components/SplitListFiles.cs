@@ -1,6 +1,7 @@
 ﻿using LiveSplit.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LiveSplit.UI.Components.OutputToFile {
@@ -21,18 +22,19 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		const string FILE_LIST_NAMES_RAW = @"{1}\Names_Raw.txt";
 		const string FILE_LIST_WHITESPACE = @"{1}\Names_Indent_{2}.txt";
 		const string FILE_LIST_FINISH_TIME_LIVE = @"{1}\{0}\Time_Run_Current.txt";
-		const string FILE_LIST_FINISH_TIME_UPCOMING = @"{1}\{0}\Time_Run_Upcoming.txt";
-		const string FILE_LIST_RUN_DELTA = @"{1}\{0}\Delta_Run.txt";
 		const string FILE_LIST_GOLD_DELTA = @"{1}\{0}\Delta_Gold.txt";
 		const string FILE_LIST_GOLD_TIME_UPCOMING = @"{1}\{0}\Time_Gold_Upcoming.txt";
-		const string FILE_LIST_SEGMENT_TIME_UPCOMING = @"{1}\{0}\Time_Segment_Upcoming.txt";
-		const string FILE_LIST_SEGMENT_DELTA = @"{1}\{0}\Delta_Segment.txt";
 		const string FILE_LIST_CURRENT_SPLIT_HIGHLIGHT = @"{1}\Highlight_CurrentSplit.txt";
 		const string FILE_LIST_GOLD_HIGHLIGHT = @"{1}\{0}\Highlight_Gold.txt";
-		const string FILE_LIST_AHEAD_GAINED_HIGHLIGHT = @"{1}\{0}\Highlight_AheadGained.txt";
-		const string FILE_LIST_AHEAD_LOST_HIGHLIGHT = @"{1}\{0}\Highlight_AheadLost.txt";
-		const string FILE_LIST_BEHIND_GAINED_HIGHLIGHT = @"{1}\{0}\Highlight_BehindGained.txt";
-		const string FILE_LIST_BEHIND_LOST_HIGHLIGHT = @"{1}\{0}\Highlight_BehindLost.txt";
+		// {3} is the comparison's folder: these files are written once for each of Levels.Comparisons
+		const string FILE_LIST_FINISH_TIME_UPCOMING = @"{1}\{0}\{3}\Time_Run_Upcoming.txt";
+		const string FILE_LIST_SEGMENT_TIME_UPCOMING = @"{1}\{0}\{3}\Time_Segment_Upcoming.txt";
+		const string FILE_LIST_RUN_DELTA = @"{1}\{0}\{3}\Delta_Run.txt";
+		const string FILE_LIST_SEGMENT_DELTA = @"{1}\{0}\{3}\Delta_Segment.txt";
+		const string FILE_LIST_AHEAD_GAINED_HIGHLIGHT = @"{1}\{0}\{3}\Highlight_AheadGained.txt";
+		const string FILE_LIST_AHEAD_LOST_HIGHLIGHT = @"{1}\{0}\{3}\Highlight_AheadLost.txt";
+		const string FILE_LIST_BEHIND_GAINED_HIGHLIGHT = @"{1}\{0}\{3}\Highlight_BehindGained.txt";
+		const string FILE_LIST_BEHIND_LOST_HIGHLIGHT = @"{1}\{0}\{3}\Highlight_BehindLost.txt";
 
 		public SplitListFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) : base(state, settings, levels, files) { }
 
@@ -84,7 +86,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			// -1 for none: no current split before the start or after the finish, nothing completed before the start
 			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
 			int previousSubsplitIndex = GetPreviousSubsplitIndex(lvl);
-			var lines = new ListLines(upcoming, lvl + 1);
+			var lines = new ListLines(Levels.Comparisons, upcoming, lvl + 1);
 
 			for (int spl = first; spl <= last; spl++) {
 				AppendNames(lines, lvl, spl);
@@ -99,7 +101,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			}
 
 			foreach (var file in lines.Files) {
-				MakeFile(folder + file.Template, file.Lines.ToString(), method, lvl);
+				MakeFile(folder + file.Template, file.Lines.ToString(), method, lvl, file.ComparisonFolder);
 			}
 		}
 
@@ -118,32 +120,36 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		// A completed split: this attempt's time and deltas, and its highlight
 		void AppendCompletedLine(ListLines lines, TimingMethod method, int lvl, int spl) {
 			var split = State.Run[Levels[lvl].Indices[spl]];
-			TimeSpan? runDelta = RunDelta(method, lvl, spl);
-			TimeSpan? segmentDelta = SegmentDelta(method, lvl, spl);
 			lines.RunTimeCurrent.Append(TimeFormatter.DurationString(split.SplitTime[method]));
-			lines.RunDelta.Append(TimeFormatter.DeltaString(runDelta));
 			lines.GoldDelta.Append(TimeFormatter.DeltaString(GoldDelta(method, lvl, spl)));
-			lines.SegmentDelta.Append(TimeFormatter.DeltaString(segmentDelta));
-			HighlightFile(lines, method, lvl, spl, runDelta, segmentDelta)?.Append(HIGHLIGHT_FILL);
+			// A gold is filled in Highlight_Gold, and in none of a comparison's highlights. A skipped split has no time, and no highlight.
+			bool isGold = IsGold(method, lvl, spl);
+			bool highlighted = !isGold && LiveRunTime(method, lvl, spl) != null;
+			if (isGold) lines.GoldHighlight.Append(HIGHLIGHT_FILL);
+			foreach (var comparison in lines.Comparisons) {
+				TimeSpan? runDelta = RunDelta(method, comparison.Name, lvl, spl);
+				TimeSpan? segmentDelta = SegmentDelta(method, comparison.Name, lvl, spl);
+				comparison.RunDelta.Append(TimeFormatter.DeltaString(runDelta));
+				comparison.SegmentDelta.Append(TimeFormatter.DeltaString(segmentDelta));
+				if (highlighted) HighlightFile(comparison, method, lvl, spl, runDelta, segmentDelta)?.Append(HIGHLIGHT_FILL);
+			}
 		}
 
-		// The current split and those after it: their PB times and best segments
+		// The current split and those after it: their best segments, and each comparison's times
 		void AppendUpcomingLine(ListLines lines, TimingMethod method, int lvl, int spl) {
-			var split = State.Run[Levels[lvl].Indices[spl]];
-			lines.RunTimeUpcoming.Append(TimeFormatter.DurationString(split.PersonalBestSplitTime[method]));
 			lines.GoldTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].BestSegmentTimes[method][spl]));
-			lines.SegmentTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].PbSegmentTimes[method][spl]));
+			foreach (var comparison in lines.Comparisons) {
+				comparison.RunTimeUpcoming.Append(TimeFormatter.DurationString(ComparisonTime(method, comparison.Name, lvl, spl)));
+				comparison.SegmentTimeUpcoming.Append(TimeFormatter.DurationString(Levels[lvl].ComparisonSegmentTimes[comparison.Name][method][spl]));
+			}
 		}
 
-		// The highlight file that a completed split is filled in, or null for none. The first that applies wins.
-		// A skipped split has no time, and no highlight.
-		StringBuilder HighlightFile(ListLines lines, TimingMethod method, int lvl, int spl, TimeSpan? runDelta, TimeSpan? segmentDelta) {
-			if (LiveRunTime(method, lvl, spl) == null) return null;
-			if (IsGold(method, lvl, spl)) return lines.GoldHighlight;
+		// The comparison's highlight file that a completed split that isn't a gold is filled in, or null for none. The first that applies wins.
+		StringBuilder HighlightFile(ComparisonLines lines, TimingMethod method, int lvl, int spl, TimeSpan? runDelta, TimeSpan? segmentDelta) {
 			if (runDelta < TimeSpan.Zero && segmentDelta < TimeSpan.Zero) return lines.AheadGainedHighlight;
 			if (runDelta < TimeSpan.Zero) return lines.AheadLostHighlight;
 			if (segmentDelta < TimeSpan.Zero) return lines.BehindGainedHighlight;
-			if (State.Run[Levels[lvl].Indices[spl]].PersonalBestSplitTime[method] != null) return lines.BehindLostHighlight;
+			if (ComparisonTime(method, lines.Name, lvl, spl) != null) return lines.BehindLostHighlight;
 			return null;
 		}
 
@@ -154,31 +160,24 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		class ListLines {
 
 			public readonly StringBuilder Names, NamesRaw;
-			public readonly StringBuilder RunTimeCurrent, RunDelta, SegmentDelta, GoldDelta;
-			public readonly StringBuilder AheadGainedHighlight, AheadLostHighlight, BehindGainedHighlight, BehindLostHighlight, GoldHighlight;
+			public readonly StringBuilder RunTimeCurrent, GoldDelta, GoldHighlight;
 			// Only for the current split and those after it, which CompletedSplits never has. Null there.
-			public readonly StringBuilder RunTimeUpcoming, SegmentTimeUpcoming, GoldTimeUpcoming, CurrentSplitHighlight;
+			public readonly StringBuilder GoldTimeUpcoming, CurrentSplitHighlight;
 			// Names_Indent_{depth}, one per depth up to the level's
 			public readonly StringBuilder[] Indents;
+			// The files of each comparison, in the order of SplitLevels.Comparisons
+			public readonly ComparisonLines[] Comparisons;
 
-			// Every file above with its FILE_LIST_* template
-			readonly List<(string Template, StringBuilder Lines)> _files = new List<(string, StringBuilder)>();
+			// Every file above with its FILE_LIST_* template, and the comparison's folder for a comparison's file
+			readonly List<(string Template, string ComparisonFolder, StringBuilder Lines)> _files = new List<(string, string, StringBuilder)>();
 
-			public ListLines(bool upcoming, int depths) {
+			public ListLines(List<(string Name, string Folder)> comparisons, bool upcoming, int depths) {
 				Names = Add(FILE_LIST_NAMES);
 				NamesRaw = Add(FILE_LIST_NAMES_RAW);
 				RunTimeCurrent = Add(FILE_LIST_FINISH_TIME_LIVE);
-				RunDelta = Add(FILE_LIST_RUN_DELTA);
-				SegmentDelta = Add(FILE_LIST_SEGMENT_DELTA);
 				GoldDelta = Add(FILE_LIST_GOLD_DELTA);
-				AheadGainedHighlight = Add(FILE_LIST_AHEAD_GAINED_HIGHLIGHT);
-				AheadLostHighlight = Add(FILE_LIST_AHEAD_LOST_HIGHLIGHT);
-				BehindGainedHighlight = Add(FILE_LIST_BEHIND_GAINED_HIGHLIGHT);
-				BehindLostHighlight = Add(FILE_LIST_BEHIND_LOST_HIGHLIGHT);
 				GoldHighlight = Add(FILE_LIST_GOLD_HIGHLIGHT);
 				if (upcoming) {
-					RunTimeUpcoming = Add(FILE_LIST_FINISH_TIME_UPCOMING);
-					SegmentTimeUpcoming = Add(FILE_LIST_SEGMENT_TIME_UPCOMING);
 					GoldTimeUpcoming = Add(FILE_LIST_GOLD_TIME_UPCOMING);
 					CurrentSplitHighlight = Add(FILE_LIST_CURRENT_SPLIT_HIGHLIGHT);
 				}
@@ -186,20 +185,48 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				for (int depth = 0; depth < depths; depth++) {
 					Indents[depth] = Add(IndentFile(depth));
 				}
+				Comparisons = comparisons.Select(c => new ComparisonLines(c.Name, upcoming, template => Add(template, c.Folder))).ToArray();
 			}
 
-			StringBuilder Add(string template) {
+			StringBuilder Add(string template, string comparisonFolder = null) {
 				var lines = new StringBuilder();
-				_files.Add((template, lines));
+				_files.Add((template, comparisonFolder, lines));
 				return lines;
 			}
 
-			public IEnumerable<(string Template, StringBuilder Lines)> Files => _files;
+			public IEnumerable<(string Template, string ComparisonFolder, StringBuilder Lines)> Files => _files;
 
 			public void EndLine() {
 				// '\n', not AppendLine, which would write "\r\n"
 				foreach (var file in _files) {
 					file.Lines.Append('\n');
+				}
+			}
+		}
+
+		/// <summary>
+		/// The files of one list that compare with one comparison, in that comparison's folder
+		/// </summary>
+		class ComparisonLines {
+
+			public readonly string Name;
+			public readonly StringBuilder RunDelta, SegmentDelta;
+			public readonly StringBuilder AheadGainedHighlight, AheadLostHighlight, BehindGainedHighlight, BehindLostHighlight;
+			// Only for the current split and those after it, which CompletedSplits never has. Null there.
+			public readonly StringBuilder RunTimeUpcoming, SegmentTimeUpcoming;
+
+			// add makes the StringBuilder of a file, and adds it to the list's files
+			public ComparisonLines(string name, bool upcoming, Func<string, StringBuilder> add) {
+				Name = name;
+				RunDelta = add(FILE_LIST_RUN_DELTA);
+				SegmentDelta = add(FILE_LIST_SEGMENT_DELTA);
+				AheadGainedHighlight = add(FILE_LIST_AHEAD_GAINED_HIGHLIGHT);
+				AheadLostHighlight = add(FILE_LIST_AHEAD_LOST_HIGHLIGHT);
+				BehindGainedHighlight = add(FILE_LIST_BEHIND_GAINED_HIGHLIGHT);
+				BehindLostHighlight = add(FILE_LIST_BEHIND_LOST_HIGHLIGHT);
+				if (upcoming) {
+					RunTimeUpcoming = add(FILE_LIST_FINISH_TIME_UPCOMING);
+					SegmentTimeUpcoming = add(FILE_LIST_SEGMENT_TIME_UPCOMING);
 				}
 			}
 		}

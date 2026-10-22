@@ -36,7 +36,7 @@ Each event fires **after** the state change, so a handler sees the new state:
 
 ## Comparison data (verified)
 
-- `PersonalBestSplitTime` and `BestSegmentTime` **don't change during a run**. LiveSplit updates them on reset, before `OnReset` fires. Comparisons made during the run, including in the finished state, therefore use the values from before the run. The [segment history](#segment-history-partly-verified) also gains the attempt only on reset (read in source).
+- `PersonalBestSplitTime` and `BestSegmentTime` **don't change during a run**. LiveSplit updates them on reset, before `OnReset` fires. Comparisons made during the run, including in the finished state, therefore use the values from before the run. The [segment history](#segment-history-partly-verified) also gains the attempt only on reset, and the generated [comparisons](#comparisons-read-in-source-partly-checked-headless) are regenerated only after a reset or an edit (read in source).
 - `AttemptHistory` gets one entry per reset attempt. Unfinished attempts have a `null` time.
 - `Run.Metadata` is never null. With no platform set, `PlatformName` depends on where the run came from:
   - `""` in a run loaded from a splits file (`StandardFormatsRunFactory`);
@@ -64,6 +64,33 @@ Read in source only:
 - `ImportSegmentHistory` adds the PB as two pseudo-attempts with keys ≤ 0, one per timing method. `ImportBestSegment` adds one entry, on one split, with a new key ≤ 0. `FixSplits()` moves entries whose key is above the highest attempt index to new keys ≤ 0.
 - `FixSplits()` raises an entry that is faster than its split's best segment to the best segment. That only happens after a best segment was edited to be slower. The split times rebuilt from such an attempt are then too slow by the difference.
 - `FixSplits()` removes an entry with a key ≤ 0 whose times all equal another attempt's entry on the same split.
+
+## Comparisons (read in source, partly checked headless)
+
+The component writes one folder per comparison ([architecture.md](architecture.md#comparisons)). The source was read on 2026-10-22 at `683cd60` (1.8.37): [CompositeComparisons.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/Comparisons/CompositeComparisons.cs), [Run.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/Run.cs), [TimerForm.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/TimerForm.cs), [CommandServer.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Server/CommandServer.cs) and [RunEditorDialog.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/RunEditorDialog.cs).
+
+Checked headless on 2026-10-22:
+- `segment.Comparisons[name]` gives an empty `Time` for a name the segment doesn't have, rather than throwing. Setting it adds the name.
+- `Run.Comparisons` lists the custom comparisons (`CustomComparisons`, Personal Best first), then the generators' names. A new `Run(new StandardComparisonGeneratorsFactory())` has the generators Best Segments and Average Segments.
+- With Personal Best selected, every file is the same as when the component read `PersonalBestSplitTime`, which is `Comparisons["Personal Best"]`.
+
+Read in source only:
+- A comparison can have any name that doesn't start with `[Race]` and isn't taken. So a name can contain characters that aren't allowed in a folder name.
+- `LiveSplitState.CurrentComparison` is a plain property, null until something sets it. Setting it raises nothing. Only the switch hotkeys go through `TimerModel`, which raises `OnSwitchComparisonNext` or `OnSwitchComparisonPrevious` after setting it. Other places set it directly:
+  - the right-click menu (`TimerForm.SwitchComparison`, which falls back to Personal Best for a name the run doesn't have);
+  - the server's `setcomparison`, on the server's thread, with any name, unchecked;
+  - Edit Splits, when the selected comparison is renamed or removed.
+- Generated comparisons are filled by `TimerForm.RegenerateComparisons()`, in LiveSplit's UI code, not by `TimerModel`. Outside LiveSplit, call each generator's `Generate(state.Settings)`. It runs:
+  - in TimerForm's `OnReset` handler;
+  - when splits are opened (`SetRun`);
+  - after each change in Edit Splits, just before `CallRunManuallyModified()`;
+  - when the Sum of Best mode or the enabled generators change in LiveSplit's Settings dialog.
+  
+  Nothing regenerates them during a run.
+- At startup, `TimerForm.Init` loads the layout before it subscribes to `OnReset`. So this component's reset handler runs before TimerForm's, which regenerates the comparisons.
+  - When the reset comes from the UI thread, both handlers finish before the next `Update()`.
+  - When it comes through the server, TimerForm regenerates on the server's thread while `Update()` may already be rewriting.
+  - A layout loaded later subscribes after TimerForm.
 
 ## `GraphicsCache` (verified)
 

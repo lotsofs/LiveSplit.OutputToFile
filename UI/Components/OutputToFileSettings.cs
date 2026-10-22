@@ -1,5 +1,8 @@
-﻿using System;
+﻿using LiveSplit.Model;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -14,9 +17,22 @@ namespace LiveSplit.UI.Components.OutputToFile
 		public bool OutputSplitList { get; set; }
 		public bool OutputSubsplits { get; set; }
 		public bool OutputCompletedSplits { get; set; }
+		// A folder for every custom comparison of the open splits, ticked or not
+		public bool AllCustomComparisons { get; set; }
+
+		// The comparisons ticked in the list, each written to a folder of its own. Changed through SetComparisonTicked,
+		// which counts the changes in TickedComparisonsVersion, a cache key.
+		readonly HashSet<string> _tickedComparisons = new HashSet<string>();
+		public IEnumerable<string> TickedComparisons => _tickedComparisons;
+		public int TickedComparisonsVersion { get; private set; }
 
 		// The latest failed file write, as shown in the settings, or null. Not a setting: it isn't saved.
 		public string WriteError { get; private set; }
+
+		// The run whose comparisons the list shows, from ShowRunComparisons. Null until LiveSplit first shows the settings.
+		IRun _run;
+		// Set while the list is filled in code, so ItemCheck doesn't count it as ticking
+		bool _fillingComparisons;
 
 		public OutputToFileSettings()
 		{
@@ -28,6 +44,7 @@ namespace LiveSplit.UI.Components.OutputToFile
 			OutputSplitList = true;
 			OutputSubsplits = true;
 			OutputCompletedSplits = false;
+			AllCustomComparisons = false;
 
 			// Applied when the textbox loses focus, not per keystroke: FolderPath is a cache key, so every partial path would get a full set of files
 			this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnValidation);
@@ -37,6 +54,7 @@ namespace LiveSplit.UI.Components.OutputToFile
 			this.checkBoxOutputSplitList.DataBindings.Add("Checked", this, "OutputSplitList", false, DataSourceUpdateMode.OnPropertyChanged);
 			this.checkBoxOutputSubsplits.DataBindings.Add("Checked", this, "OutputSubsplits", false, DataSourceUpdateMode.OnPropertyChanged);
 			this.checkBoxOutputCompletedSplits.DataBindings.Add("Checked", this, "OutputCompletedSplits", false, DataSourceUpdateMode.OnPropertyChanged);
+			this.checkBoxAllCustomComparisons.DataBindings.Add("Checked", this, "AllCustomComparisons", false, DataSourceUpdateMode.OnPropertyChanged);
 		}
 
 		private int CreateSettingsNode(XmlDocument document, XmlElement parent)
@@ -47,9 +65,37 @@ namespace LiveSplit.UI.Components.OutputToFile
 				SettingsHelper.CreateSetting(document, parent, "OutputTimer", OutputTimer) ^
 				SettingsHelper.CreateSetting(document, parent, "OutputSplitList", OutputSplitList) ^
 				SettingsHelper.CreateSetting(document, parent, "OutputSubsplits", OutputSubsplits) ^
-				SettingsHelper.CreateSetting(document, parent, "OutputCompletedSplits", OutputCompletedSplits)
+				SettingsHelper.CreateSetting(document, parent, "OutputCompletedSplits", OutputCompletedSplits) ^
+				SettingsHelper.CreateSetting(document, parent, "AllCustomComparisons", AllCustomComparisons) ^
+				CreateTickedComparisonsNode(document, parent)
 				;
 		}
+
+		// <Comparisons> with a <Comparison> per ticked name, in a fixed order. Without a document, only the hash.
+		private int CreateTickedComparisonsNode(XmlDocument document, XmlElement parent)
+		{
+			XmlElement list = document?.CreateElement("Comparisons");
+			int hash = 0;
+			foreach (string name in _tickedComparisons.OrderBy(n => n, StringComparer.Ordinal))
+			{
+				hash ^= SettingsHelper.CreateSetting(document, list, "Comparison", name);
+			}
+			parent?.AppendChild(list);
+			return hash;
+		}
+
+		/// <summary>
+		/// Tick or untick a comparison in the list's setting
+		/// </summary>
+		public void SetComparisonTicked(string name, bool ticked)
+		{
+			if (ticked ? _tickedComparisons.Add(name) : _tickedComparisons.Remove(name))
+			{
+				TickedComparisonsVersion++;
+			}
+		}
+
+		public bool IsComparisonTicked(string name) => _tickedComparisons.Contains(name);
 
 		public XmlNode GetSettings(XmlDocument document)
 		{
@@ -73,6 +119,60 @@ namespace LiveSplit.UI.Components.OutputToFile
 			OutputSplitList = SettingsHelper.ParseBool(element["OutputSplitList"], true);
 			OutputSubsplits = SettingsHelper.ParseBool(element["OutputSubsplits"], true);
 			OutputCompletedSplits = SettingsHelper.ParseBool(element["OutputCompletedSplits"], false);
+			AllCustomComparisons = SettingsHelper.ParseBool(element["AllCustomComparisons"], false);
+			// Layouts saved before the list have no Comparisons: nothing ticked
+			_tickedComparisons.Clear();
+			XmlElement list = element["Comparisons"];
+			if (list != null)
+			{
+				foreach (XmlElement comparison in list.GetElementsByTagName("Comparison"))
+				{
+					_tickedComparisons.Add(comparison.InnerText);
+				}
+			}
+			TickedComparisonsVersion++;
+			if (_run != null)
+			{
+				FillComparisonList(AllCustomComparisons);
+			}
+		}
+
+		/// <summary>
+		/// Show the run's comparisons in the list. Call on the UI thread, before the settings are shown.
+		/// </summary>
+		public void ShowRunComparisons(IRun run)
+		{
+			_run = run;
+			FillComparisonList(AllCustomComparisons);
+		}
+
+		// The run's comparisons, without the custom ones while allCustom is on (they're all written then), and the ticked ones the run doesn't have, so they can be unticked
+		private void FillComparisonList(bool allCustom)
+		{
+			var names = _run.Comparisons.Where(name => !(allCustom && SplitLevels.IsCustomComparison(_run, name))).ToList();
+			names.AddRange(_tickedComparisons.Where(name => !_run.Comparisons.Contains(name)).OrderBy(name => name, StringComparer.Ordinal));
+			_fillingComparisons = true;
+			checkedListBoxComparisons.Items.Clear();
+			foreach (string name in names)
+			{
+				checkedListBoxComparisons.Items.Add(name, IsComparisonTicked(name));
+			}
+			_fillingComparisons = false;
+		}
+
+		private void checkedListBoxComparisons_ItemCheck(object sender, ItemCheckEventArgs e)
+		{
+			if (_fillingComparisons) return;
+			SetComparisonTicked((string)checkedListBoxComparisons.Items[e.Index], e.NewValue == CheckState.Checked);
+		}
+
+		private void checkBoxAllCustomComparisons_CheckedChanged(object sender, EventArgs e)
+		{
+			// Runs before the binding updates AllCustomComparisons, so read the checkbox
+			if (_run != null)
+			{
+				FillComparisonList(checkBoxAllCustomComparisons.Checked);
+			}
 		}
 
 		/// <summary>

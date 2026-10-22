@@ -108,7 +108,7 @@ static class Program
         model.InitializeGameTime();
         state.IsGameTimePaused = true; // from here on, game time changes only through SetGameTime
         At(9.5); model.Split(); Tick();
-        Console.WriteLine(Read(@"PreviousSplit\AllSplits\GameTime\Sign.txt"));
+        Console.WriteLine(Read(@"PreviousSplit\AllSplits\GameTime\Current Comparison\Sign.txt"));
     }
 
     static Time T(double s) => new Time(TimeSpan.FromSeconds(s), TimeSpan.FromSeconds(s));
@@ -147,6 +147,12 @@ Things to know:
   - To make the holes that edits leave, change a copy of the run (`(IRun)state.Run.Clone()`), then call `run.FixSplits()` as the editor does. Clearing a split's best segment is `run[i].BestSegmentTime = new Time()`. Clean Sum of Best is `run[i].SegmentHistory.Remove(attempt)`.
   - Then `state.Run = run`, `state.CallRunManuallyModified()` and `Tick()`.
   - Reach the bests through the component's private `_levels` field by reflection: `SplitLevels.Count`, its indexer, and each `SplitLevel`'s `BestSegmentTimes`.
+- **Comparisons.**
+  - `LiveSplitState.CurrentComparison` is null until set; the sample sets it to Personal Best.
+  - To switch, as the right-click menu or the server does, set `state.CurrentComparison`, then `Tick()`.
+  - Generated comparisons (Best Segments, Average Segments) stay empty until something calls each generator's `Generate(state.Settings)`. LiveSplit's UI does that after every reset and edit, so do it after `model.Reset()`, before the `Tick()`.
+  - A custom comparison is `run.CustomComparisons.Add(name)`, plus `run[i].Comparisons[name] = time` for each split.
+  - Tick one in the settings with `comp.Settings.SetComparisonTicked(name, true)`, or set `AllCustomComparisons`.
 - **Loading a splits file.** `new StandardFormatsRunFactory(stream, path).Create(new StandardComparisonGeneratorsFactory())`, with `livesplit_core.dll` from LiveSplit's `x64\` folder next to the harness ([livesplit-notes.md](livesplit-notes.md#running-livesplit-code-outside-livesplit-verified)).
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
 - **Don't delete output files mid-run.** `FileQueue` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
@@ -217,7 +223,7 @@ The share of bad reads is then the chance that an OBS read lands on a write. Div
 
 These checks reproduce bugs tracked in [TODO.md](TODO.md); the Code column names the item. Each one shows today's output and the correct output, so a fix can be confirmed.
 
-The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. The splits happen at 9.5, 21, 28, 39 and 48 s of game time, with a `Tick()` after each. With every output on, it produces 165 files.
+The base run is `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. The splits happen at 9.5, 21, 28, 39 and 48 s of game time, with a `Tick()` after each. With every output on and no comparison ticked, it produces 166 files.
 
 The base run has no segment history. So in `SansSubsplits`, `Area A` and `Area B`, which span several splits, have no best segment: their gold files show `-`, and completing them counts as a gold.
 

@@ -16,18 +16,6 @@ There is no test project. Changes are checked by hand, in LiveSplit or with a he
 
 **Docs.** CLAUDE.md "Build / deploy", which says there are no tests. [testing.md](testing.md).
 
-## CMP — Deltas ignore the selected comparison
-
-Deltas always compare against Personal Best. The comparison selected in LiveSplit (`state.CurrentComparison`) is ignored.
-
-**Evidence.** Read: every delta uses `PersonalBestSplitTime`.
-
-**Plan.** Read times from `Comparisons[state.CurrentComparison]` instead, and add the comparison to the cache keys in `Update()`. Decide what the `PB`/`NoPB` values of `Sign.txt` mean against other comparisons.
-
-**Verify.** Switch the comparison mid-run: deltas and highlights change to match.
-
-**Docs.** README. output-files.md, wherever it says "PB". architecture.md "How the values are calculated" and "When files get written" (the cache keys).
-
 ## FMT — Time format is fixed
 
 `TimeFormatter.DetermineTimeFormat` ([TimeFormatter.cs](../UI/Components/TimeFormatter.cs)) picks the precision from hard-coded thresholds, and durations always use `MSS`. There's no setting. A `// TODO` comment above it says the same; this item replaces it.

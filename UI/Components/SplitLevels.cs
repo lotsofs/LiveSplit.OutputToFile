@@ -1,6 +1,7 @@
 ﻿using LiveSplit.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace LiveSplit.UI.Components.OutputToFile {
@@ -10,15 +11,23 @@ namespace LiveSplit.UI.Components.OutputToFile {
 	/// </summary>
 	class SplitLevels {
 
+		// The folder of the comparison selected in LiveSplit
+		public const string CURRENT_COMPARISON_FOLDER = "Current Comparison";
+
 		SplitLevel[] _levels = new SplitLevel[1];
 
 		// Depth of each split, by global index
 		public int[] Depths { get; private set; }
 		// Display name of each split at each level: Names[global][lvl]
 		public List<List<string>> Names { get; private set; }
+		// The comparisons the comparison files are written for, each with its folder: the one selected in LiveSplit first,
+		// then those the settings call for. Two entries can have the same name, but never the same folder.
+		public List<(string Name, string Folder)> Comparisons { get; private set; } = new List<(string, string)>();
 
 		public int Count => _levels.Length;
 		public SplitLevel this[int lvl] => _levels[lvl];
+		// The comparison selected in LiveSplit when the levels were calculated
+		public string CurrentComparison => Comparisons[0].Name;
 
 		public void GenerateSubsplitLevels(IRun run, bool outputSubsplits) {
 			int numberOfLevels = CalculateDepths(run);
@@ -122,36 +131,69 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		}
 
 		/// <summary>
-		/// Calculate a list of segment times for all splits
+		/// Choose the comparisons to write: current, the one selected in LiveSplit, then each of the run's comparisons that is ticked,
+		/// or is a custom one while allCustom is on.
 		/// </summary>
-		/// <param name="run"></param>
-		/// <param name="method"></param>
-		public void CalculatePBSegments(IRun run, TimingMethod method) {
-			for (int lvl = 0; lvl < _levels.Length; lvl++) {
-				SplitLevel level = _levels[lvl];
-				List<int> indices = level.Indices;
-				level.PbSegmentTimes[method] = new TimeSpan?[indices.Count];
-
-				for (int localIndex = 0; localIndex < indices.Count; localIndex++) {
-					int globalIndex = indices[localIndex];
-					TimeSpan? finishTime = run[globalIndex].PersonalBestSplitTime[method];
-					if (globalIndex == 0 || localIndex == 0) {
-						// This is the first (Sub)split so segment time = run time
-						level.PbSegmentTimes[method][localIndex] = finishTime;
-						continue;
-					}
-					int prevGlobalIndex = indices[localIndex - 1];
-					TimeSpan? prevFinishTime = run[prevGlobalIndex].PersonalBestSplitTime[method];
-					if (finishTime == null || prevFinishTime == null) {
-						// This or the previous split time is missing so we can't calculate a segment time
-						level.PbSegmentTimes[method][localIndex] = null;
-					}
-					else {
-						// segment time can be calculated
-						level.PbSegmentTimes[method][localIndex] = finishTime - prevFinishTime;
-					}
+		public void ChooseComparisons(IRun run, string current, Predicate<string> ticked, bool allCustom) {
+			Comparisons = new List<(string, string)> { (current, CURRENT_COMPARISON_FOLDER) };
+			// Windows folder names ignore case
+			var folders = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { CURRENT_COMPARISON_FOLDER };
+			foreach (string name in run.Comparisons) {
+				if (!ticked(name) && !(allCustom && IsCustomComparison(run, name))) continue;
+				// Two comparisons can't share a folder: the first keeps it
+				string folder = ComparisonFolder(name);
+				if (folders.Add(folder)) {
+					Comparisons.Add((name, folder));
 				}
 			}
+		}
+
+		/// <summary>
+		/// Whether a comparison was added in Edit Splits. LiveSplit keeps Personal Best with those, but it isn't one.
+		/// </summary>
+		public static bool IsCustomComparison(IRun run, string name) {
+			return name != Run.PersonalBestComparisonName && run.CustomComparisons.Contains(name);
+		}
+
+		/// <summary>
+		/// A comparison's name as a folder name: characters a folder name can't have, and the trailing dots and spaces
+		/// that Windows drops, become '_'
+		/// </summary>
+		public static string ComparisonFolder(string name) {
+			char[] folder = name.ToCharArray();
+			char[] invalid = Path.GetInvalidFileNameChars();
+			for (int i = 0; i < folder.Length; i++) {
+				if (Array.IndexOf(invalid, folder[i]) >= 0) folder[i] = '_';
+			}
+			for (int i = folder.Length - 1; i >= 0 && (folder[i] == '.' || folder[i] == ' '); i--) {
+				folder[i] = '_';
+			}
+			return folder.Length == 0 ? "_" : new string(folder);
+		}
+
+		/// <summary>
+		/// Each chosen comparison's segment times at every level: its split time at a member minus its split time at the previous member.
+		/// The first member gets its split time. Null if either is missing.
+		/// </summary>
+		public void CalculateComparisonSegments(IRun run) {
+			foreach (string comparison in Comparisons.Select(c => c.Name).Distinct()) {
+				foreach (SplitLevel level in _levels) {
+					level.ComparisonSegmentTimes[comparison] = new Dictionary<TimingMethod, TimeSpan?[]>() {
+						{ TimingMethod.RealTime, SegmentTimes(run, level.Indices, comparison, TimingMethod.RealTime) },
+						{ TimingMethod.GameTime, SegmentTimes(run, level.Indices, comparison, TimingMethod.GameTime) },
+					};
+				}
+			}
+		}
+
+		static TimeSpan?[] SegmentTimes(IRun run, List<int> indices, string comparison, TimingMethod method) {
+			var segmentTimes = new TimeSpan?[indices.Count];
+			for (int localIndex = 0; localIndex < indices.Count; localIndex++) {
+				TimeSpan? splitTime = run[indices[localIndex]].Comparisons[comparison][method];
+				// Subtracting a null gives null
+				segmentTimes[localIndex] = localIndex == 0 ? splitTime : splitTime - run[indices[localIndex - 1]].Comparisons[comparison][method];
+			}
+			return segmentTimes;
 		}
 
 		/// <summary>
@@ -244,7 +286,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 	}
 
 	/// <summary>
-	/// One subsplit level: which splits it contains, and its PB segment times and best segments.
+	/// One subsplit level: which splits it contains, and its comparisons' segment times and best segments.
 	/// Arrays are indexed by local index, i.e. position in Indices.
 	/// Nothing here may describe the current attempt: CalculateSegments() rebuilds every level on any cache key change, including timer phase changes.
 	/// </summary>
@@ -253,14 +295,14 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		// Local index → global index into the run
 		public List<int> Indices;
 
-		public Dictionary<TimingMethod, TimeSpan?[]> PbSegmentTimes;
+		// By comparison name, for SplitLevels.Comparisons, from SplitLevels.CalculateComparisonSegments
+		public Dictionary<string, Dictionary<TimingMethod, TimeSpan?[]>> ComparisonSegmentTimes = new Dictionary<string, Dictionary<TimingMethod, TimeSpan?[]>>();
 		// The fastest each member was done within one attempt, from SplitLevels.CalculateBestSegments
 		public Dictionary<TimingMethod, TimeSpan?[]> BestSegmentTimes;
 
 		public SplitLevel(List<int> indices) {
 			Indices = indices;
 			int count = indices.Count;
-			PbSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
 			BestSegmentTimes = new Dictionary<TimingMethod, TimeSpan?[]>() { { TimingMethod.RealTime, new TimeSpan?[count] }, { TimingMethod.GameTime, new TimeSpan?[count] } };
 		}
 	}

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
-	/// Writes the files in the root of the output folder: run information and split counts.
+	/// Writes the files in the root of the output folder: run information, split counts and the selected comparison.
 	/// </summary>
 	class RunInfoFiles : OutputWriter {
 
@@ -13,6 +13,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		const string FILE_INFO_SPLITCOUNT = @"TotalSplits_{1}.txt";
 		const string FILE_INFO_ATTEMPTCOUNT = @"AttemptCount.txt";
 		const string FILE_INFO_FINISHEDRUNSCOUNT = @"FinishedRunsCount.txt";
+		const string FILE_INFO_CURRENTCOMPARISON = @"CurrentComparison.txt";
 
 		public RunInfoFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) : base(state, settings, levels, files) { }
 
@@ -23,6 +24,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			MakeFile(FILE_INFO_ATTEMPTCOUNT, State.Run.AttemptCount.ToString());
 			int finishedRunsInHistory = State.Run.AttemptHistory.Where(x => x.Time.RealTime != null).Count();
 			MakeFile(FILE_INFO_FINISHEDRUNSCOUNT, (finishedRunsInHistory + (State.CurrentPhase == TimerPhase.Ended ? 1 : 0)).ToString());
+			MakeFile(FILE_INFO_CURRENTCOMPARISON, Levels.CurrentComparison);
 			for (int lvl = 0; lvl < Levels.Count; lvl++) {
 				MakeFile(FILE_INFO_SPLITCOUNT, Levels[lvl].Indices.Count.ToString(), null, lvl);
 			}

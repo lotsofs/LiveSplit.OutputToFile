@@ -61,8 +61,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		#region live times and deltas
 
 		// This attempt's times and deltas for a member of a level, by local index. They are computed from the run
-		// whenever files are written, never stored: PB times, best segments and the segment history don't change during a run,
-		// and a completed split's SplitTime only changes when it is undone.
+		// whenever files are written, never stored: comparisons, best segments and the segment history don't change during a run,
+		// and a completed split's SplitTime only changes when it is undone. Deltas take the name of a comparison in Levels.Comparisons.
 		// The local index must be a member's: callers handle -1 (no member) from the subsplit index functions themselves.
 		// Subtracting TimeSpan? values gives null when either is null.
 
@@ -82,12 +82,19 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			return LiveRunTime(method, lvl, localIndex) - LiveRunTime(method, lvl, localIndex - 1);
 		}
 
-		protected TimeSpan? RunDelta(TimingMethod method, int lvl, int localIndex) {
-			return LiveRunTime(method, lvl, localIndex) - State.Run[Levels[lvl].Indices[localIndex]].PersonalBestSplitTime[method];
+		/// <summary>
+		/// The comparison's split time
+		/// </summary>
+		protected TimeSpan? ComparisonTime(TimingMethod method, string comparison, int lvl, int localIndex) {
+			return State.Run[Levels[lvl].Indices[localIndex]].Comparisons[comparison][method];
 		}
 
-		protected TimeSpan? SegmentDelta(TimingMethod method, int lvl, int localIndex) {
-			return LiveSegmentTime(method, lvl, localIndex) - Levels[lvl].PbSegmentTimes[method][localIndex];
+		protected TimeSpan? RunDelta(TimingMethod method, string comparison, int lvl, int localIndex) {
+			return LiveRunTime(method, lvl, localIndex) - ComparisonTime(method, comparison, lvl, localIndex);
+		}
+
+		protected TimeSpan? SegmentDelta(TimingMethod method, string comparison, int lvl, int localIndex) {
+			return LiveSegmentTime(method, lvl, localIndex) - Levels[lvl].ComparisonSegmentTimes[comparison][method][localIndex];
 		}
 
 		/// <summary>
@@ -112,6 +119,13 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		#region file writing
 
 		protected void MakeFile(string fileName, string contents, TimingMethod? method, int subsplitLevel) {
+			MakeFile(fileName, contents, method, subsplitLevel, null);
+		}
+
+		/// <summary>
+		/// Write to file, filling {0} with the timing method, {1} with the level's tag and {3} with the comparison's folder
+		/// </summary>
+		protected void MakeFile(string fileName, string contents, TimingMethod? method, int subsplitLevel, string comparisonFolder) {
 			string subsplitLevelTag;
 			if (subsplitLevel == Levels.Count - 1) {
 				subsplitLevelTag = "AllSplits";
@@ -123,7 +137,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				// Named after the depth it leaves out: level 1 drops the splits with 2+ dashes
 				subsplitLevelTag = "SansSubsplits_Level" + (subsplitLevel + 1);
 			}
-			string file = string.Format(fileName, method.ToString(), subsplitLevelTag);
+			// {2} is Names_Indent's depth, which IndentFile fills before this
+			string file = string.Format(fileName, method.ToString(), subsplitLevelTag, "", comparisonFolder);
 			MakeFile(file, contents);
 		}
 

@@ -1,5 +1,5 @@
 ﻿namespace LiveSplit.UI.Components.OutputToFile {
-	// The values written to PreviousSplit\{level}\{method}\Sign.txt
+	// The values written to PreviousSplit\{level}\{method}\{comparison}\Sign.txt. After the finish, each run-time value has Finished in front.
 	enum Signs {
 		NotApplicable,
 		Ahead,
@@ -10,13 +10,14 @@
 		LostBehind,
 		GoldAhead,
 		GoldBehind,
-		PB,
-		NoPB,
-		PBGained,
-		PBLost,
-		PBGold,
-		NoPBGained,
-		NoPBLost,
-		NoPBGold,
+		FinishedNotApplicable,
+		FinishedAhead,
+		FinishedBehind,
+		FinishedGainedAhead,
+		FinishedGainedBehind,
+		FinishedLostAhead,
+		FinishedLostBehind,
+		FinishedGoldAhead,
+		FinishedGoldBehind,
 	}
 }
