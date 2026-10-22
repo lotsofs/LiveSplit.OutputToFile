@@ -19,7 +19,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [SET](Cleanup.md#set--architecturemds-settings-section-is-out-of-date) | Docs | architecture.md's Settings section leaves out the Comparisons and Time Format settings: their properties, bindings, handlers and XML keys | Low |
 
 ## Features and limitations — [Features.md](Features.md)
 

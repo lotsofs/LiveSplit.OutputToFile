@@ -204,7 +204,7 @@ A comparison can be written twice, as `Current Comparison` and in its own folder
 The writers loop over `Levels.Comparisons` for those files, passing `comparison.Folder` to `MakeFile` and `comparison.Name` to `ComparisonTime`, `RunDelta` and `SegmentDelta`. `RunInfoFiles` writes `Levels.CurrentComparison` to `CurrentComparison.txt`.
 
 **Settings.**
-- Ticked names are kept in `OutputToFileSettings`, changed with `SetComparisonTicked`, which counts the changes in `TickedComparisonsVersion`, a cache key. They're saved as `<Comparisons><Comparison>…</Comparison></Comparisons>`, in a fixed order, and are in the settings hash.
+- Ticked names are kept in `OutputToFileSettings`, changed with `SetComparisonTicked`, which counts the changes in `TickedComparisonsVersion`, a cache key. `ChooseComparisons` asks `IsComparisonTicked`; the tests read the whole set from `TickedComparisons`. They're saved as `<Comparisons><Comparison>…</Comparison></Comparisons>`, in a fixed order, and are in the settings hash.
 - `GetSettingsControl` passes `State.Run` to `ShowRunComparisons`. The list then shows the run's comparisons, without the custom ones while All custom comparisons is on (they're all written then), plus any ticked names the run doesn't have, so they can be unticked.
 - The checkbox's `CheckedChanged` fills the list again from the checkbox, because it runs before the binding updates `AllCustomComparisons`.
 
@@ -296,26 +296,36 @@ Most write functions start from these two helpers, which return a **local** inde
 
 `OutputToFileSettings` exposes these plain properties:
 
-| Property | Type | Default |
-|---|---|---|
-| `FolderPath` | string | empty |
-| `SplitsBefore` | int | 10 |
-| `SplitsAfter` | int | 10 |
-| `OutputTimer` | bool | off |
-| `OutputSplitList` | bool | on |
-| `OutputSubsplits` | bool | on |
-| `OutputCompletedSplits` | bool | off |
+| Property | Type | Default | Set from the UI by |
+|---|---|---|---|
+| `FolderPath` | string | empty | binding (`OnValidation`), and Browse |
+| `SplitsBefore` | int | 10 | binding |
+| `SplitsAfter` | int | 10 | binding |
+| `OutputTimer` | bool | off | binding |
+| `OutputSplitList` | bool | on | binding |
+| `OutputSubsplits` | bool | on | binding |
+| `OutputCompletedSplits` | bool | off | binding |
+| `AllCustomComparisons` | bool | off | binding |
+| `TimeAccuracy` | `FormatAccuracy` | Seconds | `comboBoxTimeAccuracy_SelectedIndexChanged` |
+| `DeltaAccuracy` | `FormatAccuracy` | Flex | `comboBoxDeltaAccuracy_SelectedIndexChanged` |
 
-Each one is bound to its control with `DataBindings.Add` in the constructor. All but `FolderPath` use `DataSourceUpdateMode.OnPropertyChanged`, so a change applies at once.
+The ticked comparisons are a set, not a property; see [Comparisons](#comparisons).
 
-- The constructor sets the defaults. The controls' initial values in the Designer file and the `SetSettings` fallbacks, used when a key is missing from the layout, are the same. Until a control's handle is created, it shows its Designer value rather than the bound property.
+The bound properties are bound to their controls with `DataBindings.Add` in the constructor. All but `FolderPath` use `DataSourceUpdateMode.OnPropertyChanged`, so a change applies at once.
+
+- The constructor sets the defaults. The `SetSettings` fallbacks, used when a key is missing from the layout, are the same (`SettingsTests.NewSettingsHaveTheDefaults`). So are the bound controls' initial values in the Designer file. Until a control's handle is created, it shows its Designer value rather than the bound property.
+- The accuracies aren't bound: a `ComboBox` has no event a binding could use for every change of its selection. Each drop-down list's index is the `FormatAccuracy` value, so the lists follow the enum's order. The Designer selects nothing; `ShowAccuracies` selects both, from the constructor and from `SetSettings`, and the `SelectedIndexChanged` handlers set the properties back. A value in the layout that isn't one of the choices loads the default (`ParseAccuracy`).
 
 - `FolderPath` uses `OnValidation`: a typed path applies only when focus leaves the textbox, through Tab, a click on another control, OK, or Enter (which clicks the dialog's AcceptButton; see [livesplit-notes.md](livesplit-notes.md#layout-settings-dialog-read-in-source-size-checked-headless)). Applying every keystroke would write a full set of files to each partial path, because `FolderPath` is a cache key.
   - The Browse button has `CausesValidation = false`, so moving focus to it doesn't apply a partly typed path. Its handler sets `FolderPath` and the textbox itself. A path typed and then left unbrowsed applies at the next focus change to another control.
   - Closing a modal dialog with X doesn't validate the focused control (seen headless, 2026-10-15), so a path typed but never left is dropped.
-- Binding is the only thing that updates these properties from the UI, apart from Browse. The control has two event handlers: `checkBoxOutputSplitList_CheckedChanged`, which enables or disables the split-list group, and `buttonFolderPath_Click`.
-- The class doesn't implement `INotifyPropertyChanged`, so setting a property in code won't update its control while it is shown. `buttonFolderPath_Click` updates the textbox itself for this reason. The next time the control is shown in a new dialog, the bindings read the properties again (seen headless for the textbox, 2026-10-15), so after Cancel restores the settings the dialog shows them on reopening.
-- XML keys: `FolderPath`, `SplitsBefore`, `SplitsAfter`, `OutputTimer`, `OutputSplitList`, `OutputSubsplits`, `OutputCompletedSplits`. There is no version key; a layout from an older release is recognized by its missing keys, and gets their fallbacks. Layouts saved by earlier builds also have `Version` `0.1`, which nothing reads and LiveSplit's next save drops.
+- The control's event handlers:
+  - `buttonFolderPath_Click` sets `FolderPath`;
+  - `checkBoxOutputSplitList_CheckedChanged` enables or disables the split-list group;
+  - `checkBoxAllCustomComparisons_CheckedChanged` and `checkedListBoxComparisons_ItemCheck` fill the comparison list and tick comparisons (see [Comparisons](#comparisons));
+  - `comboBoxTimeAccuracy_SelectedIndexChanged` and `comboBoxDeltaAccuracy_SelectedIndexChanged` set the accuracies.
+- The class doesn't implement `INotifyPropertyChanged`, so setting a property in code won't update its control while it is shown. `buttonFolderPath_Click` updates the textbox itself for this reason. The next time the control is shown in a new dialog, the bindings read the properties again (seen headless for the textbox, 2026-10-15), so after Cancel restores the settings the dialog shows them on reopening. The drop-down lists aren't bound, so they show a new accuracy only through `SetSettings`, which Cancel calls.
+- XML keys: `FolderPath`, `SplitsBefore`, `SplitsAfter`, `OutputTimer`, `OutputSplitList`, `OutputSubsplits`, `OutputCompletedSplits`, `AllCustomComparisons`, `TimeAccuracy`, `DeltaAccuracy`, and `Comparisons`, which holds a `Comparison` per ticked name. There is no version key; a layout from an older release is recognized by its missing keys, and gets their fallbacks. Layouts saved by earlier builds also have `Version` `0.1`, which nothing reads and LiveSplit's next save drops.
 - `WriteError` isn't a setting: it holds the latest failed file write, shown in red in `labelWriteError` under the Time Format group, and is neither saved nor hashed. `Update()` sets and clears it through `ShowWriteError` (see "Writing files").
 - The control and `tableLayoutPanelTop` are `AutoSize` with `GrowAndShrink`, so the control is as tall as its groups, plus the error while one is shown. LiveSplit's Layout Settings tab scrolls once the control is taller than 561 px ([livesplit-notes.md](livesplit-notes.md#layout-settings-dialog-read-in-source-size-checked-headless)). `ShowWriteError` hides the label before emptying it: while the control isn't on screen, only the text change makes the table shrink back.
 - `GetSettingsHashCode()` reuses `CreateSettingsNode(null, null)`, which XORs the hashes of the saved values, so two changes can cancel out. That's harmless here: LiveSplit only uses the hash to decide whether to redraw, and this component draws nothing.
