@@ -18,7 +18,7 @@ Read the doc that matches the task before editing:
 | [docs/output-files.md](docs/output-files.md) | Every output file, its contents in each timer phase, and the `Sign.txt` values and time formats. More detailed than the README, which describes the same files for users. |
 | [docs/livesplit-notes.md](docs/livesplit-notes.md) | LiveSplit behavior the code relies on: event order, when PB and best segments update, `GraphicsCache`. Each fact is marked verified or not. |
 | [docs/testing.md](docs/testing.md) | The tests in `Tests\`: running them, their snapshots, adding one. Testing in LiveSplit by hand, or headless from code, and the checks too long to be tests |
-| [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
+| [docs/TODO.md](docs/TODO.md) | **Start here for open work.** Index of tracked items (bugs, performance, cleanup, features, build and README, and those decided not worth fixing) by three-letter code. Each code links to its section in a detail doc, with evidence, a plan and how to verify it. |
 | [docs/DONE.md](docs/DONE.md) | Log of finished TODO items: what was done and when, newest first |
 | [docs/releasing.md](docs/releasing.md) | Cutting a release, and the rules of `update.xml`, the feed through which LiveSplit offers it to users |
 | [CHANGELOG.md](CHANGELOG.md) | What changed for users in each release, and what is unreleased |

@@ -2,7 +2,7 @@
 
 Open work in this repo, by three-letter code. Each code links to its section in the detail doc named in the group heading: what's wrong or wanted, the evidence, a plan, how to verify it, and which docs to update. Within a group, rows are in suggested order of work. Each detail doc notes the dependencies between its plans.
 
-When an item is finished, delete its row here and its section in the detail doc, and log it in [DONE.md](DONE.md). When work turns up a new defect that isn't being fixed now, add both.
+When an item is finished, delete its row here and its section in the detail doc, and log it in [DONE.md](DONE.md). When work turns up a new defect that isn't being fixed now, add both. An item decided not to be worth fixing moves to the last group, Won't fix.
 
 ## Defects — [Defects.md](Defects.md)
 
@@ -13,7 +13,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [ATM](Performance.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic. Measured: an OBS text source on a timer file goes blank for 1–2 s about once every 4 h of running timer. Not worth fixing unless blanks are seen | Parked |
 
 ## Cleanup — [Cleanup.md](Cleanup.md)
 
@@ -30,3 +29,11 @@ When an item is finished, delete its row here and its section in the detail doc,
 | Code | Area | Summary | Severity |
 |---|---|---|---|
 | [UPD](Project.md#upd--update-prompt-not-yet-seen-in-livesplit) | Updates | LiveSplit's startup update prompt was only checked headless; after release 8 is published, see it in LiveSplit: the prompt, the install from GitHub and the restart | Medium |
+
+## Won't fix — [WontFix.md](WontFix.md)
+
+Known and measured, but not worth fixing. Kept with their evidence and plan, in case that changes.
+
+| Code | Area | Summary | Severity |
+|---|---|---|---|
+| [ATM](WontFix.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic. Measured: an OBS text source on a timer file goes blank for 1–2 s about once every 4 h of running timer. Revisit only if blanks are seen | Low |
