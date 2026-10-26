@@ -37,7 +37,7 @@ Written from `Update()`, but only when what one of them shows changes: the run t
 
 | File | Contents |
 |---|---|
-| `RunTimer.txt` | The current time, or `-` if that method has no time (game time not initialized) |
+| `RunTimer.txt` | The current time, or `-` if that method has no time (game time not initialized). While the timer isn't running, the splits' "Start timer at" time (`0:00` unless set) for both methods, as LiveSplit's timer shows. |
 | `SegmentTimer_{level}.txt` | The current time minus the previous member's split time, so it restarts at `0:00` on each split at that level. Equals the run timer on the level's first member and when the timer isn't running. After the finish, the last member's segment time. `-` if the previous member was skipped (after the finish: the member before the last). |
 
 ## `CurrentSplit\{level}\`

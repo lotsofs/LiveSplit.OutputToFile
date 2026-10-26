@@ -32,7 +32,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		public void WriteTimer(TimingMethod method) {
 			if (_segmentStartsStale) UpdateSegmentStarts();
 
-			TimeSpan? runTime = State.CurrentTime[method];
+			// Before the start, the splits' "Start timer at" time, as LiveSplit's Timer component shows it
+			TimeSpan? runTime = State.CurrentPhase == TimerPhase.NotRunning ? State.Run.Offset : State.CurrentTime[method];
 			if (!HasTimerChanged(method, runTime)) { return; }
 
 			// Run Timer. "-" when there is none.

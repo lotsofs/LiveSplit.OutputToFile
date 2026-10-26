@@ -1,3 +1,4 @@
+using System;
 using Xunit;
 
 namespace LiveSplit.UI.Components.OutputToFile.Tests {
@@ -56,6 +57,37 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.At(12);
 				Assert.Equal("-", run.Read(TIMERS + "SegmentTimer_AllSplits.txt"));
 				Assert.Equal("0:12", run.Read(TIMERS + "SegmentTimer_SansSubsplits.txt"));
+			}
+		}
+
+		[Fact]
+		public void BeforeTheStartTimersShowTheStartTimerAtTime() {
+			using (var run = TestRun.Base(r => r.State.Run.Offset = TimeSpan.FromMinutes(5))) {
+				Assert.Equal("5:00", run.Read(TIMERS + "RunTimer.txt"));
+				Assert.Equal("5:00", run.Read(TIMERS + "SegmentTimer_AllSplits.txt"));
+				Assert.Equal("5:00", run.Read(@"Timers\RealTime\RunTimer.txt"));
+			}
+		}
+
+		[Fact]
+		public void AfterAResetTimersShowTheStartTimerAtTime() {
+			using (var run = TestRun.Base(r => r.State.Run.Offset = TimeSpan.FromSeconds(-5))) {
+				run.Start();
+				run.At(3);
+				run.Reset();
+				Assert.Equal("−0:05", run.Read(TIMERS + "RunTimer.txt"));
+				Assert.Equal("−0:05", run.Read(TIMERS + "SegmentTimer_AllSplits.txt"));
+			}
+		}
+
+		[Fact]
+		public void ChangingStartTimerAtBeforeTheStartRewritesTheTimers() {
+			using (var run = TestRun.Base()) {
+				// No event: the timers' own change check sees it
+				run.State.Run.Offset = TimeSpan.FromSeconds(-5);
+				run.Tick();
+				Assert.Equal("−0:05", run.Read(TIMERS + "RunTimer.txt"));
+				Assert.Equal("−0:05", run.Read(TIMERS + "SegmentTimer_SansSubsplits.txt"));
 			}
 		}
 

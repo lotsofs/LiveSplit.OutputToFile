@@ -12,12 +12,13 @@ Facts about LiveSplit that the code depends on. Most of them can't be seen from 
 
 | Phase | `CurrentSplitIndex` | `CurrentSplit` | `CurrentTime` |
 |---|---|---|---|
-| `NotRunning` | −1 | — | Real time is 0 with the default start offset; it's expected to equal the offset otherwise, but that wasn't checked. Game time is `null` until game time is first initialized, then `0` after a reset. |
+| `NotRunning` | −1 | — | Real time is 0, whatever the splits' "Start timer at" (`Run.Offset`; checked 2026-10-23 with 5:00). Game time is `null` until game time is first initialized, then `0` after a reset. |
 | `Running` | Index of the split in progress | that segment | live |
 | `Paused` | unchanged | unchanged | Real time frozen at the pause |
 | `Ended` | `Run.Count` | `null` | Frozen at the final time |
 
-- Game time is `null` until `TimerModel.InitializeGameTime()` runs, which is usually done by an auto splitter or load remover. Every `GameTime` file shows `-` until then.
+- LiveSplit's Timer component doesn't show `CurrentTime` while not running: it shows `Run.Offset`, for either timing method (read in source, `GetTime` in LiveSplit.Timer `6c9e478`). `Timers\` does the same.
+- Game time is `null` until `TimerModel.InitializeGameTime()` runs, which is usually done by an auto splitter or load remover. Every `GameTime` file shows `-` until then, except the timers before the start.
 - A skipped split's `SplitTime` stays empty (`null`).
 - Undo moves the index back and **clears** the undone split's `SplitTime`. Undo from `Ended` returns the timer to `Running`.
 

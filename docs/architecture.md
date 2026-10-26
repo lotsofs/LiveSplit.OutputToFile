@@ -244,7 +244,7 @@ Most write functions start from these two helpers, which return a **local** inde
   2–5 go in each comparison's folder, by that comparison's deltas. A split that matches none of these gets no highlight. `HIGHLIGHT_FILL` is 43 × `█`.
 - **Completed / Remaining:** the previous index + 1, i.e. the number of members completed at this level, and `Count − Completed`. They're numbers in every phase: 0 / `Count` when the timer isn't running, `Count` / 0 after the finish.
 - **Number / After:** the current index + 1, and `Count − current index − 1`. With no current member (current index −1) they're `-`, like `Name.txt`.
-- **Run timer:** `State.CurrentTime[method]`. **Segment timer** (`TimerFiles.SegmentTime`): the run timer minus the `SplitTime` of the level's previous member. It equals the run timer on the first member and when the timer isn't running. After the finish it is the last member's `LiveSegmentTime`, frozen.
+- **Run timer:** `State.CurrentTime[method]`. While the timer isn't running, `State.Run.Offset` (the splits' "Start timer at") for both methods instead, as LiveSplit's Timer component shows ([livesplit-notes.md](livesplit-notes.md#timer-state-by-phase-verified)). **Segment timer** (`TimerFiles.SegmentTime`): the run timer minus the `SplitTime` of the level's previous member. It equals the run timer on the first member and when the timer isn't running. After the finish it is the last member's `LiveSegmentTime`, frozen.
 - **FinishedRunsCount:** the number of attempts in history with a real time, plus 1 while the timer is `Ended`, because the current attempt joins the history only on reset.
 
 ## Writing files

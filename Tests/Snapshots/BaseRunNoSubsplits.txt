@@ -242,9 +242,9 @@ SplitList\AllSplits\RealTime\Time_Gold_Upcoming.txt
 SplitList\AllSplits\RealTime\Time_Run_Current.txt
   |(real time)
 Timers\GameTime\RunTimer.txt
-  |-
+  |0:00
 Timers\GameTime\SegmentTimer_AllSplits.txt
-  |-
+  |0:00
 Timers\RealTime\RunTimer.txt
   |(real time)
 Timers\RealTime\SegmentTimer_AllSplits.txt
@@ -275,10 +275,6 @@ SplitList\AllSplits\Highlight_CurrentSplit.txt
   |
   |
   |
-Timers\GameTime\RunTimer.txt
-  |0:00
-Timers\GameTime\SegmentTimer_AllSplits.txt
-  |0:00
 === At 5
 Timers\GameTime\RunTimer.txt
   |0:05

@@ -19,6 +19,18 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 			}
 		}
 
+		[Fact(Skip = "SSN: a split renamed without an event, as LiveSplit's server does, shows only after the next timer event")]
+		public void RenamingASplitWithoutAnEventRewritesTheFiles() {
+			using (var run = TestRun.Base()) {
+				run.Start();
+				// LiveSplit's server command setcurrentsplitname renames the split in place, and raises no event
+				run.State.Run[0].Name = "-Renamed";
+				run.Tick();
+				Assert.Equal("Renamed", run.Read(@"CurrentSplit\AllSplits\Name.txt"));
+				Assert.Equal("Renamed", run.Lines(NAMES)[0]);
+			}
+		}
+
 		[Fact]
 		public void ReplacingTheRunRewritesTheFiles() {
 			using (var run = TestRun.Base()) {

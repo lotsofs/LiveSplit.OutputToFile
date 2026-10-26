@@ -8,6 +8,7 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
+| [SSN](Defects.md#ssn--a-split-renamed-through-livesplits-server-shows-only-at-the-next-split) | Change detection | A split renamed through LiveSplit's server (`setsplitname`, `setcurrentsplitname`) keeps its old name in the files until the next split, start, skip, undo or reset: the server raises no event | Low |
 
 ## Performance — [Performance.md](Performance.md)
 
@@ -23,6 +24,9 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
+| [SCL](Features.md#scl--the-split-list-doesnt-follow-livesplits-scrolling) | Split list | Scrolling in LiveSplit (mouse wheel or hotkeys) doesn't move `SplitList\`; make every level's list follow it, one of its own lines per notch, reset on split, start, reset, skip and undo | Medium |
+| [CRN](Features.md#crn--a-ticked-comparison-renamed-in-edit-splits-is-no-longer-written) | Comparisons | Renaming a ticked comparison in Edit Splits empties its folder and leaves the old name ticked; follow LiveSplit's `ComparisonRenamed` event, as its own components do | Low |
+| [CLO](Features.md#clo--files-keep-their-contents-after-livesplit-closes) | File writing | When LiveSplit closes, every file keeps its last contents; GitHub issue #5 asks for the split list to be cleared. Decide what the files show while LiveSplit is closed | Low |
 
 ## Project and README — [Project.md](Project.md)
 
