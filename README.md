@@ -67,6 +67,8 @@ Highlights are a shaded bar to layer behind splits.
 
 The files of an output you turn off in the settings, of a comparison you untick, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits` and `Timers`) as its own, so don't keep other files there.
 
+When you close LiveSplit, it resets the timer, so the files show what they show after a reset. **Close Splits** does the same, and the files then show its empty splits. Opening another layout, or removing the component from the layout, leaves the files as they are.
+
 ## Comparisons
 
 Differences, `Sign.txt`, the ahead and behind highlights, and the split and segment times of the current and upcoming splits compare against a comparison, as LiveSplit's own splits do. Those files are in a comparison folder inside `GameTime` and `RealTime`:

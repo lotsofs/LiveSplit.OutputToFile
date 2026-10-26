@@ -7,6 +7,7 @@ What changed in Output to File between releases: the files it writes, what they 
 ### Fixed
 
 - **Before the timer starts, the timers in `Timers` show the splits' *Start timer at* time**, as LiveSplit's timer does, such as `5:00`, or `−0:05` for a countdown (previously: `0:00`, and `-` for game time until the first start).
+- **Closing LiveSplit during a run leaves the files as after a reset**, since LiveSplit resets the timer as it closes (previously: they kept the run's values from the moment it closed). The same goes for **Close Splits**, after which the files show its empty splits.
 
 ## 8 (2026-10-22)
 

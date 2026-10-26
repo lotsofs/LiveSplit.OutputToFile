@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace LiveSplit.UI.Components.OutputToFile.Tests {
@@ -99,6 +100,35 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.Equal("edited", File.ReadAllText(category));
 				run.Reset();
 				Assert.Equal("Any%", File.ReadAllText(category));
+			}
+		}
+
+		[Fact]
+		public void ClosingLiveSplitWritesItsReset() {
+			using (var closed = TestRun.Base())
+			using (var reset = TestRun.Base()) {
+				foreach (var run in new[] { closed, reset }) {
+					run.Start();
+					run.Split(9.5);
+				}
+				// LiveSplit resets the timer as it closes, then disposes the component with no frame in between
+				closed.Model.Reset();
+				closed.Component.Dispose();
+				reset.Reset();
+				Assert.Equal("-", closed.Read(@"CurrentSplit\AllSplits\Name.txt"));
+				Assert.Equal(reset.AllFiles().Where(f => !f.Key.Contains("RealTime")), closed.AllFiles().Where(f => !f.Key.Contains("RealTime")));
+			}
+		}
+
+		[Fact]
+		public void DisposingWithNothingChangedWritesNothing() {
+			using (var run = TestRun.Base()) {
+				string category = Path.Combine(run.Folder, "CategoryName.txt");
+				run.Start();
+				File.WriteAllText(category, "edited");
+				// As when another layout is opened
+				run.Component.Dispose();
+				Assert.Equal("edited", File.ReadAllText(category));
 			}
 		}
 	}

@@ -129,6 +129,10 @@ Turning off the Timer, Split list or Completed splits setting empties that outpu
 
 The files stay, with no contents, and are filled again when the output or level comes back. Leftovers like these from earlier sessions are emptied when the layout is loaded. Nothing is deleted. Only the component's own files are emptied, and only in the folder currently set. Its own files are everything in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\` and `Timers\`, and the `TotalSplits*.txt` files. That includes any other file kept in those folders, and the files older releases wrote there.
 
+## When LiveSplit closes
+
+LiveSplit resets the timer as it closes, so the files are left as after any reset, with the "Not running" contents above. Close Splits also resets the timer, then opens a blank run: no game or category, and one split with an empty name. The files are left showing that run. Opening another layout, or removing the component from the layout, leaves the files as they are. See [livesplit-notes.md](livesplit-notes.md#closing-livesplit-and-changing-layouts-read-in-source).
+
 ## Formatting
 
 From `TimeFormatter.cs`, which uses LiveSplit's own formatters (`RegularTimeFormatter` for times, `DeltaTimeFormatter` for differences), so the files read like LiveSplit's components. Values are truncated, not rounded.

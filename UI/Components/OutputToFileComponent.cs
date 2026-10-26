@@ -1,4 +1,5 @@
 ﻿using LiveSplit.Model;
+using LiveSplit.Options;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -212,8 +213,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			}
 		}
 
-		// This function is called when the component is removed from the layout, or when LiveSplit
-		// closes a layout with this component in it.
+		// Called when LiveSplit closes, on Close Splits (which switches to a layout with only a timer), when another layout
+		// is opened, and when the component is removed from the layout. Can be called twice.
 		public void Dispose() {
 			State.OnStart -= state_OnStart;
 			State.OnSplit -= state_OnSplitChange;
@@ -221,6 +222,15 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			State.OnUndoSplit -= state_OnSplitChange;
 			State.OnReset -= state_OnReset;
 			State.RunManuallyModified -= state_RunManuallyModified;
+			// LiveSplit resets the timer when it closes, and on Close Splits, then disposes the component with no frame in between.
+			// One last frame writes that reset. When nothing has changed since the last frame, it writes nothing.
+			try {
+				Update(null, State, 0, 0, LayoutMode.Vertical);
+			}
+			catch (Exception ex) {
+				// Thrown out of LiveSplit's closing, it would stop LiveSplit disposing the other components and stopping its server
+				Log.Error(ex);
+			}
 			// Let queued files finish, but don't hang LiveSplit on a stuck drive
 			_files.WaitForWrites(2000);
 		}

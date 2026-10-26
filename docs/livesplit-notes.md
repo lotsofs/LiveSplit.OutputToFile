@@ -220,6 +220,20 @@ Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60`
   - `LiveSplitState.Run` is a plain property, so replacing the run raises nothing by itself.
 - LiveSplit keeps calling `Update()` while the Edit Splits dialog is open, so edits reach the files as they're made ([which thread](#which-thread-raises-the-timer-events-mostly-read-in-source)).
 
+## Closing LiveSplit and changing layouts (read in source)
+
+Read in the LiveSplit source at `683cd60` (1.8.37) on 2026-10-26 ([TimerForm.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/TimerForm.cs), [TimerModel.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/TimerModel.cs), [StandardRunFactory.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/Model/RunFactories/StandardRunFactory.cs)). Not checked by running LiveSplit. The component's test of closing does the same steps headless.
+
+- **Closing LiveSplit resets the timer** (`TimerForm_FormClosing`), then disposes the layout's components:
+  1. `WarnUserAboutSplitsSave()` asks whether to save the splits, if they have unsaved changes. Cancel stops the closing. Otherwise it calls `Model.Reset()`, which also updates the history, the best segments and the PB. In timer-only mode it asks nothing and resets.
+  2. `WarnUserAboutLayoutSave` asks whether to save the layout, if it has unsaved changes. Cancel stops the closing, but the timer has already been reset.
+  3. It saves LiveSplit's settings, calls `Dispose()` on every layout component, deactivates the auto splitter and stops the server.
+- No frame runs between that reset and `Dispose()`. The two prompts set `DontRedraw`, which makes the refresh skip `Update()` ([which thread](#which-thread-raises-the-timer-events-mostly-read-in-source)), and the rest runs on the UI thread without returning to the message loop. The exception is the error box shown when saving the settings fails, which doesn't set `DontRedraw`. So a component sees the `OnReset` but no `Update()` after it.
+- `TimerModel.Reset()` does nothing while the timer is `NotRunning`, so closing then raises no event.
+- **Close Splits** asks about saving the splits and resets as above. If the layout has anything but a single Timer component, it asks about saving the layout. It then resets again, opens a blank run (no game or category, and one split with an empty name), and switches to a new layout with only a timer (`SetLayout`). That disposes the component, again with no frame between the reset and `Dispose()`.
+- **`SetLayout(layout)`** disposes every component of the old layout that the new one doesn't hold, compared by reference. Opening a layout from a file creates new components, so every old one is disposed, including an Output to File that the new layout has too.
+- **Edit Layout.** OK disposes the components removed in the editor. Cancel puts back the layout from before (`SetLayout`), which disposes the components added in the editor, and restores the other components' settings with `SetSettings`.
+
 ## Not verified
 
 These come from LiveSplit conventions and from this component working in practice:
