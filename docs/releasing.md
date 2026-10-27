@@ -33,7 +33,7 @@ Publish the code:
 
 Make the GitHub release:
 
-7. **GitHub.** Create release `N` from tag `N`, with that DLL attached under its own name. A prerelease works. A draft doesn't, because its assets can't be downloaded.
+7. **GitHub.** Create release `N` from tag `N`, with that DLL attached under its own name. Take it from `bin\Release`, not from LiveSplit's `Components` folder, where the deployed build has the same name. A prerelease works. A draft doesn't, because its assets can't be downloaded.
 8. **Check.** `curl -sIL https://github.com/lotsofs/LiveSplit.OutputToFile/releases/download/N/LiveSplit.OutputToFile.dll` ends in `200` with the DLL's size, and the downloaded file's SHA-256 matches the build's.
 
 Offer it through LiveSplit:
@@ -57,8 +57,9 @@ Which code each download on GitHub was built from. Checked on 2026-10-21 by buil
 | 6 | 2023-05-29 | replaced 2023-06-01 | `dc1e61b`, the first subsplits commit, a minute before the upload |
 | 7 | 2024-10-09 | uploaded with the tag | its tag |
 | 8 | 2026-10-22 | uploaded with the tag | its tag |
+| 9 | 2026-10-27 | uploaded with the tag | its tag |
 
-The downloads that were replaced aren't on GitHub any more, so what they contained isn't known. Tags `4` and `5` are the same commit. Release 8's download was checked against the build of its tag by SHA-256 when it was uploaded.
+The downloads that were replaced aren't on GitHub any more, so what they contained isn't known. Tags `4` and `5` are the same commit. The downloads of releases 8 and 9 were checked against the build of their tag by SHA-256 when they were uploaded. Release 9's first upload was a wrong file, a test build of 8.0. The check caught it, and it was replaced a few minutes later, before the feed listed the release.
 
 ## The feed
 

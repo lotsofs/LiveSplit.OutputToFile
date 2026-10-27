@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <updates>
-  <update version="8.0">
+  <update version="9.0">
     <files>
-      <file path="8/LiveSplit.OutputToFile.dll" localPath="Components/LiveSplit.OutputToFile.dll" status="changed" />
+      <file path="9/LiveSplit.OutputToFile.dll" localPath="Components/LiveSplit.OutputToFile.dll" status="changed" />
     </files>
+    <changelog>
+      <change>Now writes the splits' region, Uses Emulator and variables from Edit Splits.</change>
+      <change>Now writes LiveSplit's custom variables, such as a death count, with the new Custom variables setting.</change>
+      <change>SplitList now scrolls along with the mouse wheel over LiveSplit.</change>
+      <change>Fixes: before the start, the timers show the Start timer at time; closing LiveSplit resets the files; renamed splits and comparisons show straight away.</change>
+    </changelog>
+  </update>
+  <update version="8.0">
+    <files />
     <changelog>
       <change>Now checks for updates to this component.</change>
     </changelog>
