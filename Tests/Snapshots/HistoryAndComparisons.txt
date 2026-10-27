@@ -289,6 +289,8 @@ PreviousSplit\SansSubsplits\RealTime\Target\SegmentDifference.txt
   |(real time)
 PreviousSplit\SansSubsplits\RealTime\Target\Sign.txt
   |(real time)
+RegionName.txt
+  |(empty)
 SplitList\AllSplits\GameTime\CurrentComparison\Delta_Run.txt
   |
   |
@@ -656,6 +658,10 @@ TotalSplits_AllSplits.txt
   |5
 TotalSplits_SansSubsplits.txt
   |2
+UsesEmulator.txt
+  |(empty)
+Variables.txt
+  |(empty)
 === Start
 AttemptCount.txt
   |3

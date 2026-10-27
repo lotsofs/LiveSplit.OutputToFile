@@ -4,6 +4,12 @@ What changed in Output to File between releases: the files it writes, what they 
 
 ## Unreleased
 
+### Added
+
+- **`RegionName.txt`** has the region set in Edit Splits, such as `USA / NTSC`.
+- **`UsesEmulator.txt`** says `Emulator` when Uses Emulator is ticked in Edit Splits, and is empty otherwise.
+- **The variables set in Edit Splits**, such as Variant: Unrestricted. `Variables.txt` has them all on one line, the way LiveSplit's title shows them: `Unrestricted, No Glitches`. The new `Variables` folder has a file for each variable with its value, such as `Variables\Variant.txt`.
+
 ### Fixed
 
 - **Before the timer starts, the timers in `Timers` show the splits' *Start timer at* time**, as LiveSplit's timer does, such as `5:00`, or `−0:05` for a countdown (previously: `0:00`, and `-` for game time until the first start).

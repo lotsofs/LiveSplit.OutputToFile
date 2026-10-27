@@ -45,6 +45,26 @@ Each event fires **after** the state change, so a handler sees the new state:
 
   At `e16f72c` a new `Run` had `""`. The component writes either as an empty `PlatformName.txt`.
 
+## Run metadata (read in source)
+
+The component writes the platform, region, Uses Emulator and variables from the run's metadata ([output-files.md](output-files.md#root)). Read on 2026-10-27 at `683cd60` (1.8.37): [RunMetadata.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/RunMetadata.cs), [Run.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/Run.cs), [XMLRunSaver.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/RunSavers/XMLRunSaver.cs), [StandardFormatsRunFactory.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/RunFactories/StandardFormatsRunFactory.cs) and [MetadataControl.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/MetadataControl.cs). Not run, apart from the tests that set these properties directly.
+
+- **What the splits file holds.** Its `<Metadata>` holds the platform, with Uses Emulator as its `usesEmulator` attribute, the region, and the variables (speedrun.com's subcategories, `<Variable name="…">value</Variable>`).
+  - Loading puts them in `PlatformName`, `UsesEmulator`, `RegionName` and `VariableValueNames`, a dictionary from name to value.
+  - These are plain values. Reading them doesn't touch speedrun.com, and the component needs no reference to `SpeedrunComSharp.dll`.
+- **What does touch speedrun.com.** `Game`, `Category`, `Region`, `Platform` and `VariableValues` are speedrun.com's data.
+  - Reading `Game` calls `Refresh()`, then waits for the download of the game.
+  - The component reads none of them.
+- **The background clean-up.** Setting `Run.GameName` or `CategoryName` calls `Metadata.Refresh()`. When the game name has changed, it starts thread-pool tasks:
+  - One downloads the game from speedrun.com, and sets `GameAvailable` if it's found.
+  - The others then clear `PlatformName` and `RegionName` if the game doesn't have them. They also remove the variables the game doesn't have for the category, or all of them if the game wasn't found. A download that fails, as offline, clears nothing.
+  - None of this raises `RunManuallyModified`, so the platform, region and variables are cache keys.
+  - The variables task builds a new dictionary and assigns it to `VariableValueNames`. It never changes the dictionary it replaces, so the key compares the dictionary by reference.
+- **Edit Splits** changes `VariableValueNames` in place, on the UI thread: it removes a variable set back to nothing. Any metadata change raises `RunEdited`, and so `RunManuallyModified` (see [Editing and opening splits](#editing-and-opening-splits-read-in-source)).
+  - It fills the region and platform lists only from the game's speedrun.com data, and disables them without it.
+  - It shows Uses Emulator only if that game allows emulators, and offers only the game's own variables.
+  - So without speedrun.com's data, these can only be set by editing the splits file.
+
 ## Segment history (partly verified)
 
 The component takes the best segments of sections from the history ([architecture.md](architecture.md#best-segments)). The source was read on 2026-10-21 at `683cd60` (1.8.37): `UpdateSegmentHistory` in [TimerModel.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/TimerModel.cs), `FixSplits` and the import methods in [IRun.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/IRun.cs), `Clean` in [SumOfBest.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/SumOfBest.cs), and the split edits in [RunEditorDialog.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/RunEditorDialog.cs).

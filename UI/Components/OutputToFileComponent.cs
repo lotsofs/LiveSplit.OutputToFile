@@ -63,7 +63,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 
 		// The folders the writers write to, in the output folder. A full rewrite empties every file in them that it doesn't write,
 		// and every file in the output folder itself that matches OUTPUT_ROOT_FILES. The other root files are always written.
-		static readonly string[] OUTPUT_FOLDERS = { "CurrentSplit", "PreviousSplit", "SplitList", "CompletedSplits", "Timers" };
+		static readonly string[] OUTPUT_FOLDERS = { "CurrentSplit", "PreviousSplit", "SplitList", "CompletedSplits", "Timers", "Variables" };
 		// TotalSplits_{level}.txt, and TotalSplits.txt from before subsplits
 		const string OUTPUT_ROOT_FILES = "TotalSplits*.txt";
 
@@ -176,7 +176,13 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Cache["AttemptHistoryCount"] = state.Run.AttemptCount;
 			Cache["GameName"] = state.Run.GameName;
 			Cache["CategoryName"] = state.Run.CategoryName;
+			// LiveSplit downloads the game from speedrun.com in the background, then clears the platform, region and variables
+			// the game doesn't have, with no event
 			Cache["PlatformName"] = state.Run.Metadata.PlatformName;
+			Cache["RegionName"] = state.Run.Metadata.RegionName;
+			Cache["UsesEmulator"] = state.Run.Metadata.UsesEmulator;
+			// Compared by reference. That clean-up replaces the dictionary; Edit Splits changes it in place, and raises RunManuallyModified.
+			Cache["Variables"] = state.Run.Metadata.VariableValueNames;
 			Cache["RunEdits"] = runEdits;
 			Cache["TimerEvents"] = timerEvents;
 			// Compared by reference. Close Splits replaces the run without raising RunManuallyModified.

@@ -105,6 +105,8 @@ PreviousSplit\AllSplits\RealTime\RunTime.txt
   |(real time)
 PreviousSplit\AllSplits\RealTime\SegmentTime.txt
   |(real time)
+RegionName.txt
+  |(empty)
 SplitList\AllSplits\GameTime\CurrentComparison\Delta_Run.txt
   |
   |
@@ -251,6 +253,10 @@ Timers\RealTime\SegmentTimer_AllSplits.txt
   |(real time)
 TotalSplits_AllSplits.txt
   |5
+UsesEmulator.txt
+  |(empty)
+Variables.txt
+  |(empty)
 === Start
 AttemptCount.txt
   |1

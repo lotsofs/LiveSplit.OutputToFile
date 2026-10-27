@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -43,6 +44,26 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.State.Run = TestRun.MakeRun(("One", 10, 9), ("Two", 20, 9));
 				run.Tick();
 				Assert.Equal(new[] { "One", "Two" }, run.Lines(NAMES));
+			}
+		}
+
+		[Fact]
+		public void LiveSplitClearingTheMetadataRewritesTheFiles() {
+			using (var run = TestRun.Base()) {
+				run.Edit(r => {
+					r.Metadata.RegionName = "USA / NTSC";
+					r.Metadata.VariableValueNames["Variant"] = "Unrestricted";
+				});
+				// After downloading the game from speedrun.com, LiveSplit clears what the game doesn't have, with no event
+				run.State.Run.Metadata.RegionName = "";
+				run.Tick();
+				Assert.Equal("", run.Read("RegionName.txt"));
+				Assert.Equal("Unrestricted", run.Read("Variables.txt"));
+				// It replaces the variables rather than changing them
+				run.State.Run.Metadata.VariableValueNames = new Dictionary<string, string>();
+				run.Tick();
+				Assert.Equal("", run.Read("Variables.txt"));
+				Assert.Equal("", run.Read(@"Variables\Variant.txt"));
 			}
 		}
 

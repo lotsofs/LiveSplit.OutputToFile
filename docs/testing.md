@@ -49,7 +49,7 @@ This writes the snapshots instead of comparing them. Then read the snapshots' gi
 
 ### The base run
 
-`TestRun.Base()`: `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. `PlayBaseRun()` splits at 9.5, 21, 28, 39 and 48 s of game time. With every output on and no comparison ticked, it produces 166 files.
+`TestRun.Base()`: `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. `PlayBaseRun()` splits at 9.5, 21, 28, 39 and 48 s of game time. With every output on and no comparison ticked, it produces 169 files.
 
 The base run has no segment history. So in `SansSubsplits`, `Area A` and `Area B`, which span several splits, have no best segment: their gold files show `-`, and completing them counts as a gold.
 

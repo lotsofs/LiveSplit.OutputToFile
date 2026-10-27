@@ -60,7 +60,7 @@ The code is in `UI/Components/`:
 | `SplitLevels.cs` | `SplitLevels` and `SplitLevel`: depths, display names, the comparisons to write, each level's members, comparison segment times and best segments |
 | `OutputWriter.cs` | Base class of the writers: `MakeFile`, `GetCurrentSubsplitIndex`, `GetPreviousSubsplitIndex`, and this attempt's times and deltas (`LiveSegmentTime`, `RunDelta`, `IsGold`, …) |
 | `FileQueue.cs` | Writes the files on a background thread, skipping unchanged contents; keeps the latest write error |
-| `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …) |
+| `RunInfoFiles.cs` | Writes the root files (`GameName.txt`, `TotalSplits_*.txt`, …), and `Variables\`, a file per variable of the run |
 | `TimerFiles.cs` | Writes `Timers\` |
 | `SplitFiles.cs` | Writes `CurrentSplit\` and `PreviousSplit\`, including `Sign.txt` |
 | `SplitListFiles.cs` | Writes `SplitList\` and `CompletedSplits\` |
@@ -99,7 +99,7 @@ The code is in `UI/Components/`:
 5. Document it in `docs/output-files.md`, `README.md` and `CHANGELOG.md`.
 6. Update the test snapshots (docs/testing.md), and check in their diff that the file shows up with the contents you expect.
 
-A new output folder gets its own `OutputWriter` subclass. Add it to the csproj, construct it in the component's constructor with the shared `_levels` and `_files`, and call it from `WriteSplits()` or `Update()`. Add the folder to `OUTPUT_FOLDERS`, so its files are emptied when they're no longer written.
+A new output folder gets its own `OutputWriter` subclass. (`Variables\` is the exception: it's run information, from the same metadata as the root files, so `RunInfoFiles` writes it.) Add it to the csproj, construct it in the component's constructor with the shared `_levels` and `_files`, and call it from `WriteSplits()` or `Update()`. Add the folder to `OUTPUT_FOLDERS`, so its files are emptied when they're no longer written.
 
 **Adding a setting** (`OutputToFileSettings`, a WinForms `UserControl` with its layout in `.Designer.cs`/`.resx`):
 1. Add the property, plus its default and `DataBindings.Add` call in the constructor. Binding is what updates the property from the control.

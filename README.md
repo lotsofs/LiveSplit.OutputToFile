@@ -40,7 +40,8 @@ If a file can't be written, because another program has it locked, it's read-onl
 
 The [tree](#output-directory-tree) at the end of this page lists every file.
 
-- The main folder holds the run's details: `GameName.txt`, `CategoryName.txt`, `PlatformName.txt` (the platform set in Edit Splits), `AttemptCount.txt`, `FinishedRunsCount.txt`, the number of splits, and `CurrentComparison.txt` (see [Comparisons](#comparisons)).
+- The main folder holds the run's details: `GameName.txt`, `CategoryName.txt`, `PlatformName.txt` (the platform set in Edit Splits), `RegionName.txt` (the region), `UsesEmulator.txt` (`Emulator` when Uses Emulator is ticked, otherwise empty), `Variables.txt` (see below), `AttemptCount.txt`, `FinishedRunsCount.txt`, the number of splits, and `CurrentComparison.txt` (see [Comparisons](#comparisons)).
+- `Variables` has a file for each variable set in Edit Splits, with its value: `Variables\Variant.txt` holds `Unrestricted`. A file is named after its variable, without the `?` that Yes/No variables end with, and with `_` for any character a file name can't have. `Variables.txt` has them all on one line, as LiveSplit adds them to the category in its title: `Unrestricted, No Glitches`.
 - `CurrentSplit` is about the split you're on, and `PreviousSplit` about the one you just did.
 - `SplitList` is a list of the splits around the current one, and `CompletedSplits` a list of every split done so far.
 - `Timers` holds the run's timer, `RunTimer.txt`, and the time since the last split, `SegmentTimer_….txt`.
@@ -107,7 +108,7 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 
 ## Output Directory Tree
 
-This is the tree for splits with three levels of subsplits, with every output on and Personal Best ticked under **Comparisons**. To keep it short, the `PersonalBest` folder is shown once per output, though every `GameTime` and `RealTime` folder has one, and `etc.` marks a folder that holds the same kind of files as the ones above it.
+This is the tree for splits with three levels of subsplits and one variable, Variant, with every output on and Personal Best ticked under **Comparisons**. To keep it short, the `PersonalBest` folder is shown once per output, though every `GameTime` and `RealTime` folder has one, and `etc.` marks a folder that holds the same kind of files as the ones above it.
 
 ```
 |   AttemptCount.txt
@@ -116,10 +117,13 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   FinishedRunsCount.txt
 |   GameName.txt
 |   PlatformName.txt
+|   RegionName.txt
 |   TotalSplits_AllSplits.txt
 |   TotalSplits_SansSubsplits.txt
 |   TotalSplits_SansSubsplits_Level2.txt
 |   TotalSplits_SansSubsplits_Level3.txt
+|   UsesEmulator.txt
+|   Variables.txt
 |   
 +---CompletedSplits
 |   +---AllSplits
@@ -466,18 +470,21 @@ This is the tree for splits with three levels of subsplits, with every output on
 |       |   etc.
 |       …
 |               
-\---Timers
-    +---GameTime
-    |       RunTimer.txt
-    |       SegmentTimer_AllSplits.txt
-    |       SegmentTimer_SansSubsplits.txt
-    |       SegmentTimer_SansSubsplits_Level2.txt
-    |       SegmentTimer_SansSubsplits_Level3.txt
-    |       
-    \---RealTime
-            RunTimer.txt
-            SegmentTimer_AllSplits.txt
-            SegmentTimer_SansSubsplits.txt
-            SegmentTimer_SansSubsplits_Level2.txt
-            SegmentTimer_SansSubsplits_Level3.txt
++---Timers
+|   +---GameTime
+|   |       RunTimer.txt
+|   |       SegmentTimer_AllSplits.txt
+|   |       SegmentTimer_SansSubsplits.txt
+|   |       SegmentTimer_SansSubsplits_Level2.txt
+|   |       SegmentTimer_SansSubsplits_Level3.txt
+|   |       
+|   \---RealTime
+|           RunTimer.txt
+|           SegmentTimer_AllSplits.txt
+|           SegmentTimer_SansSubsplits.txt
+|           SegmentTimer_SansSubsplits_Level2.txt
+|           SegmentTimer_SansSubsplits_Level3.txt
+|           
+\---Variables
+        Variant.txt
 ```
