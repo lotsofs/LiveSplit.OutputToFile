@@ -17,6 +17,9 @@
     <Reference Include="LiveSplit.Core">
       <HintPath>$(LiveSplitDir)\LiveSplit.Core.dll</HintPath>
     </Reference>
+    <Reference Include="SpeedrunComSharp">
+      <HintPath>$(LiveSplitDir)\SpeedrunComSharp.dll</HintPath>
+    </Reference>
     <Reference Include="UpdateManager">
       <HintPath>$(LiveSplitDir)\UpdateManager.dll</HintPath>
     </Reference>

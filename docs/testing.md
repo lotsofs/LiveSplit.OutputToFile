@@ -11,7 +11,7 @@ dotnet test LiveSplit.OutputToFile.sln             # builds first, then runs eve
 
 - The build has no warnings, so any warning is new. The component needs the .NET Framework 4.8.1 targeting pack (see CLAUDE.md). The test project is SDK-style and gets the reference assemblies from NuGet.
 - The test project builds the component through a project reference, so `dotnet test` always tests the current code. With `--no-build`, it tests whatever was built last.
-- Like the component, it takes LiveSplit's folder from `LiveSplitDir`. It references `LiveSplit.Core.dll` and `UpdateManager.dll` itself, copied into its `bin\`, because the component's build doesn't copy them.
+- Like the component, it takes LiveSplit's folder from `LiveSplitDir`. It references `LiveSplit.Core.dll`, `SpeedrunComSharp.dll` and `UpdateManager.dll` itself, copied into its `bin\`, because the component's build doesn't copy them.
 - Its packages (xunit, the test SDK) restore from the NuGet cache, so the build works offline once they're there.
 - `deploy.cmd` builds only the component, not the tests.
 
@@ -89,7 +89,7 @@ Driving the built component from code, as the tests do: build a `Run`, drive it 
 
 For a one-off check that doesn't belong in the tests, such as a timing, a long stress run or a comparison of two builds:
 - write a temporary test with `TestRun`, and delete it before committing;
-- or write a console app outside the repo. It targets `net481`, and references `LiveSplit.Core.dll`, `UpdateManager.dll` and the built component, as the test project does.
+- or write a console app outside the repo. It targets `net481`, and references `LiveSplit.Core.dll`, `SpeedrunComSharp.dll`, `UpdateManager.dll` and the built component, as the test project does.
 
 Things to know:
 
