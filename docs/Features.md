@@ -2,36 +2,6 @@
 
 Things the component doesn't do yet. The index is [TODO.md](TODO.md).
 
-## SCL — The split list doesn't follow LiveSplit's scrolling
-
-Scrolling in LiveSplit, with the mouse wheel or the Scroll Up/Down hotkeys, shows earlier or later splits in its Splits component. `SplitList\` keeps showing the window around the current split. Wanted: every level's `SplitList\` follows the scrolling. `CompletedSplits\`, `CurrentSplit\` and `PreviousSplit\` stay as they are.
-
-**Evidence.** Read in source, not run:
-- The mouse wheel and the hotkeys call `TimerModel.ScrollUp`/`ScrollDown`, which raise `OnScrollUp`/`OnScrollDown` on the state (LiveSplit `683cd60`). The component doesn't subscribe to them.
-- LiveSplit doesn't store a scroll position. The Splits component keeps its own `ScrollOffset`, one split per notch (LiveSplit.Splits `20bbf92`):
-  - It resets the offset to 0 on start, split, skip, undo and reset.
-  - Each frame, it clamps the offset so the window stays within the run.
-
-**Plan.**
-- Subscribe to `OnScrollUp` and `OnScrollDown`. As with the timer events, the handlers only count, with `Interlocked`.
-- `Update()` applies the count to an offset:
-  - It sets the offset to 0 when a start, split, skip, undo or reset was counted.
-  - It clamps the offset to the `AllSplits` level, as LiveSplit does.
-  - It adds the offset to the `Cache` keys, so a scroll rewrites the files.
-- `SplitListRange` shifts each level's window by the offset, one of that level's lines per notch, and clamps it to the level.
-
-**Verify.** Tests:
-- One scroll down shifts `SplitList\AllSplits\Names.txt` by one line, and `SansSubsplits` by one section.
-- Scrolling past either end stops at the end. Scrolling back moves at once, without having to undo the extra notches first.
-- A split, or a reset, brings the window back to the current split.
-- Scrolling before the start and after the finish works too, as in LiveSplit.
-
-**Docs.**
-- output-files.md: the SplitList section.
-- architecture.md: the events and `Update()`.
-- README.md: the split list.
-- CHANGELOG.md: under Unreleased, Added.
-
 ## CRN — A ticked comparison renamed in Edit Splits is no longer written
 
 The Comparisons setting remembers ticked comparisons by name. When a ticked comparison is renamed in Edit Splits:

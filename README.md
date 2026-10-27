@@ -28,7 +28,7 @@ The settings are in LiveSplit's Layout Settings, on the **Output to File** tab.
   - **Subsplits**: the `SansSubsplits` folders (see [Subsplits](#subsplits)). On at first.
   - **Completed splits**: `CompletedSplits`, a list of every split done so far. Off at first.
   - **Split List**: `SplitList`, a list of the splits around the current one. On at first.
-- **Split List Writing**: how many splits `SplitList` shows before and after the current one, 10 each at first. Near the start and the end of the run, the list shows the first or the last splits instead, so its length stays the same.
+- **Split List Writing**: how many splits `SplitList` shows before and after the current one, 10 each at first. Near the start and the end of the run, the list shows the first or the last splits instead, so its length stays the same. Scrolling with the mouse wheel over LiveSplit moves `SplitList` too: each notch moves on a split, and the list shows the splits around that split, the same way it shows those around the current one. The next split, start, skip, undo or reset brings it back to the current split.
 - **Comparisons**: which comparisons get a folder of their own (see [Comparisons](#comparisons)).
 - **Time Format**: the decimals of times and of differences (see below).
 
@@ -62,9 +62,9 @@ After is the number of splits after the current one. It's `-` before the timer s
 
 Every file in a list has one line per split, so text sources placed side by side line up. A line with nothing to show is blank. `Names_Indent_0.txt`, `Names_Indent_1.txt`, … have a split's name only on the lines of splits with that many dashes, so each depth can be its own text source, indented differently.
 
-`CompletedSplits` has the same files as `SplitList`, except `Highlight_CurrentSplit.txt` and the `Time_…_Upcoming.txt` files, since none of its splits are current or upcoming.
+`CompletedSplits` has the same files as `SplitList`, except `Highlight_CurrentSplit.txt` and the `Time_…_Upcoming.txt` files, since none of its splits are current or upcoming, and `Highlight_ScrolledToSplit.txt`, since it doesn't scroll.
 
-Highlights are a shaded bar to layer behind splits.
+Highlights are a shaded bar to layer behind splits. `Highlight_ScrolledToSplit.txt` marks the split you've scrolled to with the mouse wheel (see Split List Writing under [Settings](#settings)), or in `SansSubsplits` the section it's in. It's empty while you haven't scrolled.
 
 The files of an output you turn off in the settings, of a comparison you untick, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits` and `Timers`) as its own, so don't keep other files there.
 
@@ -340,6 +340,7 @@ This is the tree for splits with three levels of subsplits and one variable, Var
 +---SplitList
 |   +---AllSplits
 |   |   |   Highlight_CurrentSplit.txt
+|   |   |   Highlight_ScrolledToSplit.txt
 |   |   |   Names.txt
 |   |   |   Names_Indent_0.txt
 |   |   |   Names_Indent_1.txt
@@ -391,6 +392,7 @@ This is the tree for splits with three levels of subsplits and one variable, Var
 |   |               
 |   +---SansSubsplits
 |   |   |   Highlight_CurrentSplit.txt
+|   |   |   Highlight_ScrolledToSplit.txt
 |   |   |   Names.txt
 |   |   |   Names_Indent_0.txt
 |   |   |   Names_Raw.txt
@@ -429,6 +431,7 @@ This is the tree for splits with three levels of subsplits and one variable, Var
 |   |               
 |   +---SansSubsplits_Level2
 |   |   |   Highlight_CurrentSplit.txt
+|   |   |   Highlight_ScrolledToSplit.txt
 |   |   |   Names.txt
 |   |   |   Names_Indent_0.txt
 |   |   |   Names_Indent_1.txt

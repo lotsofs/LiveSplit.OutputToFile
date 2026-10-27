@@ -1,6 +1,6 @@
 # Output files
 
-Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 169 files with every output on and no comparison ticked. The README describes the same files for users, in less detail.
+Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 171 files with every output on and no comparison ticked. The README describes the same files for users, in less detail.
 
 How to read the paths:
 
@@ -107,6 +107,12 @@ One line per member, for a window of `SplitsBefore + 1 + SplitsAfter` members ar
 - If the run is finished, or the current member is among the last `SplitsAfter` members, it's the last members.
 - Otherwise it's centered on the current member.
 
+Scrolling the mouse wheel over LiveSplit's window moves a scrolled-to split, one split of the run per notch. It starts from the current split, or from the first split before the start and the last after the finish, and stops at the first and last split. Every level then chooses its window as above, with the member that holds the scrolled-to split in place of the current member. In `SansSubsplits`, for example, that member is the section the split is in.
+- Near the start and end of the run a notch may not move the window, and in a coarser level the window moves only when the scrolled-to split enters another member.
+- A start, split, skip, undo or reset goes back to the current split.
+- A current member scrolled out of the window has no line in `Highlight_CurrentSplit.txt`.
+- `Highlight_ScrolledToSplit.txt` fills the line of the member that holds the scrolled-to split, which is always in the window. It's blank while not scrolled, including after scrolling back to where it started.
+
 Every file has the same number of lines, so separate text sources line up. "Completed" lines are members before the current one. "Upcoming" lines are the current member and every member after it. Lines that don't apply are blank.
 
 | File | Line contents |
@@ -115,6 +121,7 @@ Every file has the same number of lines, so separate text sources line up. "Comp
 | `Names_Raw.txt` | Raw name |
 | `Names_Indent_{n}.txt` (n = 0 … level) | Display name only on lines whose split depth is `n`. One file per indent level. |
 | `Highlight_CurrentSplit.txt` | Fill on the current member's line |
+| `Highlight_ScrolledToSplit.txt` | Fill on the line of the member holding the scrolled-to split, only while scrolled |
 | `{method}\Time_Run_Current.txt` | Completed: this attempt's split time |
 | `{method}\{comparison}\Time_Run_Upcoming.txt` | Upcoming: the comparison's split time |
 | `{method}\{comparison}\Time_Segment_Upcoming.txt` | Upcoming: the comparison's segment time |
@@ -132,7 +139,7 @@ Each completed line has a fill in at most one of `Highlight_Gold.txt` and one co
 
 ## `CompletedSplits\{level}\` (Completed splits setting)
 
-The same files as `SplitList`, but the lines cover every completed member: none while the timer isn't running, and all members once the run is finished. No line is current or upcoming, so `Highlight_CurrentSplit.txt` and the `Time_*_Upcoming.txt` files aren't written.
+The same files as `SplitList`, but the lines cover every completed member: none while the timer isn't running, and all members once the run is finished. No line is current or upcoming, so `Highlight_CurrentSplit.txt` and the `Time_*_Upcoming.txt` files aren't written. It doesn't scroll, so neither is `Highlight_ScrolledToSplit.txt`.
 
 ## Outputs turned off, and levels that are gone
 

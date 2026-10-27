@@ -438,6 +438,13 @@ SplitList\AllSplits\Highlight_CurrentSplit.txt
   |
   |
   |
+SplitList\AllSplits\Highlight_ScrolledToSplit.txt
+  |
+  |
+  |
+  |
+  |
+  |
 SplitList\AllSplits\Names.txt
   |A1
   |A2
@@ -587,6 +594,10 @@ SplitList\SansSubsplits\GameTime\Time_Run_Current.txt
   |
   |
 SplitList\SansSubsplits\Highlight_CurrentSplit.txt
+  |
+  |
+  |
+SplitList\SansSubsplits\Highlight_ScrolledToSplit.txt
   |
   |
   |

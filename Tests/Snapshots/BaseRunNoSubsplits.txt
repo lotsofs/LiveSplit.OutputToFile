@@ -198,6 +198,13 @@ SplitList\AllSplits\Highlight_CurrentSplit.txt
   |
   |
   |
+SplitList\AllSplits\Highlight_ScrolledToSplit.txt
+  |
+  |
+  |
+  |
+  |
+  |
 SplitList\AllSplits\Names.txt
   |A1
   |A2

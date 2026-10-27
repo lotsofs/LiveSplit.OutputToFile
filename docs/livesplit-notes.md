@@ -257,6 +257,16 @@ Read in the LiveSplit source at `683cd60` (1.8.37) on 2026-10-26 ([TimerForm.cs]
 - **`SetLayout(layout)`** disposes every component of the old layout that the new one doesn't hold, compared by reference. Opening a layout from a file creates new components, so every old one is disposed, including an Output to File that the new layout has too.
 - **Edit Layout.** OK disposes the components removed in the editor. Cancel puts back the layout from before (`SetLayout`), which disposes the components added in the editor, and restores the other components' settings with `SetSettings`.
 
+## Scrolling (read in source, checked by reflection)
+
+`SplitList\` follows LiveSplit's scroll notches, and resets them on the same events as its Splits component, but lays out its window its own way ([architecture.md](architecture.md#scrolling)). Read on 2026-10-27 at `683cd60` (1.8.37) in [TimerForm.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.View/View/TimerForm.cs), [TimerModel.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Model/TimerModel.cs) and [HotkeyProfile.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Options/HotkeyProfile.cs), and in the Splits component's [SplitsComponent.cs](https://github.com/LiveSplit/LiveSplit.Splits/blob/819107787fd2cfda8dd107306d4ca812a1b597b6/src/LiveSplit.Splits/UI/Components/SplitsComponent.cs) at `8191077`, the commit 1.8.37 pins.
+
+- **Only the mouse wheel scrolls.** `TimerForm_MouseWheel` calls `Model.ScrollUp()` or `ScrollDown()`, one per wheel event, on the UI thread. They raise `OnScrollUp` and `OnScrollDown`, and change nothing in the state. There are no scroll hotkeys, and the server has no scroll command. Checked by reflection on the installed DLLs: the handler calls those two methods, and `HotkeyProfile` has no scroll key.
+- **LiveSplit keeps no scroll position.** The Splits component keeps its own `ScrollOffset`, one split per notch, down positive.
+  - It sets it to 0 on `OnStart`, `OnSplit`, `OnSkipSplit`, `OnUndoSplit` and `OnReset`. A pause keeps it.
+  - Each frame, it clamps the offset so that its window stays within the run. A notch past the end is dropped then, so a notch back moves the window at once.
+  - Before the start its window is the first splits, and after the finish the last ones; scrolling moves it from there too.
+
 ## Not verified
 
 These come from LiveSplit conventions and from this component working in practice:

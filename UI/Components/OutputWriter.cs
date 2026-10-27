@@ -46,14 +46,21 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			if (State.CurrentPhase != TimerPhase.Running && State.CurrentPhase != TimerPhase.Paused) {
 				return -1;
 			}
-			// The first member at or after the current split. The last split is a member of every level, so there is one.
+			return MemberAtOrAfter(level, State.CurrentSplitIndex);
+		}
+
+		/// <summary>
+		/// The local index of the level's first member at or after a split of the run: the member that holds that split.
+		/// The last split is a member of every level, so there is one for every split.
+		/// </summary>
+		protected int MemberAtOrAfter(int level, int splitIndex) {
 			List<int> indices = Levels[level].Indices;
 			for (int i = 0; i < indices.Count; i++) {
-				if (indices[i] >= State.CurrentSplitIndex) {
+				if (indices[i] >= splitIndex) {
 					return i;
 				}
 			}
-			throw new InvalidOperationException($"Level {level} has no member at or after split {State.CurrentSplitIndex}: the levels don't match the run.");
+			throw new InvalidOperationException($"Level {level} has no member at or after split {splitIndex}: the levels don't match the run.");
 		}
 
 		#endregion

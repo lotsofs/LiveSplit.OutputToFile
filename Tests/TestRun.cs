@@ -168,6 +168,19 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 		}
 
 		/// <summary>
+		/// One notch of the mouse wheel over LiveSplit's window
+		/// </summary>
+		public void ScrollUp() {
+			Model.ScrollUp();
+			Tick();
+		}
+
+		public void ScrollDown() {
+			Model.ScrollDown();
+			Tick();
+		}
+
+		/// <summary>
 		/// Selects a comparison, as the right-click menu or the server does: no event
 		/// </summary>
 		public void SelectComparison(string name) {

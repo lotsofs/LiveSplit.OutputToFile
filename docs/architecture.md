@@ -25,7 +25,7 @@ Code is referred to by member name. The table below says which file each class i
 
 ## Lifecycle
 
-1. LiveSplit loads the layout and calls `OutputToFileFactory.Create(state)`. The component's constructor creates the settings control with default values, subscribes to the timer events and `RunManuallyModified`, creates the shared `SplitLevels`, the `FileQueue` and the four writers, and runs `CalculateSegments()`.
+1. LiveSplit loads the layout and calls `OutputToFileFactory.Create(state)`. The component's constructor creates the settings control with default values, subscribes to the timer events, the scroll events and `RunManuallyModified`, creates the shared `SplitLevels`, the `FileQueue` and the four writers, and runs `CalculateSegments()`.
 2. LiveSplit then calls `SetSettings(xml)` with the saved settings. This does **not** trigger a recalculation by itself. In practice the first `Update()` does it, because every cache key is new at that point.
 3. `Update()` is called repeatedly for as long as the layout is open. The component has zero size, and `DrawVertical`/`DrawHorizontal` are empty.
 4. `GetSettings()` runs when the layout is saved. `GetSettingsHashCode()` is called on every refresh, but LiveSplit only uses it to decide whether to redraw, not to detect unsaved changes ([livesplit-notes.md](livesplit-notes.md#layout-save-prompt-and-the-settings-hash-read-in-source)).
@@ -36,7 +36,7 @@ Code is referred to by member name. The table below says which file each class i
 
 **Threads.**
 - The timer events can arrive on a thread other than the UI thread. LiveSplit's server raises them on its connection's thread ([livesplit-notes.md](livesplit-notes.md#which-thread-raises-the-timer-events-mostly-read-in-source)).
-- So the event handlers only count events (`Interlocked.Increment`). Everything else runs in `Update()`, on the UI thread, so the levels, the writers' caches and the settings control are only ever used from one thread. `FileQueue` locks its own state for its drain task.
+- So the event handlers only count events (`Interlocked`). Everything else runs in `Update()`, on the UI thread, so the levels, the writers' caches and the settings control are only ever used from one thread. `FileQueue` locks its own state for its drain task.
 - The caller still changes LiveSplit's state outside the component. An `Update()` can therefore read a split half made, and an exception from that is caught and logged by LiveSplit.
 - `Update()` reads the event counts before any state, and an event always comes after its change. So such a change is counted, and the files are rewritten from the finished state on the next frame.
 - Don't do work in a handler. When the server drives the timer, a handler would race `Update()` over the levels and could throw. The server doesn't catch handler exceptions, so that closes LiveSplit.
@@ -47,13 +47,14 @@ Code is referred to by member name. The table below says which file each class i
 |---|---|
 | `OnStart`, `OnSplit`, `OnSkipSplit`, `OnUndoSplit`, `OnReset` | Counts the event (`_timerEvents`), a cache key, so the next `Update()` rewrites everything. `OnReset` also counts the reset (`_resets`). Several events in one frame cost one rewrite. |
 | `RunManuallyModified` | Counts the edit (`_runEdits`), a cache key, so the next `Update()` rewrites everything. Several edits in one frame cost one rewrite. |
-| `Update()` (every frame) | 0. Read the three counts, before any state. If the latest write error changed, show it in the settings (`ShowWriteError`). If the reset count changed, `FileQueue.ForgetWrittenFiles()`, so each attempt ends with every file written in full. <br>1. If any cache key or split name changed (below), a full rewrite: `FileQueue.BeginSweep()`, `CalculateSegments()`, `RunInfoFiles.Write()` (game, category, platform, region, emulator, variables, attempts, finished runs, total splits), then `WriteSplits()`. <br>2. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless what one of that method's files shows changed since its last write: the run timer's or a level's segment timer's whole second (truncated, sign included), or the timer phase. `TimerFiles` keeps each level's segment start, the time its segment timer counts from, and finds them again only after `SegmentStartsChanged()`, which `CalculateSegments()` calls. A frame therefore costs a subtraction per level, not a search. After a full rewrite every timer file is written, because finding the segment starts again also forgets what the files show. <br>3. After a full rewrite: `FileQueue.EndSweep()`, which empties the output files the rewrite didn't write (see [Writing files](#writing-files)). |
+| `OnScrollUp`, `OnScrollDown` | Counts the notch (`_scrolls`: down adds one, up takes one away), a cache key, so the next `Update()` rewrites everything with `SplitList\` scrolled (see [Scrolling](#scrolling)). |
+| `Update()` (every frame) | 0. Read the four counts, before any state. If the latest write error changed, show it in the settings (`ShowWriteError`). If the reset count changed, `FileQueue.ForgetWrittenFiles()`, so each attempt ends with every file written in full. <br>1. If any cache key or split name changed (below), a full rewrite: `FileQueue.BeginSweep()`, `CalculateSegments()`, `SplitListFiles.Scroll()`, `RunInfoFiles.Write()` (game, category, platform, region, emulator, variables, attempts, finished runs, total splits), then `WriteSplits()`. <br>2. If `OutputTimer` is on: `TimerFiles.WriteTimer(RealTime)` and `WriteTimer(GameTime)`. Each returns immediately unless what one of that method's files shows changed since its last write: the run timer's or a level's segment timer's whole second (truncated, sign included), or the timer phase. `TimerFiles` keeps each level's segment start, the time its segment timer counts from, and finds them again only after `SegmentStartsChanged()`, which `CalculateSegments()` calls. A frame therefore costs a subtraction per level, not a search. After a full rewrite every timer file is written, because finding the segment starts again also forgets what the files show. <br>3. After a full rewrite: `FileQueue.EndSweep()`, which empties the output files the rewrite didn't write (see [Writing files](#writing-files)). |
 | `Dispose()` | One last `Update()`, as above, so that a reset LiveSplit makes just before disposing the component reaches the files ([Lifecycle](#lifecycle)). With the base run mid-run, it takes about 17 ms until every file is written, and with 590 files about 65–110 ms (seen headless, 2026-10-26). |
 
 The cache keys in `Update()` are:
 - attempt count, game name, category name;
 - platform name, region name, Uses Emulator, and the variables dictionary (by reference). After downloading the game from speedrun.com, LiveSplit clears the platform, region and variables the game doesn't have, in the background and with no event. It replaces the dictionary rather than changing it ([livesplit-notes.md](livesplit-notes.md#run-metadata-read-in-source)). Edit Splits changes the dictionary in place, but raises `RunManuallyModified`;
-- the `RunManuallyModified` count, the timer event count, the `Run` object (by reference);
+- the `RunManuallyModified` count, the timer event count, the scroll count, the `Run` object (by reference);
 - `FolderPath`, `SplitsBefore`, `SplitsAfter`, the four `Output*` settings, `AllCustomComparisons`, `TickedComparisonsVersion`, `TimeAccuracy` and `DeltaAccuracy`;
 - `CurrentPhase`, and `state.CurrentComparison`, since selecting a comparison raises no event;
 - for each comparison written, its time at the last split (`_comparisonChecks`). LiveSplit regenerates its generated comparisons without a timer event after a reset through the server and from its Settings dialog ([livesplit-notes.md](livesplit-notes.md#comparisons-read-in-source-partly-checked-headless)). Their cumulative times then change at the last split, so this key catches it.
@@ -76,9 +77,24 @@ LiveSplit fires every event *after* it has updated the timer state, and the rewr
 
 1. `SplitFiles.WriteSplitInformation()`: names and indexes.
 2. `SplitFiles.WriteSplitTimes(RealTime)`, `WriteSplitTimes(GameTime)`: the CurrentSplit and PreviousSplit time files.
-3. `SplitListFiles.WriteSplitLists(RealTime)`, `WriteSplitLists(GameTime)`: for each level, the `SplitList\` window and the `CompletedSplits\` list. `WriteSplitLists` works out each list's range of splits (`SplitListRange` for the window), and `WriteSplitListLevel` writes the files for that range.
+3. `SplitListFiles.WriteSplitLists(RealTime)`, `WriteSplitLists(GameTime)`: for each level, the `SplitList\` window and the `CompletedSplits\` list. `WriteSplitLists` works out each list's range of splits (`SplitListRange` for the window, around the current or the scrolled-to split), and `WriteSplitListLevel` writes the files for that range.
 
 The steps don't depend on each other: each computes what it needs from the run.
+
+### Scrolling
+
+`SplitList\` follows the mouse wheel over LiveSplit's window ([livesplit-notes.md](livesplit-notes.md#scrolling-read-in-source-checked-by-reflection)). Each notch moves the **scrolled-to split** by one split of the run. Every level lays out its window around that split as it does around the current split.
+- **Where the window goes.** `SplitListRange` takes the level's member at or after the scrolled-to split (`OutputWriter.MemberAtOrAfter`), the member that holds it. It puts `SplitsBefore` members before it and `SplitsAfter` after it, shifted to stay within the level.
+  - The scrolled-to split itself is the unscrolled split (`UnscrolledSplit()`) plus `_scrollOffset`. The unscrolled split is the current split while running, the first split before the start and the last after the finish. With no scrolling, the window is therefore where it always was.
+  - So near either end of the run, a notch can move the scrolled-to split without moving the window. In a coarser level, the window moves only when the scrolled-to split enters another member, such as another section.
+- **The offset.** LiveSplit keeps no scroll position, so `SplitListFiles` keeps one, `_scrollOffset`, in splits of the run, down positive.
+  - The handlers count the notches in `_scrolls`, a cache key, so each frame with a notch is a full rewrite.
+  - In the rewrite, after `CalculateSegments()`, `Scroll()` gets the notches since the last rewrite, and whether a timer event (start, split, skip, undo or reset) was counted since then. A timer event first sets the offset back to 0, as LiveSplit does.
+  - It then adds the notches and clamps the offset, so the scrolled-to split stays within the run. Notches past either end are dropped, so a notch back always moves the scrolled-to split. It runs on every rewrite, notches or not, so a run that changed length is clamped again.
+  - The order of a notch and a timer event in the same frame isn't known; `Scroll()` treats the notch as the later one.
+- Besides the window, only `Highlight_ScrolledToSplit.txt` depends on the offset. `ScrolledToMember` gives the member that holds the scrolled-to split, or −1 while the offset is 0, and `WriteSplitListLevel` fills that line. `ListLines` creates the file only for `SplitList\`, so `CompletedSplits\` doesn't have it. Which lines are completed or current is the same as without scrolling, and a current split scrolled out of the window has no `Highlight_CurrentSplit.txt` line.
+- The offset is in the writer, not in `SplitLevels`, so rebuilding the levels keeps it.
+- A notch that moves no window still costs a rewrite, which changes no file.
 
 ## Subsplit levels
 

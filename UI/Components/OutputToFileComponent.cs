@@ -48,6 +48,11 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		int _resetsSeen;
 		// Counts RunManuallyModified, which LiveSplit raises after each edit in Edit Splits and when splits are opened. A cache key in Update().
 		int _runEdits;
+		// Counts LiveSplit's scrolling, a notch at a time: down adds one, up takes one away. A cache key in Update().
+		int _scrolls;
+		// The scroll and timer event counts the split list last followed
+		int _scrollsSeen;
+		int _timerEventsSeen;
 		// A cache key for each comparison written, with its name: the comparison's time at the last split. LiveSplit regenerates
 		// its generated comparisons (Average Segments, …) on reset, after edits and from its Settings dialog. A reset sent through
 		// the server, or the Settings dialog, can change them after the rewrite, with no event; their last split time changes then.
@@ -79,6 +84,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			state.OnUndoSplit += state_OnSplitChange;
 			state.OnReset += state_OnReset;
 			state.RunManuallyModified += state_RunManuallyModified;
+			state.OnScrollUp += state_OnScrollUp;
+			state.OnScrollDown += state_OnScrollDown;
 
 			State = state;
 			_levels = new SplitLevels();
@@ -129,6 +136,15 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Interlocked.Increment(ref _runEdits);
 		}
 
+		// The mouse wheel over LiveSplit's window
+		void state_OnScrollUp(object sender, EventArgs e) {
+			Interlocked.Decrement(ref _scrolls);
+		}
+
+		void state_OnScrollDown(object sender, EventArgs e) {
+			Interlocked.Increment(ref _scrolls);
+		}
+
 		#endregion
 
 		// comparison: the one selected in LiveSplit, read once per rewrite, so that every file uses the same one
@@ -162,6 +178,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			int timerEvents = Volatile.Read(ref _timerEvents);
 			int resets = Volatile.Read(ref _resets);
 			int runEdits = Volatile.Read(ref _runEdits);
+			int scrolls = Volatile.Read(ref _scrolls);
 			// Write errors happen on the background thread; the settings control may only be touched here, on the UI thread
 			if (_files.TakeErrorChange(out string writeError)) {
 				Settings.ShowWriteError(writeError);
@@ -185,6 +202,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Cache["Variables"] = state.Run.Metadata.VariableValueNames;
 			Cache["RunEdits"] = runEdits;
 			Cache["TimerEvents"] = timerEvents;
+			Cache["Scrolls"] = scrolls;
 			// Compared by reference. Close Splits replaces the run without raising RunManuallyModified.
 			Cache["Run"] = state.Run;
 			Cache["FolderPath"] = Settings.FolderPath;
@@ -211,6 +229,10 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			if (rewrite) {
 				_files.BeginSweep();
 				CalculateSegments(comparison);
+				// A start, split, skip, undo or reset brings the split list back to the current split, as in LiveSplit
+				_splitListFiles.Scroll(scrolls - _scrollsSeen, timerEvents != _timerEventsSeen);
+				_scrollsSeen = scrolls;
+				_timerEventsSeen = timerEvents;
 				_runInfoFiles.Write();
 				WriteSplits();
 			}
@@ -243,6 +265,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			State.OnUndoSplit -= state_OnSplitChange;
 			State.OnReset -= state_OnReset;
 			State.RunManuallyModified -= state_RunManuallyModified;
+			State.OnScrollUp -= state_OnScrollUp;
+			State.OnScrollDown -= state_OnScrollDown;
 			// LiveSplit resets the timer when it closes, and on Close Splits, then disposes the component with no frame in between.
 			// One last frame writes that reset. When nothing has changed since the last frame, it writes nothing.
 			try {

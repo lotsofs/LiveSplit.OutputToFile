@@ -25,6 +25,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		const string FILE_LIST_GOLD_DELTA = @"{1}\{0}\Delta_Gold.txt";
 		const string FILE_LIST_GOLD_TIME_UPCOMING = @"{1}\{0}\Time_Gold_Upcoming.txt";
 		const string FILE_LIST_CURRENT_SPLIT_HIGHLIGHT = @"{1}\Highlight_CurrentSplit.txt";
+		const string FILE_LIST_SCROLLED_TO_SPLIT_HIGHLIGHT = @"{1}\Highlight_ScrolledToSplit.txt";
 		const string FILE_LIST_GOLD_HIGHLIGHT = @"{1}\{0}\Highlight_Gold.txt";
 		// {3} is the comparison's folder: these files are written once for each of Levels.Comparisons
 		const string FILE_LIST_FINISH_TIME_UPCOMING = @"{1}\{0}\{3}\Time_Run_Upcoming.txt";
@@ -36,7 +37,38 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		const string FILE_LIST_BEHIND_GAINED_HIGHLIGHT = @"{1}\{0}\{3}\Highlight_BehindGained.txt";
 		const string FILE_LIST_BEHIND_LOST_HIGHLIGHT = @"{1}\{0}\{3}\Highlight_BehindLost.txt";
 
+		// How far LiveSplit's scrolling has moved the split that every level's SplitList window is laid out around, in splits of the run,
+		// down positive. Scroll() keeps that split within the run, so scrolling back moves it at once.
+		int _scrollOffset;
+
 		public SplitListFiles(LiveSplitState state, OutputToFileSettings settings, SplitLevels levels, FileQueue files) : base(state, settings, levels, files) { }
+
+		/// <summary>
+		/// Follows LiveSplit's scrolling: each notch moves the split the windows are laid out around by one split of the run.
+		/// Call once per rewrite, after the levels are calculated.
+		/// </summary>
+		/// <param name="notches">The notches scrolled since the last call, down positive</param>
+		/// <param name="backToCurrent">Whether to go back to the current split first</param>
+		public void Scroll(int notches, bool backToCurrent) {
+			if (backToCurrent) _scrollOffset = 0;
+			// Notches past either end of the run are dropped, as LiveSplit's Splits component drops its own
+			int split = Math.Min(Math.Max(UnscrolledSplit() + _scrollOffset + notches, 0), State.Run.Count - 1);
+			_scrollOffset = split - UnscrolledSplit();
+		}
+
+		// The split the windows are laid out around, by index in the run
+		int ScrolledToSplit() => UnscrolledSplit() + _scrollOffset;
+
+		// The local index of the level's member that holds the scrolled-to split, or -1 while not scrolled
+		int ScrolledToMember(int lvl) => _scrollOffset == 0 ? -1 : MemberAtOrAfter(lvl, ScrolledToSplit());
+
+		// The split the windows are laid out around without scrolling, by index in the run: the current split,
+		// the first split before the start, and the last after the finish
+		int UnscrolledSplit() {
+			if (State.CurrentPhase == TimerPhase.NotRunning) return 0;
+			if (State.CurrentPhase == TimerPhase.Ended) return State.Run.Count - 1;
+			return State.CurrentSplitIndex;
+		}
 
 		public void WriteSplitLists(TimingMethod method) {
 			int startingLevel = 0;
@@ -55,29 +87,18 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			}
 		}
 
-		// The SplitList window at one level, as local indices: the current split with SplitsBefore splits before it
-		// and SplitsAfter after it, shifted to stay within the level
+		// The SplitList window at one level, as local indices: the member holding the scrolled-to split, with SplitsBefore members
+		// before it and SplitsAfter after it, shifted to stay within the level. Without scrolling, that member is the current one,
+		// the first before the start and the last after the finish.
 		(int First, int Last) SplitListRange(int lvl) {
 			int count = Levels[lvl].Indices.Count;
 			int range = 1 + Settings.SplitsBefore + Settings.SplitsAfter;
 			if (range > count) {
 				return (0, count - 1);
 			}
-			// No current split before the start or after the finish: the first members, or the last
-			if (State.CurrentPhase == TimerPhase.NotRunning) {
-				return (0, range - 1);
-			}
-			if (State.CurrentPhase == TimerPhase.Ended) {
-				return (count - range, count - 1);
-			}
-			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
-			if (currentSubsplitIndex < Settings.SplitsBefore) {
-				return (0, range - 1);
-			}
-			if (currentSubsplitIndex > count - 1 - Settings.SplitsAfter) {
-				return (count - range, count - 1);
-			}
-			return (currentSubsplitIndex - Settings.SplitsBefore, currentSubsplitIndex + Settings.SplitsAfter);
+			int member = MemberAtOrAfter(lvl, ScrolledToSplit());
+			int first = Math.Min(Math.Max(member - Settings.SplitsBefore, 0), count - range);
+			return (first, first + range - 1);
 		}
 
 		// Writes the files of one split list (folder) at one level, for the splits with local indices first to last.
@@ -86,11 +107,14 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			// -1 for none: no current split before the start or after the finish, nothing completed before the start
 			int currentSubsplitIndex = GetCurrentSubsplitIndex(lvl);
 			int previousSubsplitIndex = GetPreviousSubsplitIndex(lvl);
+			int scrolledToIndex = ScrolledToMember(lvl);
 			var lines = new ListLines(Levels.Comparisons, upcoming, lvl + 1);
 
 			for (int spl = first; spl <= last; spl++) {
 				AppendNames(lines, lvl, spl);
 				if (spl == currentSubsplitIndex) lines.CurrentSplitHighlight.Append(HIGHLIGHT_FILL);
+				// CompletedSplits doesn't have it, though a completed split can be scrolled to
+				if (spl == scrolledToIndex) lines.ScrolledToSplitHighlight?.Append(HIGHLIGHT_FILL);
 				if (spl <= previousSubsplitIndex) {
 					AppendCompletedLine(lines, method, lvl, spl);
 				}
@@ -161,8 +185,9 @@ namespace LiveSplit.UI.Components.OutputToFile {
 
 			public readonly StringBuilder Names, NamesRaw;
 			public readonly StringBuilder RunTimeCurrent, GoldDelta, GoldHighlight;
-			// Only for the current split and those after it, which CompletedSplits never has. Null there.
-			public readonly StringBuilder GoldTimeUpcoming, CurrentSplitHighlight;
+			// Only for the current split and those after it, which CompletedSplits never has, and for scrolling, which only
+			// moves SplitList. Null there.
+			public readonly StringBuilder GoldTimeUpcoming, CurrentSplitHighlight, ScrolledToSplitHighlight;
 			// Names_Indent_{depth}, one per depth up to the level's
 			public readonly StringBuilder[] Indents;
 			// The files of each comparison, in the order of SplitLevels.Comparisons
@@ -180,6 +205,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				if (upcoming) {
 					GoldTimeUpcoming = Add(FILE_LIST_GOLD_TIME_UPCOMING);
 					CurrentSplitHighlight = Add(FILE_LIST_CURRENT_SPLIT_HIGHLIGHT);
+					ScrolledToSplitHighlight = Add(FILE_LIST_SCROLLED_TO_SPLIT_HIGHLIGHT);
 				}
 				Indents = new StringBuilder[depths];
 				for (int depth = 0; depth < depths; depth++) {

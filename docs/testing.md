@@ -21,7 +21,7 @@ Each test plays a run through LiveSplit's `TimerModel`, lets the component write
 
 | File | Holds |
 |---|---|
-| `TestRun.cs` | `TestRun`, which every test uses: it builds a run, the timer and the component with every output on, and plays it (`Start`, `Split(s)`, `Skip`, `Undo`, `Pause`, `Reset`, `PlayAttempt`, `Edit`, `SelectComparison`). Each action is followed by `Tick()`, one LiveSplit frame that waits for the writes. `Read`, `Lines` and `Exists` read the files. |
+| `TestRun.cs` | `TestRun`, which every test uses: it builds a run, the timer and the component with every output on, and plays it (`Start`, `Split(s)`, `Skip`, `Undo`, `Pause`, `Reset`, `PlayAttempt`, `Edit`, `SelectComparison`, and `ScrollUp` and `ScrollDown`, a notch of the mouse wheel). Each action is followed by `Tick()`, one LiveSplit frame that waits for the writes. `Read`, `Lines` and `Exists` read the files. |
 | `Snapshot.cs` | Records a run's whole output, step by step, and compares it with `Snapshots\{name}.txt` |
 | `SnapshotTests.cs` | Whole runs through every phase: [the base run](#the-base-run), the same without subsplits, and a run with a segment history and a second comparison |
 | `*Tests.cs` | Tests of one value or behaviour each, named after what they check, grouped by output folder or class |
@@ -49,7 +49,7 @@ This writes the snapshots instead of comparing them. Then read the snapshots' gi
 
 ### The base run
 
-`TestRun.Base()`: `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. `PlayBaseRun()` splits at 9.5, 21, 28, 39 and 48 s of game time. With every output on and no comparison ticked, it produces 169 files.
+`TestRun.Base()`: `-A1` (PB 10), `-A2` (PB 20), `{Area A}A3` (PB 30), `-B1` (PB 40), `{Area B}B2` (PB 50). Every best segment is 9 s. `PlayBaseRun()` splits at 9.5, 21, 28, 39 and 48 s of game time. With every output on and no comparison ticked, it produces 171 files.
 
 The base run has no segment history. So in `SansSubsplits`, `Area A` and `Area B`, which span several splits, have no best segment: their gold files show `-`, and completing them counts as a gold.
 
@@ -66,7 +66,8 @@ The base run has no segment history. So in `SansSubsplits`, `Area A` and `Area B
    - a skip, then an undo;
    - a pause and a resume;
    - the finish;
-   - a reset.
+   - a reset;
+   - the mouse wheel over LiveSplit's window, before the start, mid-run and after the finish: each notch moves on a split, and `SplitList\` shows the window around it at every level, as around the current split. The next split or reset brings it back.
 
    Look at both `AllSplits` and `SansSubsplits`.
 5. Repeat with a splits file that has no subsplits. There is only one level then, and level 0 is `AllSplits`.
