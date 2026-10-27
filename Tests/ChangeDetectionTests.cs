@@ -20,7 +20,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 			}
 		}
 
-		[Fact(Skip = "SSN: a split renamed without an event, as LiveSplit's server does, shows only after the next timer event")]
+		[Fact]
 		public void RenamingASplitWithoutAnEventRewritesTheFiles() {
 			using (var run = TestRun.Base()) {
 				run.Start();
@@ -29,6 +29,10 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.Tick();
 				Assert.Equal("Renamed", run.Read(@"CurrentSplit\AllSplits\Name.txt"));
 				Assert.Equal("Renamed", run.Lines(NAMES)[0]);
+				// Without its dash, A2 becomes a member of SansSubsplits
+				run.State.Run[1].Name = "A2";
+				run.Tick();
+				Assert.Equal(new[] { "A2", "Area A", "Area B" }, run.Lines(@"SplitList\SansSubsplits\Names.txt"));
 			}
 		}
 

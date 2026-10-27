@@ -219,6 +219,9 @@ Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60`
   - LiveSplit then stays in timer-only mode. From then on, `TimerForm`'s `OnReset` handler replaces the run with a new blank one on every reset, also without the event.
   - `LiveSplitState.Run` is a plain property, so replacing the run raises nothing by itself.
 - LiveSplit keeps calling `Update()` while the Edit Splits dialog is open, so edits reach the files as they're made ([which thread](#which-thread-raises-the-timer-events-mostly-read-in-source)).
+- The server renames splits in place and raises no event: `setsplitname <index> <name>` (index from 0) and `setcurrentsplitname <name>` set the split's `Name` and `Run.HasChanged`, on the server's thread ([CommandServer.cs](https://github.com/LiveSplit/LiveSplit/blob/683cd60a9f3fe2dc31a5054c6d10f5d71f2e6ae1/src/LiveSplit.Core/Server/CommandServer.cs)). Unlike the rest of this section, this was run:
+  - Reproduced 2026-10-23 in LiveSplit 1.8.37, with `setcurrentsplitname` through the named pipe.
+  - Checked headless 2026-10-26, by calling the installed `CommandServer.ProcessMessage` from another thread. Both commands renamed the split. Without a check of the names, the component's files didn't change within 10 frames, so none of the events it counts was raised.
 
 ## Closing LiveSplit and changing layouts (read in source)
 

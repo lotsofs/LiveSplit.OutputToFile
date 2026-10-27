@@ -52,6 +52,9 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		// its generated comparisons (Average Segments, …) on reset, after edits and from its Settings dialog. A reset sent through
 		// the server, or the Settings dialog, can change them after the rewrite, with no event; their last split time changes then.
 		List<(string Key, string Name)> _comparisonChecks = new List<(string, string)>();
+		// The run's split names as of the last rewrite. LiveSplit's server renames a split in place (setsplitname,
+		// setcurrentsplitname), with no event, so Update() compares them every frame.
+		string[] _splitNames = new string[0];
 
 		RunInfoFiles _runInfoFiles;
 		TimerFiles _timerFiles;
@@ -131,6 +134,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		// comparison: the one selected in LiveSplit, read once per rewrite, so that every file uses the same one
 		void CalculateSegments(string comparison) {
 			IRun run = State.Run;
+			// Before the levels and the writers read the names: a rename after this is seen next frame
+			_splitNames = run.Select(s => s.Name).ToArray();
 			_levels.GenerateSubsplitLevels(run, Settings.OutputSubsplits);
 			// Outside LiveSplit, no comparison may be selected
 			_levels.ChooseComparisons(run, comparison ?? Run.PersonalBestComparisonName, Settings.IsComparisonTicked, Settings.AllCustomComparisons);
@@ -196,7 +201,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				Cache[check.Key] = lastSplit.Comparisons[check.Name];
 			}
 			// A full rewrite queues every file the settings and levels call for. Those it doesn't are emptied.
-			bool rewrite = Cache.HasChanged;
+			bool rewrite = Cache.HasChanged || SplitNamesChanged(state.Run);
 			if (rewrite) {
 				_files.BeginSweep();
 				CalculateSegments(comparison);
@@ -211,6 +216,16 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			if (rewrite) {
 				_files.EndSweep(Settings.FolderPath, OUTPUT_FOLDERS, OUTPUT_ROOT_FILES);
 			}
+		}
+
+		// Whether a split's name changed since the last rewrite. A string comparison checks the reference first,
+		// so an unchanged run costs one reference comparison per split.
+		bool SplitNamesChanged(IRun run) {
+			if (run.Count != _splitNames.Length) return true;
+			for (int i = 0; i < run.Count; i++) {
+				if (run[i].Name != _splitNames[i]) return true;
+			}
+			return false;
 		}
 
 		// Called when LiveSplit closes, on Close Splits (which switches to a layout with only a timer), when another layout

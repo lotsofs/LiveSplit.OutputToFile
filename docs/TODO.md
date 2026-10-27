@@ -8,7 +8,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [SSN](Defects.md#ssn--a-split-renamed-through-livesplits-server-shows-only-at-the-next-split) | Change detection | A split renamed through LiveSplit's server (`setsplitname`, `setcurrentsplitname`) keeps its old name in the files until the next split, start, skip, undo or reset: the server raises no event | Low |
 
 ## Performance — [Performance.md](Performance.md)
 
