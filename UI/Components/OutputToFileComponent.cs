@@ -1,6 +1,7 @@
 ﻿using LiveSplit.Model;
 using LiveSplit.Options;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -53,6 +54,12 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		// The scroll and timer event counts the split list last followed
 		int _scrollsSeen;
 		int _timerEventsSeen;
+		// Comparisons renamed in Edit Splits, oldest first, with their old and new names. Update() follows them in the settings.
+		readonly ConcurrentQueue<(string Old, string New)> _comparisonRenames = new ConcurrentQueue<(string, string)>();
+		// The renames followed in the ticked comparisons, oldest first, and the run they were made in. Cancel in Edit Splits
+		// puts back a copy of the run from before, with the old names, and raises no rename, so Update() moves the ticks back then.
+		readonly List<(string Old, string New)> _followedRenames = new List<(string, string)>();
+		IRun _renamedRun;
 		// A cache key for each comparison written, with its name: the comparison's time at the last split. LiveSplit regenerates
 		// its generated comparisons (Average Segments, …) on reset, after edits and from its Settings dialog. A reset sent through
 		// the server, or the Settings dialog, can change them after the rewrite, with no event; their last split time changes then.
@@ -71,6 +78,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		static readonly string[] OUTPUT_FOLDERS = { "CurrentSplit", "PreviousSplit", "SplitList", "CompletedSplits", "Timers", "Variables" };
 		// TotalSplits_{level}.txt, and TotalSplits.txt from before subsplits
 		const string OUTPUT_ROOT_FILES = "TotalSplits*.txt";
+		// Edit Splits reports a removed comparison as renamed to this, the name LiveSplit's components use for following the selection
+		const string REMOVED_COMPARISON = "Current Comparison";
 
 		#region livesplitoverhead
 
@@ -84,6 +93,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			state.OnUndoSplit += state_OnSplitChange;
 			state.OnReset += state_OnReset;
 			state.RunManuallyModified += state_RunManuallyModified;
+			state.ComparisonRenamed += state_ComparisonRenamed;
 			state.OnScrollUp += state_OnScrollUp;
 			state.OnScrollDown += state_OnScrollDown;
 
@@ -116,7 +126,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Settings.SetSettings(settings);
 		}
 
-		// The handlers only count, so they are safe on any thread. Update() rewrites everything on the next frame.
+		// The handlers only count or queue, so they are safe on any thread. Update() rewrites everything on the next frame.
 
 		void state_OnStart(object sender, EventArgs e) {
 			Interlocked.Increment(ref _timerEvents);
@@ -134,6 +144,13 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		void state_RunManuallyModified(object sender, EventArgs e) {
 			// The run was edited in place, or replaced
 			Interlocked.Increment(ref _runEdits);
+		}
+
+		// A comparison renamed or removed in Edit Splits, just before its RunManuallyModified
+		void state_ComparisonRenamed(object sender, EventArgs e) {
+			if (e is RenameEventArgs rename) {
+				_comparisonRenames.Enqueue((rename.OldName, rename.NewName));
+			}
 		}
 
 		// The mouse wheel over LiveSplit's window
@@ -188,6 +205,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				// Write every file in full once per attempt. A reset is also a timer event, so the rewrite below follows.
 				_files.ForgetWrittenFiles();
 			}
+			// Before the cache keys: the rename's RunManuallyModified then rewrites with the new name ticked
+			FollowComparisonRenames(state);
 			Cache.Restart();
 			// Check for basic 'user loaded or changed splits' etc
 			Cache["AttemptHistoryCount"] = state.Run.AttemptCount;
@@ -256,6 +275,38 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			return false;
 		}
 
+		// A ticked comparison renamed in Edit Splits stays ticked under its new name, as LiveSplit's own components follow a rename.
+		// Cancel in Edit Splits puts the old name back, and then so does this.
+		void FollowComparisonRenames(LiveSplitState state) {
+			IRun run = state.Run;
+			// Cancel puts back a copy of the run, which has the same file path. Other splits opened have another.
+			if (_renamedRun != null && run != _renamedRun) {
+				if (run.FilePath == _renamedRun.FilePath) {
+					// Newest first, so that a comparison renamed twice ends on its first name
+					for (int i = _followedRenames.Count - 1; i >= 0; i--) {
+						var (oldName, newName) = _followedRenames[i];
+						// The same splits saved after the rename, and opened again, still have the new name
+						if (Settings.IsComparisonTicked(newName) && !run.Comparisons.Contains(newName)) {
+							Settings.SetComparisonTicked(newName, false);
+							Settings.SetComparisonTicked(oldName, true);
+						}
+					}
+				}
+				_followedRenames.Clear();
+				_renamedRun = null;
+			}
+			while (_comparisonRenames.TryDequeue(out var rename)) {
+				// A removed comparison stays ticked, so the settings list shows it for unticking, like any ticked name the run doesn't have
+				if (!Settings.IsComparisonTicked(rename.Old) || rename.New == REMOVED_COMPARISON) continue;
+				Settings.SetComparisonTicked(rename.Old, false);
+				Settings.SetComparisonTicked(rename.New, true);
+				// The ticked comparisons are saved with the layout, so LiveSplit asks to save it when it closes
+				state.Layout.HasChanged = true;
+				_followedRenames.Add(rename);
+				_renamedRun = run;
+			}
+		}
+
 		// Called when LiveSplit closes, on Close Splits (which switches to a layout with only a timer), when another layout
 		// is opened, and when the component is removed from the layout. Can be called twice.
 		public void Dispose() {
@@ -265,6 +316,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			State.OnUndoSplit -= state_OnSplitChange;
 			State.OnReset -= state_OnReset;
 			State.RunManuallyModified -= state_RunManuallyModified;
+			State.ComparisonRenamed -= state_ComparisonRenamed;
 			State.OnScrollUp -= state_OnScrollUp;
 			State.OnScrollDown -= state_OnScrollDown;
 			// LiveSplit resets the timer when it closes, and on Close Splits, then disposes the component with no frame in between.

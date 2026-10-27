@@ -197,6 +197,44 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 			Tick();
 		}
 
+		/// <summary>
+		/// Renames a custom comparison, as Edit Splits does: in the run, then ComparisonRenamed and RunManuallyModified
+		/// </summary>
+		public void RenameComparison(string oldName, string newName) {
+			IRun run = State.Run;
+			run.CustomComparisons[run.CustomComparisons.IndexOf(oldName)] = newName;
+			foreach (ISegment segment in run) {
+				segment.Comparisons[newName] = segment.Comparisons[oldName];
+				segment.Comparisons.Remove(oldName);
+			}
+			State.CallComparisonRenamed(new RenameEventArgs { OldName = oldName, NewName = newName });
+			State.CallRunManuallyModified();
+			Tick();
+		}
+
+		/// <summary>
+		/// Removes a custom comparison, as Edit Splits does, which reports it as renamed to "Current Comparison"
+		/// </summary>
+		public void RemoveComparison(string name) {
+			State.Run.CustomComparisons.Remove(name);
+			State.CallComparisonRenamed(new RenameEventArgs { OldName = name, NewName = "Current Comparison" });
+			foreach (ISegment segment in State.Run) {
+				segment.Comparisons.Remove(name);
+			}
+			State.CallRunManuallyModified();
+			Tick();
+		}
+
+		/// <summary>
+		/// Replaces the run, as LiveSplit does when splits are opened, and when Edit Splits is cancelled, with a copy of the run
+		/// taken when it opened (State.Run.Clone()): no event but RunManuallyModified
+		/// </summary>
+		public void SetRun(IRun run) {
+			State.Run = run;
+			State.CallRunManuallyModified();
+			Tick();
+		}
+
 		// Set both clocks. Game time is exact; real time is only close.
 		void SetClocks(double s) {
 			State.AdjustedStartTime = TimeStamp.Now - TimeSpan.FromSeconds(s);

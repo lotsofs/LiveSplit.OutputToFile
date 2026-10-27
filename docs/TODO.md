@@ -23,7 +23,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [CRN](Features.md#crn--a-ticked-comparison-renamed-in-edit-splits-is-no-longer-written) | Comparisons | Renaming a ticked comparison in Edit Splits empties its folder and leaves the old name ticked; follow LiveSplit's `ComparisonRenamed` event, as its own components do | Low |
 | [CVR](Features.md#cvr--livesplits-custom-variables-arent-written) | Run info | LiveSplit's custom variables, set by Auto Splitting Runtime scripts and server tools, aren't written. They change with no event, maybe every frame and from the server's thread, so they need their own change check and write path | Low |
 
 ## Project and README — [Project.md](Project.md)

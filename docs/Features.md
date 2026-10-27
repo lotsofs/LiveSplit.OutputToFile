@@ -2,36 +2,6 @@
 
 Things the component doesn't do yet. The index is [TODO.md](TODO.md).
 
-## CRN — A ticked comparison renamed in Edit Splits is no longer written
-
-The Comparisons setting remembers ticked comparisons by name. When a ticked comparison is renamed in Edit Splits:
-- its folder is emptied;
-- the new name isn't ticked, so nothing is written for it;
-- the settings list still shows the old name, ticked, so it can be unticked.
-
-The user has to tick the new name. LiveSplit's own components that store a comparison name, such as Delta, follow the rename instead.
-
-**Evidence.**
-- Reproduced 2026-10-23, headless:
-  - The test ticked `Rival`, then renamed it to `Rival Two` the way the editor does, raising `ComparisonRenamed` and `RunManuallyModified`.
-  - Afterwards `PreviousSplit\AllSplits\GameTime\` held only `CurrentComparison` and an emptied `Rival`, and `Rival` was still the ticked name.
-- Read in source (LiveSplit `683cd60`):
-  - `RunEditorDialog.RenameComparison` raises `ComparisonRenamed` with a `RenameEventArgs` holding `OldName` and `NewName`, and `TimerForm` passes it on with `state.CallComparisonRenamed`.
-  - Removing a comparison raises it too, with `NewName` "Current Comparison".
-
-**Plan.**
-- Subscribe to `ComparisonRenamed`. To keep the rule that handlers only count, queue the old and new names in a `ConcurrentQueue`.
-- `Update()` applies the queue to the settings, on the UI thread: a ticked old name is unticked, and the new name ticked.
-- On a removal, keep the name ticked, so the list shows it for unticking, as for any ticked name the run doesn't have.
-- The ticked set is saved with the layout, so LiveSplit asks to save the layout afterwards, as it does for the Delta component.
-
-**Verify.** A test: tick a comparison, rename it with `CallComparisonRenamed`, and check that the new folder is written and the new name ticked.
-
-**Docs.**
-- README.md: the Comparisons setting.
-- architecture.md: the comparisons.
-- CHANGELOG.md: under Unreleased.
-
 ## CVR — LiveSplit's custom variables aren't written
 
 LiveSplit's custom variables are names with text values, kept in `Run.Metadata.CustomVariables`. They're LiveSplit's own and unrelated to speedrun.com's variables, which `Variables\` holds. Auto splitters and tools set them, for example to a death count, a collectible count or the current level. LiveSplit's Text component can show one by name. Wanted: `CustomVariables\{name}.txt`, a file per custom variable with its value.

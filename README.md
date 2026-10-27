@@ -76,6 +76,7 @@ Differences, `Sign.txt`, the ahead and behind highlights, and the split and segm
 
 - `CurrentComparison` follows the comparison selected in LiveSplit (right-click → Compare Against). `CurrentComparison.txt` holds its name.
 - Tick a comparison under **Comparisons** in the settings to also get a folder for it, named after it without its spaces, such as `PersonalBest` or `AverageSegments`. **All custom comparisons** gives every comparison you added in Edit Splits a folder, in whatever splits you open.
+- A ticked comparison you rename in Edit Splits stays ticked, and its folder takes the new name, so point its text sources at the new folder. LiveSplit then asks to save your layout when it closes, which keeps the new name ticked. If you cancel Edit Splits, the old name is ticked again.
 
 Golds don't depend on the comparison, so their files stay in `GameTime` and `RealTime`.
 

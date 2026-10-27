@@ -21,7 +21,7 @@ Each test plays a run through LiveSplit's `TimerModel`, lets the component write
 
 | File | Holds |
 |---|---|
-| `TestRun.cs` | `TestRun`, which every test uses: it builds a run, the timer and the component with every output on, and plays it (`Start`, `Split(s)`, `Skip`, `Undo`, `Pause`, `Reset`, `PlayAttempt`, `Edit`, `SelectComparison`, and `ScrollUp` and `ScrollDown`, a notch of the mouse wheel). Each action is followed by `Tick()`, one LiveSplit frame that waits for the writes. `Read`, `Lines` and `Exists` read the files. |
+| `TestRun.cs` | `TestRun`, which every test uses: it builds a run, the timer and the component with every output on, and plays it (`Start`, `Split(s)`, `Skip`, `Undo`, `Pause`, `Reset`, `PlayAttempt`, `Edit`, `RenameComparison`, `RemoveComparison`, `SetRun`, `SelectComparison`, and `ScrollUp` and `ScrollDown`, a notch of the mouse wheel). Each action is followed by `Tick()`, one LiveSplit frame that waits for the writes. `Read`, `Lines` and `Exists` read the files. |
 | `Snapshot.cs` | Records a run's whole output, step by step, and compares it with `Snapshots\{name}.txt` |
 | `SnapshotTests.cs` | Whole runs through every phase: [the base run](#the-base-run), the same without subsplits, and a run with a segment history and a second comparison |
 | `*Tests.cs` | Tests of one value or behaviour each, named after what they check, grouped by output folder or class |
@@ -112,6 +112,8 @@ Things to know:
   - Generated comparisons (Best Segments, Average Segments) stay empty until something calls each generator's `Generate(state.Settings)`. LiveSplit's UI does that after every reset and edit, so do it after `model.Reset()`, before the `Tick()`.
   - A custom comparison is `run.CustomComparisons.Add(name)`, plus `run[i].Comparisons[name] = time` for each split.
   - Tick one in the settings with `comp.Settings.SetComparisonTicked(name, true)`, or set `AllCustomComparisons`.
+  - Renaming or removing one, as Edit Splits does: change the run first, then call `state.CallComparisonRenamed(new RenameEventArgs { OldName, NewName })`, with `NewName` "Current Comparison" for a removal, then `CallRunManuallyModified()` ([livesplit-notes.md](livesplit-notes.md#editing-and-opening-splits-read-in-source)). `TestRun.RenameComparison` and `RemoveComparison` do this.
+  - Cancelling Edit Splits: keep `(IRun)state.Run.Clone()` from before the edits, then set `state.Run` to it and call `CallRunManuallyModified()`, which is `TestRun.SetRun`.
 - **Loading a splits file.** `new StandardFormatsRunFactory(stream, path).Create(new StandardComparisonGeneratorsFactory())`, with `livesplit_core.dll` from LiveSplit's `x64\` folder next to the program or the tests' DLL ([livesplit-notes.md](livesplit-notes.md#running-livesplit-code-outside-livesplit-verified)).
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
 - **Don't delete output files mid-run.** `FileQueue` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.

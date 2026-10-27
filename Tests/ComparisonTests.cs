@@ -58,6 +58,87 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 		}
 
 		[Fact]
+		public void RenamedComparisonStaysTicked() {
+			using (var run = WithTarget(r => r.Settings.SetComparisonTicked("Target", true))) {
+				run.Start();
+				run.Split(9.5);
+				run.State.Layout.HasChanged = false;
+				run.RenameComparison("Target", "Rival");
+				Assert.Equal("+0.5", run.Read(PREVIOUS + @"Rival\RunDifference.txt"));
+				Assert.Equal("", run.Read(PREVIOUS + @"Target\RunDifference.txt"));
+				Assert.Equal(new[] { "Rival" }, run.Settings.TickedComparisons);
+				// The ticked comparisons are saved with the layout
+				Assert.True(run.State.Layout.HasChanged);
+			}
+		}
+
+		[Fact]
+		public void CancelledRenameTicksTheOldNameAgain() {
+			using (var run = WithTarget(r => r.Settings.SetComparisonTicked("Target", true))) {
+				run.Start();
+				run.Split(9.5);
+				// Edit Splits edits the run itself; Cancel puts back a copy taken when it opened
+				var copy = (IRun)run.State.Run.Clone();
+				run.RenameComparison("Target", "Rival");
+				run.SetRun(copy);
+				Assert.Equal("+0.5", run.Read(PREVIOUS + @"Target\RunDifference.txt"));
+				Assert.Equal("", run.Read(PREVIOUS + @"Rival\RunDifference.txt"));
+				Assert.Equal(new[] { "Target" }, run.Settings.TickedComparisons);
+			}
+		}
+
+		[Fact]
+		public void CancelledRenamesEndOnTheFirstName() {
+			using (var run = WithTarget(r => r.Settings.SetComparisonTicked("Target", true))) {
+				var copy = (IRun)run.State.Run.Clone();
+				run.RenameComparison("Target", "Rival");
+				run.RenameComparison("Rival", "Rival Two");
+				run.SetRun(copy);
+				Assert.Equal(new[] { "Target" }, run.Settings.TickedComparisons);
+			}
+		}
+
+		[Fact]
+		public void RenameIsKeptWhenOtherSplitsAreOpened() {
+			using (var run = WithTarget(r => {
+				r.Settings.SetComparisonTicked("Target", true);
+				r.State.Run.FilePath = "Any%.lss";
+			})) {
+				// Other splits that have a comparison of the old name
+				var other = (IRun)run.State.Run.Clone();
+				other.FilePath = "Other.lss";
+				run.RenameComparison("Target", "Rival");
+				run.SetRun(other);
+				Assert.Equal(new[] { "Rival" }, run.Settings.TickedComparisons);
+			}
+		}
+
+		[Fact]
+		public void RemovedComparisonStaysTicked() {
+			using (var run = WithTarget(r => r.Settings.SetComparisonTicked("Target", true))) {
+				run.Start();
+				run.Split(9.5);
+				run.State.Layout.HasChanged = false;
+				run.RemoveComparison("Target");
+				Assert.Equal("", run.Read(PREVIOUS + @"Target\RunDifference.txt"));
+				// So that the settings list shows it, for unticking
+				Assert.Equal(new[] { "Target" }, run.Settings.TickedComparisons);
+				Assert.False(run.State.Layout.HasChanged);
+			}
+		}
+
+		[Fact]
+		public void RenamedUntickedComparisonStaysUnticked() {
+			using (var run = WithTarget()) {
+				run.State.Layout.HasChanged = false;
+				run.RenameComparison("Target", "Rival");
+				Assert.Empty(run.Settings.TickedComparisons);
+				Assert.False(run.Exists(PREVIOUS + @"Rival\RunDifference.txt"));
+				Assert.False(run.State.Layout.HasChanged);
+			}
+		}
+
+		[Fact]
 		public void TickedComparisonsFolderHasNoSpaces() {
 			using (var run = TestRun.Base(r => r.Settings.SetComparisonTicked(Run.PersonalBestComparisonName, true))) {
 				run.Start();

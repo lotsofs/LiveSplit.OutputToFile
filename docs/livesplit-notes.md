@@ -233,6 +233,12 @@ Read in the LiveSplit source at `e16f72c` on 2026-10-15, then again at `683cd60`
 - Edit Splits (`RunEditorDialog`) edits `CurrentState.Run` in place. After each change it raises `RunEdited`, and `TimerForm` responds with `CallRunManuallyModified()`. A change is any edit to a name, a time, a best segment, the game, the category, the attempt count, the metadata, an icon or a comparison, and any added, removed or moved split.
 - Splits can only be added or removed while the timer is `NotRunning`. Other edits are allowed during a run.
 - OK only closes the editor. Cancel puts back a copy of the run taken when the editor opened (`SetRun`), then calls `CallRunManuallyModified()`.
+- **Renaming and removing comparisons.** Read at `683cd60` on 2026-10-27, except where marked:
+  - Renaming one (`RenameComparison`) renames it in the run: in `CustomComparisons`, in every split's comparison times, and as `CurrentComparison` if it's selected. It then raises the editor's `ComparisonRenamed`, which `TimerForm` passes on with `CallComparisonRenamed`, and then `RunEdited`. Only a name the run already has and a `[Race]` name are refused.
+  - Removing one (`RemoveComparison`) raises `ComparisonRenamed` too, with `NewName` "Current Comparison", before it removes the split times. LiveSplit.Core has no constant for that name.
+  - Cancel raises no rename back. Its copy is `Run.Clone()`, which copies `FilePath`. The person at the machine saw it in LiveSplit on 2026-10-27: after a rename and Cancel, Edit Splits shows the old name again.
+  - Checked by reflection on the installed `LiveSplit.Core.dll`: `ComparisonRenamed` is an `EventHandler`, raised with a `LiveSplit.UI.RenameEventArgs` (`OldName`, `NewName`), and `LiveSplitState.Layout` is an `ILayout` with a `HasChanged` setter.
+  - The Delta component follows a rename: if its comparison is the old name, it takes the new one and sets `Layout.HasChanged`, so LiveSplit asks to save the layout ([DeltaComponent.cs](https://github.com/LiveSplit/LiveSplit.Delta/blob/master/src/LiveSplit.Delta/UI/Components/DeltaComponent.cs), read on master). It doesn't go back on Cancel.
 - The offset and the auto splitter settings change the run without raising the event.
 - Opening splits from a file or a URL calls `SetRun`, then `CallRunManuallyModified()`. At `e16f72c` splits could also be opened from speedrun.com; 1.8.37 no longer has that.
 - Close Splits resets the timer, then calls `SetRun` with a blank run, and doesn't raise the event.
