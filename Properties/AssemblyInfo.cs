@@ -25,8 +25,8 @@ using LiveSplit.UI.Components.OutputToFile;
 [assembly: Guid("bf2e08e6-8bed-4773-b03a-23214d25144f")]
 
 // The release number, as N.0. The factory reports it to LiveSplit's update check (docs/releasing.md).
-[assembly: AssemblyVersion("8.0")]
-[assembly: AssemblyFileVersion("8.0")]
+[assembly: AssemblyVersion("9.0")]
+[assembly: AssemblyFileVersion("9.0")]
 [assembly: ComponentFactory(typeof(OutputToFileFactory))]
 // The tests in Tests\ use the internal classes directly
 [assembly: InternalsVisibleTo("LiveSplit.OutputToFile.Tests")]

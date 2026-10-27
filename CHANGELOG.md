@@ -4,20 +4,22 @@ What changed in Output to File between releases: the files it writes, what they 
 
 ## Unreleased
 
+## 9 (2026-10-27)
+
 ### Added
 
-- **`RegionName.txt`** has the region set in Edit Splits, such as `USA / NTSC`.
-- **`UsesEmulator.txt`** says `Emulator` when Uses Emulator is ticked in Edit Splits, and is empty otherwise.
-- **The variables set in Edit Splits**, such as Variant: Unrestricted. `Variables.txt` has them all on one line, the way LiveSplit's title shows them: `Unrestricted, No Glitches`. The new `Variables` folder has a file for each variable with its value, such as `Variables\Variant.txt`.
-- **LiveSplit's custom variables**, which auto splitters and other tools can set, such as a death count. Tick the new **Custom variables** setting, and the new `CustomVariables` folder gets a file for each with its value, such as `CustomVariables\Deaths.txt`, updated as soon as the value changes. A variable with no value yet shows `-`.
-- **`SplitList` scrolls along with LiveSplit**: each notch of the mouse wheel over LiveSplit's window moves on a split, and `SplitList` shows the splits around that split, the same way it shows those around the current one. `SansSubsplits` shows the section that split is in. The new `Highlight_ScrolledToSplit.txt` marks that split, or its section, while you're scrolled. The next split, start, skip, undo or reset brings it back to the current split, as in LiveSplit.
+- **Now writes `RegionName.txt`**, which has the region set in Edit Splits, such as `USA / NTSC`.
+- **Now writes `UsesEmulator.txt`**, which says `Emulator` when Uses Emulator is ticked in Edit Splits, and is empty otherwise.
+- **Now writes the variables set in Edit Splits**, such as difficulty level or framerate restrictions. `Variables.txt` has them all on one line, the way LiveSplit's title shows them: `Hard, Unrestricted`. The new `Variables` folder has a file for each variable with its value, such as `Variables\Difficulty.txt`.
+- **Now writes LiveSplit's custom variables**, which auto splitters and other tools can set, such as a death count. Tick the new **Custom variables** setting, and the new `CustomVariables` folder gets a file for each with its value, such as `CustomVariables\Deaths.txt`, updated as soon as the value changes. A variable with no value yet shows `-`.
+- **`SplitList` now scrolls along when scrolling the mousewheel on LiveSplit**. The new `Highlight_ScrolledToSplit.txt` marks the currently scrolled to split, or its section.
 
 ### Fixed
 
-- **Before the timer starts, the timers in `Timers` show the splits' *Start timer at* time**, as LiveSplit's timer does, such as `5:00`, or `−0:05` for a countdown (previously: `0:00`, and `-` for game time until the first start).
-- **Closing LiveSplit during a run leaves the files as after a reset**, since LiveSplit resets the timer as it closes (previously: they kept the run's values from the moment it closed). The same goes for **Close Splits**, after which the files show its empty splits.
-- **A split renamed through LiveSplit's server, such as by a script or tool, shows in the files straight away** (previously: only after the next split, start, skip, undo or reset, so a new name for the current split never showed in `CurrentSplit`).
-- **A ticked comparison you rename in Edit Splits stays ticked under its new name**, and its files are written to the folder of that name. LiveSplit then asks to save your layout when it closes. Cancelling Edit Splits ticks the old name again. (Previously: its folder was emptied, and you had to tick the new name yourself.)
+- **Before the timer starts, the timers in `Timers` now show the splits' *Start timer at* time**, as LiveSplit's timer does. Previously they would just show `0:00` or `-`.
+- **Closing LiveSplit during a run leaves the files as after a reset**. Previously they kept the run's values from the moment it closed. The same goes for *Close Splits*, after which the files show its empty splits.
+- **A split renamed through LiveSplit's server shows in the files straight away**. Previously it would update only after the next split, start, skip, undo or reset.
+- **A ticked comparison renamed in Edit Splits stays ticked under its new name**, and its files are written to the folder of that name. LiveSplit then asks to save your layout when it closes. Previously its folder was emptied, and you had to tick the new name yourself.
 
 ## 8 (2026-10-22)
 
