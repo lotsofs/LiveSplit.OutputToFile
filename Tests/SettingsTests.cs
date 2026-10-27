@@ -24,6 +24,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				AllCustomComparisons = true,
 				TimeAccuracy = FormatAccuracy.Milliseconds,
 				DeltaAccuracy = FormatAccuracy.Tenths,
+				RegionFormat = RegionNameFormat.Abbreviation,
 			})
 			using (var loaded = new OutputToFileSettings()) {
 				saved.SetComparisonTicked("Target", true);
@@ -40,6 +41,8 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.True(loaded.AllCustomComparisons);
 				Assert.Equal(FormatAccuracy.Milliseconds, loaded.TimeAccuracy);
 				Assert.Equal(FormatAccuracy.Tenths, loaded.DeltaAccuracy);
+				Assert.Equal(RegionNameFormat.Abbreviation, loaded.RegionFormat);
+				Assert.Equal((int)RegionNameFormat.Abbreviation, Control<ComboBox>(loaded, "comboBoxRegionNameFormat").SelectedIndex);
 				Assert.Equal(new[] { "Best Segments", "Target" }, loaded.TickedComparisons.OrderBy(name => name, StringComparer.Ordinal));
 			}
 		}
@@ -65,6 +68,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.False(settings.AllCustomComparisons);
 				Assert.Equal(FormatAccuracy.Seconds, settings.TimeAccuracy);
 				Assert.Equal(FormatAccuracy.Flex, settings.DeltaAccuracy);
+				Assert.Equal(RegionNameFormat.FullName, settings.RegionFormat);
 				Assert.Empty(settings.TickedComparisons);
 			}
 		}
@@ -88,10 +92,21 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 		}
 
 		[Fact]
+		public void UnknownRegionNameFormatLoadsTheDefault() {
+			using (var settings = new OutputToFileSettings()) {
+				settings.SetSettings(Xml("<Settings><RegionFormat>42</RegionFormat></Settings>"));
+				Assert.Equal(RegionNameFormat.FullName, settings.RegionFormat);
+			}
+		}
+
+		[Fact]
 		public void HashFollowsTheSettings() {
 			using (var settings = new OutputToFileSettings()) {
 				int hash = settings.GetSettingsHashCode();
 				settings.OutputCompletedSplits = true;
+				Assert.NotEqual(hash, settings.GetSettingsHashCode());
+				hash = settings.GetSettingsHashCode();
+				settings.RegionFormat = RegionNameFormat.Abbreviation;
 				Assert.NotEqual(hash, settings.GetSettingsHashCode());
 				hash = settings.GetSettingsHashCode();
 				settings.SetComparisonTicked("Target", true);
@@ -113,6 +128,9 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.Equal(3, settings.SplitsBefore);
 				Control<ComboBox>(settings, "comboBoxTimeAccuracy").SelectedIndex = (int)FormatAccuracy.Milliseconds;
 				Assert.Equal(FormatAccuracy.Milliseconds, settings.TimeAccuracy);
+				Assert.Equal((int)RegionNameFormat.FullName, Control<ComboBox>(settings, "comboBoxRegionNameFormat").SelectedIndex);
+				Control<ComboBox>(settings, "comboBoxRegionNameFormat").SelectedIndex = (int)RegionNameFormat.Abbreviation;
+				Assert.Equal(RegionNameFormat.Abbreviation, settings.RegionFormat);
 				Control<CheckBox>(settings, "checkBoxOutputSplitList").Checked = false;
 				Assert.False(settings.OutputSplitList);
 				Assert.False(Control<GroupBox>(settings, "groupBoxSplitList").Enabled);
@@ -130,9 +148,9 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				form.Controls.Add(settings);
 				CreateHandles(form);
 				var table = Control<TableLayoutPanel>(settings, "tableLayoutPanelTop");
-				var timeFormat = Control<GroupBox>(settings, "groupBoxTimeFormat");
+				var regionFormat = Control<GroupBox>(settings, "groupBoxRegionFormat");
 				var error = Control<Label>(settings, "labelWriteError");
-				int contents = timeFormat.Bottom + timeFormat.Margin.Bottom + table.Margin.Bottom;
+				int contents = regionFormat.Bottom + regionFormat.Margin.Bottom + table.Margin.Bottom;
 				Assert.Equal(contents, settings.Height);
 
 				settings.ShowWriteError(@"Couldn't write SplitList\AllSplits\RealTime\CurrentComparison\Time_Run_Upcoming.txt (12:00:00): " + new string('x', 300));

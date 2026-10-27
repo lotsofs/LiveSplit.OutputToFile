@@ -54,6 +54,9 @@
 			this.labelDeltaAccuracy = new System.Windows.Forms.Label();
 			this.comboBoxDeltaAccuracy = new System.Windows.Forms.ComboBox();
 			this.labelTimers = new System.Windows.Forms.Label();
+			this.groupBoxRegionFormat = new System.Windows.Forms.GroupBox();
+			this.labelRegionNameFormat = new System.Windows.Forms.Label();
+			this.comboBoxRegionNameFormat = new System.Windows.Forms.ComboBox();
 			this.labelWriteError = new System.Windows.Forms.Label();
 			this.tableLayoutPanelTop.SuspendLayout();
 			this.groupBoxFolderPath.SuspendLayout();
@@ -62,6 +65,7 @@
 			this.groupBoxSplitList.SuspendLayout();
 			this.groupBoxComparisons.SuspendLayout();
 			this.groupBoxTimeFormat.SuspendLayout();
+			this.groupBoxRegionFormat.SuspendLayout();
 			this.tableLayoutPanelSplitList.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListAfter)).BeginInit();
@@ -78,17 +82,19 @@
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxSplitList, 0, 2);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxComparisons, 0, 3);
 			this.tableLayoutPanelTop.Controls.Add(this.groupBoxTimeFormat, 0, 4);
-			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 5);
+			this.tableLayoutPanelTop.Controls.Add(this.groupBoxRegionFormat, 0, 5);
+			this.tableLayoutPanelTop.Controls.Add(this.labelWriteError, 0, 6);
 			this.tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanelTop.Name = "tableLayoutPanelTop";
-			this.tableLayoutPanelTop.RowCount = 6;
+			this.tableLayoutPanelTop.RowCount = 7;
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 51F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 74F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 77F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 166F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 56F));
 			this.tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 468);
+			this.tableLayoutPanelTop.Size = new System.Drawing.Size(454, 524);
 			this.tableLayoutPanelTop.TabIndex = 0;
 			// 
 			// groupBoxFolderPath
@@ -411,16 +417,55 @@
 			this.labelTimers.TabIndex = 4;
 			this.labelTimers.Text = "Timers always show whole seconds.";
 			//
+			// groupBoxRegionFormat
+			//
+			this.groupBoxRegionFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBoxRegionFormat.Controls.Add(this.labelRegionNameFormat);
+			this.groupBoxRegionFormat.Controls.Add(this.comboBoxRegionNameFormat);
+			this.groupBoxRegionFormat.Location = new System.Drawing.Point(3, 471);
+			this.groupBoxRegionFormat.Name = "groupBoxRegionFormat";
+			this.groupBoxRegionFormat.Size = new System.Drawing.Size(448, 50);
+			this.groupBoxRegionFormat.TabIndex = 5;
+			this.groupBoxRegionFormat.TabStop = false;
+			this.groupBoxRegionFormat.Text = "Region Format";
+			//
+			// labelRegionNameFormat
+			//
+			this.labelRegionNameFormat.AutoSize = true;
+			this.labelRegionNameFormat.Location = new System.Drawing.Point(6, 22);
+			this.labelRegionNameFormat.Name = "labelRegionNameFormat";
+			this.labelRegionNameFormat.Size = new System.Drawing.Size(39, 13);
+			this.labelRegionNameFormat.TabIndex = 0;
+			this.labelRegionNameFormat.Text = "Region";
+			//
+			// comboBoxRegionNameFormat
+			//
+			this.comboBoxRegionNameFormat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboBoxRegionNameFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxRegionNameFormat.FormattingEnabled = true;
+			this.comboBoxRegionNameFormat.Items.AddRange(new object[] {
+            "Full name",
+            "Abbreviation"});
+			this.comboBoxRegionNameFormat.Location = new System.Drawing.Point(100, 19);
+			this.comboBoxRegionNameFormat.Name = "comboBoxRegionNameFormat";
+			this.comboBoxRegionNameFormat.Size = new System.Drawing.Size(342, 21);
+			this.comboBoxRegionNameFormat.TabIndex = 1;
+			this.comboBoxRegionNameFormat.SelectedIndex = 0;
+			this.comboBoxRegionNameFormat.SelectedIndexChanged += new System.EventHandler(this.comboBoxRegionNameFormat_SelectedIndexChanged);
+			//
 			// labelWriteError
 			//
 			this.labelWriteError.AutoSize = true;
 			this.labelWriteError.ForeColor = System.Drawing.Color.Firebrick;
-			this.labelWriteError.Location = new System.Drawing.Point(3, 471);
+			this.labelWriteError.Location = new System.Drawing.Point(3, 527);
 			this.labelWriteError.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
 			this.labelWriteError.MaximumSize = new System.Drawing.Size(448, 0);
 			this.labelWriteError.Name = "labelWriteError";
 			this.labelWriteError.Size = new System.Drawing.Size(0, 13);
-			this.labelWriteError.TabIndex = 5;
+			this.labelWriteError.TabIndex = 6;
 			this.labelWriteError.Visible = false;
 			// 
 			// OutputToFileSettings
@@ -431,7 +476,7 @@
 			this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.Controls.Add(this.tableLayoutPanelTop);
 			this.Name = "OutputToFileSettings";
-			this.Size = new System.Drawing.Size(457, 471);
+			this.Size = new System.Drawing.Size(457, 527);
 			this.tableLayoutPanelTop.ResumeLayout(false);
 			this.tableLayoutPanelTop.PerformLayout();
 			this.groupBoxFolderPath.ResumeLayout(false);
@@ -445,6 +490,8 @@
 			this.groupBoxComparisons.PerformLayout();
 			this.groupBoxTimeFormat.ResumeLayout(false);
 			this.groupBoxTimeFormat.PerformLayout();
+			this.groupBoxRegionFormat.ResumeLayout(false);
+			this.groupBoxRegionFormat.PerformLayout();
 			this.tableLayoutPanelSplitList.ResumeLayout(false);
 			this.tableLayoutPanelSplitList.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownSplitListBefore)).EndInit();
@@ -482,6 +529,9 @@
 		private System.Windows.Forms.Label labelDeltaAccuracy;
 		private System.Windows.Forms.ComboBox comboBoxDeltaAccuracy;
 		private System.Windows.Forms.Label labelTimers;
+		private System.Windows.Forms.GroupBox groupBoxRegionFormat;
+		private System.Windows.Forms.Label labelRegionNameFormat;
+		private System.Windows.Forms.ComboBox comboBoxRegionNameFormat;
 		private System.Windows.Forms.Label labelWriteError;
 	}
 }

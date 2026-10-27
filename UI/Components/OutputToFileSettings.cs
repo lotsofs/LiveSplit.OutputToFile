@@ -22,6 +22,19 @@ namespace LiveSplit.UI.Components.OutputToFile
 		// How times and differences are written. Each drop-down list's index is the value, so the lists follow the enum's order.
 		public FormatAccuracy TimeAccuracy { get; set; }
 		public FormatAccuracy DeltaAccuracy { get; set; }
+		public RegionNameFormat RegionFormat { get; set; }
+
+		internal string GetRegionDisplayName(IRun run) {
+			string regionName = run.Metadata.RegionName;
+			if (RegionFormat != RegionNameFormat.Abbreviation) return regionName;
+
+			var metadata = run.Metadata;
+			if (metadata.GameAvailable && metadata.Game != null && metadata.Game.Regions.Count > 1) {
+				var region = metadata.Region;
+				if (region != null && !string.IsNullOrEmpty(region.Abbreviation)) return region.Abbreviation;
+			}
+			return regionName;
+		}
 
 		// The comparisons ticked in the list, each written to a folder of its own. Changed through SetComparisonTicked,
 		// which counts the changes in TickedComparisonsVersion, a cache key.
@@ -50,7 +63,9 @@ namespace LiveSplit.UI.Components.OutputToFile
 			AllCustomComparisons = false;
 			TimeAccuracy = FormatAccuracy.Seconds;
 			DeltaAccuracy = FormatAccuracy.Flex;
+			RegionFormat = RegionNameFormat.FullName;
 			ShowAccuracies();
+			ShowRegionNameFormat();
 
 			// Applied when the textbox loses focus, not per keystroke: FolderPath is a cache key, so every partial path would get a full set of files
 			this.textBoxFolderPath.DataBindings.Add("Text", this, "FolderPath", false, DataSourceUpdateMode.OnValidation);
@@ -75,6 +90,7 @@ namespace LiveSplit.UI.Components.OutputToFile
 				SettingsHelper.CreateSetting(document, parent, "AllCustomComparisons", AllCustomComparisons) ^
 				SettingsHelper.CreateSetting(document, parent, "TimeAccuracy", TimeAccuracy) ^
 				SettingsHelper.CreateSetting(document, parent, "DeltaAccuracy", DeltaAccuracy) ^
+				SettingsHelper.CreateSetting(document, parent, "RegionFormat", RegionFormat) ^
 				CreateTickedComparisonsNode(document, parent)
 				;
 		}
@@ -131,6 +147,8 @@ namespace LiveSplit.UI.Components.OutputToFile
 			TimeAccuracy = ParseAccuracy(element["TimeAccuracy"], FormatAccuracy.Seconds);
 			DeltaAccuracy = ParseAccuracy(element["DeltaAccuracy"], FormatAccuracy.Flex);
 			ShowAccuracies();
+			RegionFormat = ParseRegionNameFormat(element["RegionFormat"]);
+			ShowRegionNameFormat();
 			// Layouts saved before the list have no Comparisons: nothing ticked
 			_tickedComparisons.Clear();
 			XmlElement list = element["Comparisons"];
@@ -187,6 +205,20 @@ namespace LiveSplit.UI.Components.OutputToFile
 			return defaultAccuracy;
 		}
 
+		private static RegionNameFormat ParseRegionNameFormat(XmlElement element)
+		{
+			if (SettingsHelper.TryParseEnum(element, out RegionNameFormat format) && Enum.IsDefined(typeof(RegionNameFormat), format))
+			{
+				return format;
+			}
+			return RegionNameFormat.FullName;
+		}
+
+		private void ShowRegionNameFormat()
+		{
+			comboBoxRegionNameFormat.SelectedIndex = (int)RegionFormat;
+		}
+
 		// Select the accuracies in their drop-down lists
 		private void ShowAccuracies()
 		{
@@ -203,6 +235,11 @@ namespace LiveSplit.UI.Components.OutputToFile
 		private void comboBoxDeltaAccuracy_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			DeltaAccuracy = (FormatAccuracy)comboBoxDeltaAccuracy.SelectedIndex;
+		}
+
+		private void comboBoxRegionNameFormat_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			RegionFormat = (RegionNameFormat)comboBoxRegionNameFormat.SelectedIndex;
 		}
 
 		private void checkBoxAllCustomComparisons_CheckedChanged(object sender, EventArgs e)
@@ -244,5 +281,10 @@ namespace LiveSplit.UI.Components.OutputToFile
 		private void checkBoxOutputSplitList_CheckedChanged(object sender, EventArgs e) {
 			groupBoxSplitList.Enabled = checkBoxOutputSplitList.Checked;
 		}
+	}
+
+	public enum RegionNameFormat {
+		FullName,
+		Abbreviation,
 	}
 }

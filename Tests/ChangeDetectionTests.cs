@@ -29,6 +29,10 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				run.Tick();
 
 				Assert.Equal("USA / NTSC", run.Read("RegionName.txt"));
+
+				run.Settings.RegionFormat = RegionNameFormat.Abbreviation;
+				run.Tick();
+				Assert.Equal("USA / NTSC", run.Read("RegionName.txt"));
 			}
 		}
 

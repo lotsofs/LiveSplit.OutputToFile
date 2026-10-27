@@ -12,6 +12,7 @@ What changed in Output to File between releases: the files it writes, what they 
 ### Added
 
 - **Now writes `RegionName.txt`** with the region set in Edit Splits, such as `USA / NTSC`.
+- **Choose the format of `RegionName.txt`**: full name (the default), or LiveSplit's speedrun.com abbreviation, such as `NTSC-U`, when the game data supports it.
 
 ## 8 (2026-10-22)
 

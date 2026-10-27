@@ -22,7 +22,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			MakeFile(FILE_INFO_GAMENAME, State.Run.GameName);
 			MakeFile(FILE_INFO_CATEGORYNAME, State.Run.CategoryName);
 			MakeFile(FILE_INFO_PLATFORMNAME, State.Run.Metadata.PlatformName);
-			MakeFile(FILE_INFO_REGIONNAME, State.Run.Metadata.RegionName);
+			MakeFile(FILE_INFO_REGIONNAME, Settings.GetRegionDisplayName(State.Run));
 			MakeFile(FILE_INFO_ATTEMPTCOUNT, State.Run.AttemptCount.ToString());
 			int finishedRunsInHistory = State.Run.AttemptHistory.Where(x => x.Time.RealTime != null).Count();
 			MakeFile(FILE_INFO_FINISHEDRUNSCOUNT, (finishedRunsInHistory + (State.CurrentPhase == TimerPhase.Ended ? 1 : 0)).ToString());

@@ -172,7 +172,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Cache["GameName"] = state.Run.GameName;
 			Cache["CategoryName"] = state.Run.CategoryName;
 			Cache["PlatformName"] = state.Run.Metadata.PlatformName;
-			Cache["RegionName"] = state.Run.Metadata.RegionName;
+			Cache["RegionName"] = Settings.GetRegionDisplayName(state.Run);
+			Cache["RegionFormat"] = Settings.RegionFormat;
 			Cache["RunEdits"] = runEdits;
 			Cache["TimerEvents"] = timerEvents;
 			// Compared by reference. Close Splits replaces the run without raising RunManuallyModified.

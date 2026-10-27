@@ -31,6 +31,7 @@ The settings are in LiveSplit's Layout Settings, on the **Output to File** tab.
 - **Split List Writing**: how many splits `SplitList` shows before and after the current one, 10 each at first. Near the start and the end of the run, the list shows the first or the last splits instead, so its length stays the same.
 - **Comparisons**: which comparisons get a folder of their own (see [Comparisons](#comparisons)).
 - **Time Format**: the decimals of times and of differences (see below).
+- **Region Format**: how `RegionName.txt` is written. **Full name** keeps the name from Edit Splits, such as `USA / NTSC`. **Abbreviation** uses LiveSplit's speedrun.com abbreviation, such as `NTSC-U`, when game data is available and the game has multiple regions; otherwise it falls back to the full name. Full name is selected at first.
 
 Times and differences are written the way LiveSplit writes them: `0:05`, `+5.2`, `+1:05`, with the minus sign `−` for negatives. Under **Time Format**, choose their decimals: Seconds, Tenths, Hundredths, Milliseconds, or Flex, which adds decimals only where a value would otherwise read as zero (a time under a second, a difference under a tenth). The defaults are Seconds for times and Flex for differences. The timers always show whole seconds.
 

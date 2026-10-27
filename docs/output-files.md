@@ -26,7 +26,7 @@ Rewritten whenever one of `Update()`'s cache keys changes (run loaded or edited,
 | `GameName.txt` | `Run.GameName` |
 | `CategoryName.txt` | `Run.CategoryName` |
 | `PlatformName.txt` | `Run.Metadata.PlatformName`, empty if not set |
-| `RegionName.txt` | `Run.Metadata.RegionName`, empty if not set |
+| `RegionName.txt` | The region from Edit Splits, in the selected Region Format: full name by default, or LiveSplit's speedrun.com abbreviation (such as `NTSC-U`) when game data is available and the game has multiple regions. Abbreviation falls back to the full name when those conditions aren't met. Empty if not set. |
 | `AttemptCount.txt` | `Run.AttemptCount`. LiveSplit increments it when a run starts. |
 | `FinishedRunsCount.txt` | Number of attempts in history that have a final time, plus 1 while the timer shows a finished run |
 | `TotalSplits_{level}.txt` | Number of members in that level |
