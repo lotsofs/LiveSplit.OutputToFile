@@ -1,6 +1,6 @@
 # Output files
 
-Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 166 files with every output on and no comparison ticked. The README describes the same files for users, in less detail.
+Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 167 files with every output on and no comparison ticked. The README describes the same files for users, in less detail.
 
 How to read the paths:
 
@@ -26,6 +26,7 @@ Rewritten whenever one of `Update()`'s cache keys changes (run loaded or edited,
 | `GameName.txt` | `Run.GameName` |
 | `CategoryName.txt` | `Run.CategoryName` |
 | `PlatformName.txt` | `Run.Metadata.PlatformName`, empty if not set |
+| `RegionName.txt` | `Run.Metadata.RegionName`, empty if not set |
 | `AttemptCount.txt` | `Run.AttemptCount`. LiveSplit increments it when a run starts. |
 | `FinishedRunsCount.txt` | Number of attempts in history that have a final time, plus 1 while the timer shows a finished run |
 | `TotalSplits_{level}.txt` | Number of members in that level |

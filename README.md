@@ -40,7 +40,7 @@ If a file can't be written, because another program has it locked, it's read-onl
 
 The [tree](#output-directory-tree) at the end of this page lists every file.
 
-- The main folder holds the run's details: `GameName.txt`, `CategoryName.txt`, `PlatformName.txt` (the platform set in Edit Splits), `AttemptCount.txt`, `FinishedRunsCount.txt`, the number of splits, and `CurrentComparison.txt` (see [Comparisons](#comparisons)).
+- The main folder holds the run's details: `GameName.txt`, `CategoryName.txt`, `PlatformName.txt` (the platform set in Edit Splits), `RegionName.txt` (the region set in Edit Splits), `AttemptCount.txt`, `FinishedRunsCount.txt`, the number of splits, and `CurrentComparison.txt` (see [Comparisons](#comparisons)).
 - `CurrentSplit` is about the split you're on, and `PreviousSplit` about the one you just did.
 - `SplitList` is a list of the splits around the current one, and `CompletedSplits` a list of every split done so far.
 - `Timers` holds the run's timer, `RunTimer.txt`, and the time since the last split, `SegmentTimer_….txt`.
@@ -116,6 +116,7 @@ This is the tree for splits with three levels of subsplits, with every output on
 |   FinishedRunsCount.txt
 |   GameName.txt
 |   PlatformName.txt
+|   RegionName.txt
 |   TotalSplits_AllSplits.txt
 |   TotalSplits_SansSubsplits.txt
 |   TotalSplits_SansSubsplits_Level2.txt

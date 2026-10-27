@@ -105,6 +105,8 @@ PreviousSplit\AllSplits\RealTime\RunTime.txt
   |(real time)
 PreviousSplit\AllSplits\RealTime\SegmentTime.txt
   |(real time)
+RegionName.txt
+  |(empty)
 SplitList\AllSplits\GameTime\CurrentComparison\Delta_Run.txt
   |
   |

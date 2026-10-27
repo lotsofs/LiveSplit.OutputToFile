@@ -201,6 +201,8 @@ PreviousSplit\SansSubsplits\RealTime\RunTime.txt
   |(real time)
 PreviousSplit\SansSubsplits\RealTime\SegmentTime.txt
   |(real time)
+RegionName.txt
+  |(empty)
 SplitList\AllSplits\GameTime\CurrentComparison\Delta_Run.txt
   |
   |

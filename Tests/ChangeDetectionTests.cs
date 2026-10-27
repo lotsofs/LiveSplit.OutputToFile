@@ -20,6 +20,18 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 			}
 		}
 
+		[Fact]
+		public void ChangingTheRegionRewritesTheFiles() {
+			using (var run = TestRun.Base()) {
+				Assert.Equal("", run.Read("RegionName.txt"));
+
+				run.State.Run.Metadata.RegionName = "USA / NTSC";
+				run.Tick();
+
+				Assert.Equal("USA / NTSC", run.Read("RegionName.txt"));
+			}
+		}
+
 		[Fact(Skip = "SSN: a split renamed without an event, as LiveSplit's server does, shows only after the next timer event")]
 		public void RenamingASplitWithoutAnEventRewritesTheFiles() {
 			using (var run = TestRun.Base()) {

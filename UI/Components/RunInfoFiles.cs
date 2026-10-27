@@ -10,6 +10,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		const string FILE_INFO_GAMENAME = @"GameName.txt";
 		const string FILE_INFO_CATEGORYNAME = @"CategoryName.txt";
 		const string FILE_INFO_PLATFORMNAME = @"PlatformName.txt";
+		const string FILE_INFO_REGIONNAME = @"RegionName.txt";
 		const string FILE_INFO_SPLITCOUNT = @"TotalSplits_{1}.txt";
 		const string FILE_INFO_ATTEMPTCOUNT = @"AttemptCount.txt";
 		const string FILE_INFO_FINISHEDRUNSCOUNT = @"FinishedRunsCount.txt";
@@ -21,6 +22,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			MakeFile(FILE_INFO_GAMENAME, State.Run.GameName);
 			MakeFile(FILE_INFO_CATEGORYNAME, State.Run.CategoryName);
 			MakeFile(FILE_INFO_PLATFORMNAME, State.Run.Metadata.PlatformName);
+			MakeFile(FILE_INFO_REGIONNAME, State.Run.Metadata.RegionName);
 			MakeFile(FILE_INFO_ATTEMPTCOUNT, State.Run.AttemptCount.ToString());
 			int finishedRunsInHistory = State.Run.AttemptHistory.Where(x => x.Time.RealTime != null).Count();
 			MakeFile(FILE_INFO_FINISHEDRUNSCOUNT, (finishedRunsInHistory + (State.CurrentPhase == TimerPhase.Ended ? 1 : 0)).ToString());
