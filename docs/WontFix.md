@@ -20,6 +20,7 @@ Problems that are known and measured, but were decided not to be worth fixing. E
   - Weighting back-to-back reads by their duration gives the same 68 µs. Counting them unweighted gives 15–26 µs, at both 10 writes a second and 1. That understates it, because a read that hits a write takes 4–8 times longer.
   - 68 µs × 3,540 reads an hour is 0.24 blanks an hour: about one every 4 hours per OBS text source on a timer file.
   - A whole `File.WriteAllText` call takes about 3.8 ms (median), nearly all of it outside the unreadable window.
+- **Custom variables that change every frame.** Computed from the figures above, not measured. A file in `CustomVariables\` is written whenever its value changes, so a script that changes one every frame gets it written up to 40 times a second. That's about 40 × 68 µs ≈ 0.27% of each second unreadable, read once a second: about one blank every 6 minutes for an OBS text source on that file.
 
 **Plan, if it's ever needed.** Change `FileQueue.WriteFile` ([FileQueue.cs](../UI/Components/FileQueue.cs)), which runs on the background drain:
 1. Write `<name>.tmp` in the same folder.

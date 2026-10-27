@@ -9,6 +9,7 @@ What changed in Output to File between releases: the files it writes, what they 
 - **`RegionName.txt`** has the region set in Edit Splits, such as `USA / NTSC`.
 - **`UsesEmulator.txt`** says `Emulator` when Uses Emulator is ticked in Edit Splits, and is empty otherwise.
 - **The variables set in Edit Splits**, such as Variant: Unrestricted. `Variables.txt` has them all on one line, the way LiveSplit's title shows them: `Unrestricted, No Glitches`. The new `Variables` folder has a file for each variable with its value, such as `Variables\Variant.txt`.
+- **LiveSplit's custom variables**, which auto splitters and other tools can set, such as a death count. Tick the new **Custom variables** setting, and the new `CustomVariables` folder gets a file for each with its value, such as `CustomVariables\Deaths.txt`, updated as soon as the value changes. A variable with no value yet shows `-`.
 - **`SplitList` scrolls along with LiveSplit**: each notch of the mouse wheel over LiveSplit's window moves on a split, and `SplitList` shows the splits around that split, the same way it shows those around the current one. `SansSubsplits` shows the section that split is in. The new `Highlight_ScrolledToSplit.txt` marks that split, or its section, while you're scrolled. The next split, start, skip, undo or reset brings it back to the current split, as in LiveSplit.
 
 ### Fixed

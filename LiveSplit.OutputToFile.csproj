@@ -52,6 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UI\Components\CustomVariableFiles.cs" />
     <Compile Include="UI\Components\FileQueue.cs" />
     <Compile Include="UI\Components\OutputToFileComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

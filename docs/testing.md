@@ -117,6 +117,7 @@ Things to know:
 - **Loading a splits file.** `new StandardFormatsRunFactory(stream, path).Create(new StandardComparisonGeneratorsFactory())`, with `livesplit_core.dll` from LiveSplit's `x64\` folder next to the program or the tests' DLL ([livesplit-notes.md](livesplit-notes.md#running-livesplit-code-outside-livesplit-verified)).
 - **Time with averages.** The first `Split()` includes JIT compilation, around 100 ms.
 - **Don't delete output files mid-run.** `FileQueue` skips contents it has already written, so a deleted file comes back only when its contents change or at reset. Use a fresh folder, or a new component, instead.
+- **Custom variables.** Set one with `state.Run.Metadata.SetCustomVariable(name, value)`, which raises no event, then `Tick()`. `TestRun` turns the Custom variables setting on. A new variable causes a full rewrite; a new value only rewrites `CustomVariables\`.
 - **Changing a setting.** Set the property, such as `comp.Settings.OutputSplitList = false`, then `Tick()`. The `Output*` settings are cache keys, so the next `Update()` rewrites everything and empties the files that are no longer written.
 - **Reusing a folder.** The first `Update()` of a new component empties every file in the component's folders (and every root `TotalSplits*.txt`) that it doesn't write now, such as another level's from an earlier run. Other files in the output folder are left alone.
 - **Test the current build.** `dotnet test` builds the component first. With `--no-build`, or in a program that references `bin\Debug`, whatever was built last is tested.

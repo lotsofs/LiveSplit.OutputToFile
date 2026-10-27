@@ -58,6 +58,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 			Settings.FolderPath = _folder.Path;
 			Settings.OutputTimer = true;
 			Settings.OutputCompletedSplits = true;
+			Settings.OutputCustomVariables = true;
 			setup?.Invoke(this);
 			Tick();
 		}

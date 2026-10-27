@@ -21,6 +21,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				OutputSplitList = false,
 				OutputSubsplits = false,
 				OutputCompletedSplits = true,
+				OutputCustomVariables = true,
 				AllCustomComparisons = true,
 				TimeAccuracy = FormatAccuracy.Milliseconds,
 				DeltaAccuracy = FormatAccuracy.Tenths,
@@ -37,6 +38,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.False(loaded.OutputSplitList);
 				Assert.False(loaded.OutputSubsplits);
 				Assert.True(loaded.OutputCompletedSplits);
+				Assert.True(loaded.OutputCustomVariables);
 				Assert.True(loaded.AllCustomComparisons);
 				Assert.Equal(FormatAccuracy.Milliseconds, loaded.TimeAccuracy);
 				Assert.Equal(FormatAccuracy.Tenths, loaded.DeltaAccuracy);
@@ -50,6 +52,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				FolderPath = @"C:\Stream",
 				SplitsBefore = 3,
 				OutputCompletedSplits = true,
+				OutputCustomVariables = true,
 				TimeAccuracy = FormatAccuracy.Milliseconds,
 			}) {
 				settings.SetComparisonTicked("Target", true);
@@ -62,6 +65,7 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 				Assert.True(settings.OutputSplitList);
 				Assert.True(settings.OutputSubsplits);
 				Assert.False(settings.OutputCompletedSplits);
+				Assert.False(settings.OutputCustomVariables);
 				Assert.False(settings.AllCustomComparisons);
 				Assert.Equal(FormatAccuracy.Seconds, settings.TimeAccuracy);
 				Assert.Equal(FormatAccuracy.Flex, settings.DeltaAccuracy);
@@ -109,6 +113,8 @@ namespace LiveSplit.UI.Components.OutputToFile.Tests {
 
 				Control<CheckBox>(settings, "checkBoxOutputCompletedSplits").Checked = true;
 				Assert.True(settings.OutputCompletedSplits);
+				Control<CheckBox>(settings, "checkBoxOutputCustomVariables").Checked = true;
+				Assert.True(settings.OutputCustomVariables);
 				Control<NumericUpDown>(settings, "numericUpDownSplitListBefore").Value = 3;
 				Assert.Equal(3, settings.SplitsBefore);
 				Control<ComboBox>(settings, "comboBoxTimeAccuracy").SelectedIndex = (int)FormatAccuracy.Milliseconds;

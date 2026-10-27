@@ -1,6 +1,6 @@
 # Output files
 
-Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 171 files with every output on and no comparison ticked. The README describes the same files for users, in less detail.
+Every file the component writes, what it contains, and when. This reference comes from the `FILE_*` templates in the writer classes (`RunInfoFiles`, `TimerFiles`, `SplitFiles`, `SplitListFiles`, `CustomVariableFiles`) and was checked against the base run in [testing.md](testing.md#the-base-run), which produces 171 files with every output on and no comparison ticked. The README describes the same files for users, in less detail.
 
 How to read the paths:
 
@@ -44,6 +44,14 @@ The file name is the variable's name with:
 - trailing dots and spaces trimmed, which Windows would drop anyway.
 
 Two names that end up the same share a file, and the later variable's value wins. A variable that is removed has its file emptied, as with [outputs turned off](#outputs-turned-off-and-levels-that-are-gone).
+
+## `CustomVariables\` (Custom variables setting)
+
+One file per LiveSplit custom variable (`Run.Metadata.CustomVariables`), holding its value. These are the variables that auto splitters (Auto Splitting Runtime scripts) and tools through LiveSplit's server set, such as a death count. They are unrelated to the speedrun.com variables in `Variables\`. A variable with no value is `-`, as LiveSplit's Text component shows it; LiveSplit adds one like that when the Text component or the server asks for a variable that isn't set. A variable set to an empty value gives an empty file. The order is the dictionary's.
+
+- **When.** Setting a custom variable raises no event, so `Update()` compares their values every frame. A changed value rewrites only these files. A new variable comes with a full rewrite, like every other change to which files exist. Every full rewrite writes them all.
+- **Names.** File names follow the rules for `Variables\`: the trailing `?` dropped, characters a file name can't hold replaced with `_`, trailing dots and spaces trimmed. Braces are kept.
+- **Gone.** LiveSplit never removes a custom variable, but other splits, opened or put back by Cancel in Edit Splits, have their own. The files of variables they don't have are emptied, as are all of them when the setting is turned off.
 
 ## `Timers\{method}\` (Timer setting)
 
@@ -143,13 +151,13 @@ The same files as `SplitList`, but the lines cover every completed member: none 
 
 ## Outputs turned off, and levels that are gone
 
-Turning off the Timer, Split list or Completed splits setting empties that output's files straight away. The same happens to:
+Turning off the Timer, Split list, Completed splits or Custom variables setting empties that output's files straight away. The same happens to:
 - the files of a level that is gone, because Subsplits was turned off or the splits no longer have that many dashes;
 - `Names_Indent_{n}.txt` for a depth no longer present;
 - the files in a comparison's folder, when it's unticked, or when the open splits don't have that comparison;
-- the file of a variable the splits no longer have.
+- the file of a variable, or a custom variable, the splits no longer have.
 
-The files stay, with no contents, and are filled again when the output or level comes back. Leftovers like these from earlier sessions are emptied when the layout is loaded. Nothing is deleted. Only the component's own files are emptied, and only in the folder currently set. Its own files are everything in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\`, `Timers\` and `Variables\`, and the `TotalSplits*.txt` files. That includes any other file kept in those folders, and the files older releases wrote there.
+The files stay, with no contents, and are filled again when the output or level comes back. Leftovers like these from earlier sessions are emptied when the layout is loaded. Nothing is deleted. Only the component's own files are emptied, and only in the folder currently set. Its own files are everything in `CurrentSplit\`, `PreviousSplit\`, `SplitList\`, `CompletedSplits\`, `Timers\`, `Variables\` and `CustomVariables\`, and the `TotalSplits*.txt` files. That includes any other file kept in those folders, and the files older releases wrote there.
 
 ## When LiveSplit closes
 

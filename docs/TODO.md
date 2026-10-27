@@ -23,7 +23,6 @@ When an item is finished, delete its row here and its section in the detail doc,
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [CVR](Features.md#cvr--livesplits-custom-variables-arent-written) | Run info | LiveSplit's custom variables, set by Auto Splitting Runtime scripts and server tools, aren't written. They change with no event, maybe every frame and from the server's thread, so they need their own change check and write path | Low |
 
 ## Project and README — [Project.md](Project.md)
 
@@ -36,4 +35,4 @@ Known and measured, but not worth fixing. Kept with their evidence and plan, in 
 
 | Code | Area | Summary | Severity |
 |---|---|---|---|
-| [ATM](WontFix.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic. Measured: an OBS text source on a timer file goes blank for 1–2 s about once every 4 h of running timer. Revisit only if blanks are seen | Low |
+| [ATM](WontFix.md#atm--file-writes-arent-atomic) | File writing | Writes aren't atomic. Measured: an OBS text source on a timer file goes blank for 1–2 s about once every 4 h of running timer; on a custom variable that a script changes every frame, about once every 6 min (computed). Revisit only if blanks are seen | Low |

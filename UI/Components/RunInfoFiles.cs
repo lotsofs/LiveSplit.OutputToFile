@@ -57,8 +57,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		}
 
 		// A variable's file: its name without the '?' that yes/no variables end with, characters a file name can't hold replaced,
-		// and the trailing dots and spaces that Windows would drop trimmed
-		static string VariableFileName(string name) {
+		// and the trailing dots and spaces that Windows would drop trimmed. CustomVariables\ names its files the same way.
+		internal static string VariableFileName(string name) {
 			char[] invalid = Path.GetInvalidFileNameChars();
 			string fileName = new string(name.TrimEnd('?').Select(c => invalid.Contains(c) ? '_' : c).ToArray());
 			return fileName.TrimEnd('.', ' ') + ".txt";

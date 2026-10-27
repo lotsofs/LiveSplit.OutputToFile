@@ -64,6 +64,7 @@ The code is in `UI/Components/`:
 | `TimerFiles.cs` | Writes `Timers\` |
 | `SplitFiles.cs` | Writes `CurrentSplit\` and `PreviousSplit\`, including `Sign.txt` |
 | `SplitListFiles.cs` | Writes `SplitList\` and `CompletedSplits\` |
+| `CustomVariableFiles.cs` | Writes `CustomVariables\`, LiveSplit's custom variables, which change with no event: compared every frame, and read safely while the server's thread adds to them |
 | `Signs.cs` | The `Sign.txt` values |
 | `TimeFormatter.cs` | Time and delta strings, from LiveSplit's formatters, and the `FormatAccuracy` choices. Writers call `OutputWriter.DurationString` and `DeltaString`, which pass the Time Format settings. |
 | `OutputToFileSettings.cs` | The settings control and its XML save/load |
@@ -82,7 +83,10 @@ The code is in `UI/Components/`:
   - So the handlers only count events with `Interlocked`, or queue them (`ComparisonRenamed`), and `Update()`, on the UI thread, does all the work on the next frame.
   - Keep it that way. Don't touch the levels, the writers or the settings control from a handler; give `Update()` a count, a queue or a cache key instead.
   - A handler that throws on the server's thread closes LiveSplit.
-- **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite, and `SplitNamesChanged()`, which catches splits renamed through LiveSplit's server. The timer files are the exception: `TimerFiles` has its own check, `HasTimerChanged`, on what each timer file shows and the timer phase. It caches each level's segment start; anything new that moves a split time or rebuilds the levels must call `SegmentStartsChanged()`.
+- **`Update()` runs every frame.** Keep work behind its `Cache` check. Only the keys listed there trigger a rewrite, plus `SplitNamesChanged()`, which catches splits renamed through LiveSplit's server, and `CustomVariableFiles.FilesChanged()`, which catches a new custom variable. Two outputs are the exception, with checks of their own:
+  - `TimerFiles` checks, with `HasTimerChanged`, what each timer file shows and the timer phase. It caches each level's segment start; anything new that moves a split time or rebuilds the levels must call `SegmentStartsChanged()`.
+  - `CustomVariableFiles` checks, with `HaveChanged`, the custom variables' values, which change with no event.
+  - Neither may change which files exist between full rewrites: the sweep only knows the files a rewrite writes.
 - **Writing files.** Always write through `OutputWriter`'s `MakeFile` overloads and a `FILE_*` path template (`{0}` timing method, `{1}` level tag, `{3}` comparison folder). Each writer declares the templates for its own folder. Paths use backslashes, so this is Windows-only.
   - `MakeFile` only queues: `FileQueue` writes on a thread-pool thread, keeping the latest contents per file and skipping contents already on disk. A reset clears that record, in the next `Update()`. Anything that reads the files must call `WaitForFileWrites()` first; the tests' `TestRun.Tick()` does.
   - A full rewrite in `Update()` must queue every file the settings and levels call for, whatever the phase. `FileQueue.EndSweep` empties any file in the component's folders (`OUTPUT_FOLDERS`, plus root files matching `OUTPUT_ROOT_FILES`) that wasn't queued, so a file written in only some phases would be emptied in the others.

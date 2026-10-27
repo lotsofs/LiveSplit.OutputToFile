@@ -12,8 +12,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 	/// <summary>
 	/// The LiveSplit side of the component: it reacts to timer events and to changes seen in Update(),
 	/// and decides when each group of files gets written. The writers do the writing:
-	/// RunInfoFiles (root), TimerFiles (Timers\), SplitFiles (CurrentSplit\, PreviousSplit\)
-	/// and SplitListFiles (SplitList\, CompletedSplits\).
+	/// RunInfoFiles (root, Variables\), TimerFiles (Timers\), SplitFiles (CurrentSplit\, PreviousSplit\),
+	/// SplitListFiles (SplitList\, CompletedSplits\) and CustomVariableFiles (CustomVariables\).
 	/// </summary>
 	public class OutputToFileComponent : IComponent {
 
@@ -72,10 +72,11 @@ namespace LiveSplit.UI.Components.OutputToFile {
 		TimerFiles _timerFiles;
 		SplitFiles _splitFiles;
 		SplitListFiles _splitListFiles;
+		CustomVariableFiles _customVariableFiles;
 
 		// The folders the writers write to, in the output folder. A full rewrite empties every file in them that it doesn't write,
 		// and every file in the output folder itself that matches OUTPUT_ROOT_FILES. The other root files are always written.
-		static readonly string[] OUTPUT_FOLDERS = { "CurrentSplit", "PreviousSplit", "SplitList", "CompletedSplits", "Timers", "Variables" };
+		static readonly string[] OUTPUT_FOLDERS = { "CurrentSplit", "PreviousSplit", "SplitList", "CompletedSplits", "Timers", "Variables", "CustomVariables" };
 		// TotalSplits_{level}.txt, and TotalSplits.txt from before subsplits
 		const string OUTPUT_ROOT_FILES = "TotalSplits*.txt";
 		// Edit Splits reports a removed comparison as renamed to this, the name LiveSplit's components use for following the selection
@@ -104,6 +105,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			_timerFiles = new TimerFiles(State, Settings, _levels, _files);
 			_splitFiles = new SplitFiles(State, Settings, _levels, _files);
 			_splitListFiles = new SplitListFiles(State, Settings, _levels, _files);
+			_customVariableFiles = new CustomVariableFiles(State, Settings, _levels, _files);
 			CalculateSegments(State.CurrentComparison);
 		}
 
@@ -231,6 +233,7 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			Cache["OutputSplitList"] = Settings.OutputSplitList;
 			Cache["OutputSubsplits"] = Settings.OutputSubsplits;
 			Cache["OutputCompletedSplits"] = Settings.OutputCompletedSplits;
+			Cache["OutputCustomVariables"] = Settings.OutputCustomVariables;
 			Cache["TimeAccuracy"] = Settings.TimeAccuracy;
 			Cache["DeltaAccuracy"] = Settings.DeltaAccuracy;
 			Cache["TimerPhase"] = state.CurrentPhase;
@@ -244,7 +247,8 @@ namespace LiveSplit.UI.Components.OutputToFile {
 				Cache[check.Key] = lastSplit.Comparisons[check.Name];
 			}
 			// A full rewrite queues every file the settings and levels call for. Those it doesn't are emptied.
-			bool rewrite = Cache.HasChanged || SplitNamesChanged(state.Run);
+			bool rewrite = Cache.HasChanged || SplitNamesChanged(state.Run)
+				|| (Settings.OutputCustomVariables && _customVariableFiles.FilesChanged());
 			if (rewrite) {
 				_files.BeginSweep();
 				CalculateSegments(comparison);
@@ -259,6 +263,10 @@ namespace LiveSplit.UI.Components.OutputToFile {
 			if (Settings.OutputTimer) {
 				_timerFiles.WriteTimer(TimingMethod.RealTime);
 				_timerFiles.WriteTimer(TimingMethod.GameTime);
+			}
+			// Custom variables change with no event, so their values are compared every frame. A rewrite queues every file.
+			if (Settings.OutputCustomVariables) {
+				_customVariableFiles.Write(rewrite);
 			}
 			if (rewrite) {
 				_files.EndSweep(Settings.FolderPath, OUTPUT_FOLDERS, OUTPUT_ROOT_FILES);

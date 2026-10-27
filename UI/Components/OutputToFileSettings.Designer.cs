@@ -36,6 +36,7 @@
 			this.groupBoxOutputSelection = new System.Windows.Forms.GroupBox();
 			this.checkBoxOutputSubsplits = new System.Windows.Forms.CheckBox();
 			this.checkBoxOutputCompletedSplits = new System.Windows.Forms.CheckBox();
+			this.checkBoxOutputCustomVariables = new System.Windows.Forms.CheckBox();
 			this.checkBoxOutputSplitList = new System.Windows.Forms.CheckBox();
 			this.checkBoxOutputTimer = new System.Windows.Forms.CheckBox();
 			this.groupBoxSplitList = new System.Windows.Forms.GroupBox();
@@ -153,6 +154,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputSubsplits);
 			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputCompletedSplits);
+			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputCustomVariables);
 			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputSplitList);
 			this.groupBoxOutputSelection.Controls.Add(this.checkBoxOutputTimer);
 			this.groupBoxOutputSelection.Location = new System.Drawing.Point(3, 54);
@@ -183,6 +185,16 @@
 			this.checkBoxOutputCompletedSplits.TabIndex = 2;
 			this.checkBoxOutputCompletedSplits.Text = "Completed splits";
 			this.checkBoxOutputCompletedSplits.UseVisualStyleBackColor = true;
+			//
+			// checkBoxOutputCustomVariables
+			//
+			this.checkBoxOutputCustomVariables.AutoSize = true;
+			this.checkBoxOutputCustomVariables.Location = new System.Drawing.Point(119, 42);
+			this.checkBoxOutputCustomVariables.Name = "checkBoxOutputCustomVariables";
+			this.checkBoxOutputCustomVariables.Size = new System.Drawing.Size(105, 17);
+			this.checkBoxOutputCustomVariables.TabIndex = 4;
+			this.checkBoxOutputCustomVariables.Text = "Custom variables";
+			this.checkBoxOutputCustomVariables.UseVisualStyleBackColor = true;
 			// 
 			// checkBoxOutputSplitList
 			// 
@@ -472,6 +484,7 @@
 		private System.Windows.Forms.CheckBox checkBoxOutputSplitList;
 		private System.Windows.Forms.CheckBox checkBoxOutputSubsplits;
 		private System.Windows.Forms.CheckBox checkBoxOutputCompletedSplits;
+		private System.Windows.Forms.CheckBox checkBoxOutputCustomVariables;
 		private System.Windows.Forms.GroupBox groupBoxComparisons;
 		private System.Windows.Forms.CheckBox checkBoxAllCustomComparisons;
 		private System.Windows.Forms.CheckedListBox checkedListBoxComparisons;

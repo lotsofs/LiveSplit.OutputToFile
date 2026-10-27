@@ -28,6 +28,7 @@ The settings are in LiveSplit's Layout Settings, on the **Output to File** tab.
   - **Subsplits**: the `SansSubsplits` folders (see [Subsplits](#subsplits)). On at first.
   - **Completed splits**: `CompletedSplits`, a list of every split done so far. Off at first.
   - **Split List**: `SplitList`, a list of the splits around the current one. On at first.
+  - **Custom variables**: `CustomVariables`, the variables your auto splitter or other tools set (see below). Off at first.
 - **Split List Writing**: how many splits `SplitList` shows before and after the current one, 10 each at first. Near the start and the end of the run, the list shows the first or the last splits instead, so its length stays the same. Scrolling with the mouse wheel over LiveSplit moves `SplitList` too: each notch moves on a split, and the list shows the splits around that split, the same way it shows those around the current one. The next split, start, skip, undo or reset brings it back to the current split.
 - **Comparisons**: which comparisons get a folder of their own (see [Comparisons](#comparisons)).
 - **Time Format**: the decimals of times and of differences (see below).
@@ -45,6 +46,7 @@ The [tree](#output-directory-tree) at the end of this page lists every file.
 - `CurrentSplit` is about the split you're on, and `PreviousSplit` about the one you just did.
 - `SplitList` is a list of the splits around the current one, and `CompletedSplits` a list of every split done so far.
 - `Timers` holds the run's timer, `RunTimer.txt`, and the time since the last split, `SegmentTimer_….txt`.
+- `CustomVariables` has a file for each custom variable, with its value: LiveSplit's own variables, which auto splitters and other tools can set, such as a death count in `CustomVariables\Deaths.txt`. Each file changes as soon as its value does. A variable that LiveSplit knows of but that has no value yet shows `-`. Files are named as in `Variables`.
 
 Each of these has a folder or a file for every subsplit level (see [Subsplits](#subsplits)), and times are written for real time and game time, in `RealTime` and `GameTime` folders.
 
@@ -66,7 +68,7 @@ Every file in a list has one line per split, so text sources placed side by side
 
 Highlights are a shaded bar to layer behind splits. `Highlight_ScrolledToSplit.txt` marks the split you've scrolled to with the mouse wheel (see Split List Writing under [Settings](#settings)), or in `SansSubsplits` the section it's in. It's empty while you haven't scrolled.
 
-The files of an output you turn off in the settings, of a comparison you untick, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits` and `Timers`) as its own, so don't keep other files there.
+The files of an output you turn off in the settings, of a comparison you untick, or of a subsplit level your splits no longer have, are emptied rather than deleted, so text sources that use them show nothing. The component treats everything in its folders (`CurrentSplit`, `PreviousSplit`, `SplitList`, `CompletedSplits`, `Timers`, `Variables` and `CustomVariables`) as its own, so don't keep other files there.
 
 When you close LiveSplit, it resets the timer, so the files show what they show after a reset. **Close Splits** does the same, and the files then show its empty splits. Opening another layout, or removing the component from the layout, leaves the files as they are.
 
@@ -109,7 +111,7 @@ Every folder has its own golds. In ``AllSplits`` they are LiveSplit's golds. In 
 
 ## Output Directory Tree
 
-This is the tree for splits with three levels of subsplits and one variable, Variant, with every output on and Personal Best ticked under **Comparisons**. To keep it short, the `PersonalBest` folder is shown once per output, though every `GameTime` and `RealTime` folder has one, and `etc.` marks a folder that holds the same kind of files as the ones above it.
+This is the tree for splits with three levels of subsplits, one variable, Variant, and one custom variable, Deaths, with every output on and Personal Best ticked under **Comparisons**. To keep it short, the `PersonalBest` folder is shown once per output, though every `GameTime` and `RealTime` folder has one, and `etc.` marks a folder that holds the same kind of files as the ones above it.
 
 ```
 |   AttemptCount.txt
@@ -256,6 +258,9 @@ This is the tree for splits with three levels of subsplits and one variable, Var
 |       |   etc.
 |       …
 |               
++---CustomVariables
+|       Deaths.txt
+|       
 +---PreviousSplit
 |   +---AllSplits
 |   |   |   Name.txt
